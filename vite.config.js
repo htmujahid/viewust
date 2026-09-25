@@ -8,6 +8,28 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig(() => ({
   plugins: [sveltekit()],
 
+  // Pre-bundle every dependency at startup. Left to itself, Vite discovers them
+  // the first time a page imports them, re-optimizes mid-session, and the page
+  // that triggered it fails with "failed to load virtual css module".
+  optimizeDeps: {
+    include: [
+      "@tauri-apps/api/core",
+      "@xyflow/svelte",
+      "svelte/animate",
+      "svelte/easing",
+      "svelte/events",
+      "svelte/motion",
+      "svelte/reactivity",
+      "svelte/store",
+      "svelte/transition",
+    ],
+  },
+  ssr: {
+    optimizeDeps: {
+      include: ["svelte/animate", "svelte/easing", "svelte/events", "svelte/motion", "svelte/reactivity", "svelte/store", "svelte/transition"],
+    },
+  },
+
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
   // 1. prevent Vite from obscuring rust errors
