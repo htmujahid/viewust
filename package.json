@@ -1,21 +1,27 @@
 {
   "name": "viewust",
   "version": "0.1.0",
-  "description": "",
+  "description": "A live map of everything connected to this computer, and a window into it",
   "type": "module",
   "scripts": {
     "dev": "vite dev",
+    "dev:mock": "VITE_MOCK=1 vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "prepare": "svelte-kit sync || echo ''",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "rust:verify": "cd src-tauri && cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test",
+    "verify": "pnpm format:check && pnpm check && pnpm test && pnpm build && pnpm rust:verify",
     "tauri": "tauri"
   },
   "license": "MIT",
   "dependencies": {
     "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-opener": "^2",
     "@xyflow/svelte": "^1.7.0"
   },
   "devDependencies": {
@@ -23,9 +29,12 @@
     "@sveltejs/kit": "^2.65.1",
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tauri-apps/cli": "^2",
+    "prettier": "^3.9.9",
+    "prettier-plugin-svelte": "^4.1.1",
     "svelte": "^5.56.3",
     "svelte-check": "^4.6.0",
     "typescript": "~6.0.3",
-    "vite": "^8.0.16"
+    "vite": "^8.0.16",
+    "vitest": "^5.0.3"
   }
 }

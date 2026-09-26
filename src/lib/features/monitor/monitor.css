@@ -1,0 +1,33 @@
+/* Small list helpers shared by the monitor pages' cards. */
+.m-rows {
+  margin: var(--s-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.m-rows li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+.m-line {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-3);
+  min-width: 0;
+}
+.m-muted {
+  color: var(--text-2);
+  font-size: var(--fs-small);
+}
+.m-link {
+  color: var(--accent);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.m-link:hover {
+  text-decoration: underline;
+}

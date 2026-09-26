@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import { sveltekit } from "@sveltejs/kit/vite";
 // @ts-expect-error type error without @types/node package
 import process from "node:process";
@@ -7,6 +7,10 @@ const host = process.env.TAURI_DEV_HOST;
 // https://vite.dev/config/
 export default defineConfig(() => ({
   plugins: [sveltekit()],
+
+  test: {
+    include: ["src/**/*.test.ts"],
+  },
 
   // Pre-bundle every dependency at startup. Left to itself, Vite discovers them
   // the first time a page imports them, re-optimizes mid-session, and the page
@@ -26,7 +30,15 @@ export default defineConfig(() => ({
   },
   ssr: {
     optimizeDeps: {
-      include: ["svelte/animate", "svelte/easing", "svelte/events", "svelte/motion", "svelte/reactivity", "svelte/store", "svelte/transition"],
+      include: [
+        "svelte/animate",
+        "svelte/easing",
+        "svelte/events",
+        "svelte/motion",
+        "svelte/reactivity",
+        "svelte/store",
+        "svelte/transition",
+      ],
     },
   },
 

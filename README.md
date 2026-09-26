@@ -1,7 +1,33 @@
-# Tauri + SvelteKit + TypeScript
+# Viewust
 
-This template should help get you started developing with Tauri, SvelteKit and TypeScript in Vite.
+A live map of everything connected to your computer, and a window into it.
 
-## Recommended IDE Setup
+- **Devices** – every external device (keyboards, mice, webcams, monitors, drives…) drawn around
+  your computer, wired or wireless, plus how the computer reaches the internet.
+- **Inside the computer** – motherboard, processor, memory, drives, graphics card, power.
+- **Processes** – every running program and how it uses memory.
+- **Live monitor** – real-time CPU, memory, storage, graphics and network charts.
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
+Click anything for a summary, double-click for its full technical page.
+
+Built with [Tauri 2](https://tauri.app) (Rust) and [SvelteKit](https://svelte.dev) (Svelte 5, TypeScript).
+Hardware reading is **Linux-first**; other systems get the basics.
+
+## Running it
+
+| Command          | What it does                                                                                                                                    |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm tauri dev` | Run the real app (Rust backend + window).                                                                                                       |
+| `pnpm dev:mock`  | Run the interface in a browser with sample data. No desktop shell needed. Add `?net=wifi` or `?net=offline` to try the other connection states. |
+| `pnpm verify`    | Everything CI would check: formatting, type check, unit tests, build, and the Rust format/lint/tests.                                           |
+
+Other scripts: `pnpm test`, `pnpm format`, `pnpm check`, `pnpm rust:verify`.
+
+Needs [Rust](https://rustup.rs), [pnpm](https://pnpm.io) and Tauri's
+[Linux prerequisites](https://tauri.app/start/prerequisites/). A few readings use optional system tools
+(`nvidia-smi`, `amixer`, `modinfo`, `nmcli`, `iw`); the app works without them and simply shows less.
+
+## How it's organised
+
+See **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** for the layout, the conventions, and
+step-by-step recipes for adding a command, a page or a new kind of device.

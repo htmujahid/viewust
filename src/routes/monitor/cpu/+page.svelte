@@ -1,9 +1,11 @@
 <script lang="ts">
-  import Facts from "$lib/components/Facts.svelte";
-  import LineChart from "$lib/components/LineChart.svelte";
-  import Meter from "$lib/components/Meter.svelte";
-  import { monitor } from "$lib/monitor.svelte";
-  import * as m from "$lib/monitor-series";
+  import MonitorCard from "$lib/features/monitor/MonitorCard.svelte";
+  import MonitorGrid from "$lib/features/monitor/MonitorGrid.svelte";
+  import Facts from "$lib/components/ui/Facts.svelte";
+  import LineChart from "$lib/components/charts/LineChart.svelte";
+  import Meter from "$lib/components/ui/Meter.svelte";
+  import { monitor } from "$lib/features/monitor/store.svelte";
+  import * as m from "$lib/features/monitor/series";
 
   const samples = $derived(monitor.samples);
   const now = $derived(monitor.latest)!;
@@ -11,81 +13,102 @@
 
   // threads ranked by how busy they are right now
   const busiest = $derived(
-    now.cpu.cores.map((load, i) => ({ load, i })).sort((a, b) => b.load - a.load).slice(0, 8),
+    now.cpu.cores
+      .map((load, i) => ({ load, i }))
+      .sort((a, b) => b.load - a.load)
+      .slice(0, 8),
   );
   const hasTemp = $derived(samples.some((s) => s.cpu.temperature !== null));
 </script>
 
-<div class="m-grid">
-  <section class="card m-card m-wide">
-    <header class="m-head">
-      <div>
-        <h2 class="m-title">Processor load</h2>
-        <p class="m-big tabular">{m.percent(now.cpu.total)} <small>across {now.cpu.cores.length} threads</small></p>
-      </div>
+<MonitorGrid>
+  <MonitorCard title="Processor load" wide>
+    {#snippet value()}{m.percent(now.cpu.total)}
+      <small>across {now.cpu.cores.length} threads</small>{/snippet}
+    {#snippet aside()}
       <Facts
         items={[
           { label: "Clock", value: m.mhz(now.cpu.freq_mhz) },
-          { label: "Temperature", value: now.cpu.temperature !== null ? m.celsius(now.cpu.temperature) : null },
+          {
+            label: "Temperature",
+            value: now.cpu.temperature !== null ? m.celsius(now.cpu.temperature) : null,
+          },
           { label: "Load average", value: now.cpu.load.map((l) => l.toFixed(2)).join(" · ") },
         ]}
       />
-    </header>
-    <LineChart series={[{ name: "CPU load", color: m.COLOR_1, values: m.cpuLoad(samples) }]} format={m.percent} max={100} height={220} label="Processor load, last 60 seconds" />
-  </section>
+    {/snippet}
 
-  <section class="card m-card">
-    <header class="m-head">
-      <h2 class="m-title">Every thread, right now</h2>
-    </header>
+    <LineChart
+      series={[{ name: "CPU load", color: m.COLOR_1, values: m.cpuLoad(samples) }]}
+      format={m.percent}
+      max={100}
+      height={220}
+      label="Processor load, last 60 seconds"
+    />
+  </MonitorCard>
+
+  <MonitorCard title="Every thread, right now">
     <div class="heat" role="list">
       {#each now.cpu.cores as load, i}
-        <div class="cell" role="listitem" title="Thread {i}: {load.toFixed(0)}%" aria-label="Thread {i}: {load.toFixed(0)}%">
+        <div
+          class="cell"
+          role="listitem"
+          title="Thread {i}: {load.toFixed(0)}%"
+          aria-label="Thread {i}: {load.toFixed(0)}%"
+        >
           <span style:opacity={tone(load)}></span>
           <b>{i}</b>
         </div>
       {/each}
     </div>
-    <p class="m-muted scale">Lighter means idle, deeper blue means busy. Hover a square for its exact load.</p>
+    <p class="m-muted scale">
+      Lighter means idle, deeper blue means busy. Hover a square for its exact load.
+    </p>
 
     <h3 class="m-title sub">Busiest threads</h3>
     <ul class="m-rows">
       {#each busiest as t (t.i)}
         <li>
-          <div class="m-line"><span>Thread {t.i}</span><b class="tabular">{m.percent(t.load)}</b></div>
+          <div class="m-line">
+            <span>Thread {t.i}</span><b class="tabular">{m.percent(t.load)}</b>
+          </div>
           <Meter value={t.load} tone="accent" height={4} />
         </li>
       {/each}
     </ul>
-  </section>
+  </MonitorCard>
 
-  <section class="card m-card">
-    <header class="m-head">
-      <div>
-        <h2 class="m-title">Clock speed</h2>
-        <p class="m-big tabular">{m.mhz(now.cpu.freq_mhz)} <small>average across threads</small></p>
-      </div>
-    </header>
-    <LineChart series={[{ name: "Clock", color: m.COLOR_1, values: m.cpuClock(samples) }]} format={m.mhz} height={150} label="Processor clock speed, last 60 seconds" />
-  </section>
+  <MonitorCard title="Clock speed">
+    {#snippet value()}{m.mhz(now.cpu.freq_mhz)} <small>average across threads</small>{/snippet}
+
+    <LineChart
+      series={[{ name: "Clock", color: m.COLOR_1, values: m.cpuClock(samples) }]}
+      format={m.mhz}
+      height={150}
+      label="Processor clock speed, last 60 seconds"
+    />
+  </MonitorCard>
 
   {#if hasTemp}
-    <section class="card m-card">
-      <header class="m-head">
-        <div>
-          <h2 class="m-title">Temperature</h2>
-          <p class="m-big tabular">{now.cpu.temperature !== null ? m.celsius(now.cpu.temperature) : "—"} <small>package</small></p>
-        </div>
-      </header>
-      <LineChart series={[{ name: "Temperature", color: m.COLOR_1, values: m.cpuTemp(samples) }]} format={m.celsius} max={100} height={150} label="Processor temperature, last 60 seconds" />
-    </section>
+    <MonitorCard title="Temperature">
+      {#snippet value()}{now.cpu.temperature !== null ? m.celsius(now.cpu.temperature) : "—"}
+        <small>package</small>{/snippet}
+
+      <LineChart
+        series={[{ name: "Temperature", color: m.COLOR_1, values: m.cpuTemp(samples) }]}
+        format={m.celsius}
+        max={100}
+        height={150}
+        label="Processor temperature, last 60 seconds"
+      />
+    </MonitorCard>
   {/if}
 
   <p class="m-muted m-wide">
     Looking for which program is using the processor?
     <a class="m-link" href="/processes">Open processes →</a>
   </p>
-</div>
+</MonitorGrid>
 
 <style>
   .heat {

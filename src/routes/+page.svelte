@@ -1,214 +1,42 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { goto } from "$app/navigation";
-  import {
-    SvelteFlow,
-    Background,
-    Controls,
-    Panel,
-  } from "@xyflow/svelte";
-  import "@xyflow/svelte/dist/style.css";
-  import Icon from "$lib/components/Icon.svelte";
-  import ThemeToggle from "$lib/components/ThemeToggle.svelte";
-  import { theme } from "$lib/theme.svelte";
-  import { hardware } from "$lib/hardware.svelte";
-  import ComputerNode from "$lib/flow/ComputerNode.svelte";
-  import DeviceNode from "$lib/flow/DeviceNode.svelte";
-  import Refit from "$lib/flow/Refit.svelte";
-  import DetailsPanel from "$lib/flow/DetailsPanel.svelte";
-  import type { NodeInfo } from "$lib/flow/graph";
 
-  const nodeTypes = {
-    computer: ComputerNode,
-    device: DeviceNode,
-  };
-
-  const selected = $derived<NodeInfo | null>(
-    (hardware.nodes.find((n) => n.id === hardware.selectedId)?.data?.info as
-      | NodeInfo
-      | undefined) ?? null,
-  );
+  import RescanButton from "$lib/components/ui/RescanButton.svelte";
+  import { hardware } from "$lib/features/devices/store.svelte";
+  import MapLegend from "$lib/map/MapLegend.svelte";
+  import MapToolbar from "$lib/map/MapToolbar.svelte";
+  import MapView from "$lib/map/MapView.svelte";
 
   onMount(() => hardware.ensure());
+
+  const count = $derived(
+    hardware.total === 0
+      ? "Nothing plugged in"
+      : `${hardware.total} external ${hardware.total === 1 ? "device" : "devices"}`,
+  );
 </script>
 
-<div class="canvas">
-  <div class="flow">
-    {#if hardware.error}
-      <p class="message error">Couldn't read hardware: {hardware.error}</p>
-    {:else if !hardware.info}
-      <p class="message">Scanning…</p>
-    {:else}
-      {#key hardware.scan}
-        <SvelteFlow
-          bind:nodes={hardware.nodes}
-          bind:edges={hardware.edges}
-          {nodeTypes}
-          colorMode={theme.mode}
-          fitView
-          fitViewOptions={{ padding: 0.15 }}
-          minZoom={0.2}
-          nodesConnectable={false}
-          zoomOnDoubleClick={false}
-          onnodeclick={({ node }) => (hardware.selectedId = node.id)}
-          onpaneclick={() => (hardware.selectedId = null)}
-          deleteKey={null}
-          defaultEdgeOptions={{ type: "smoothstep" }}
-        >
-          <Refit trigger={!!selected} />
-          <Background gap={20} />
-          <Controls showLock={false} />
-          <Panel position="top-left">
-            <div class="card panel">
-              <div>
-                <h1>Connected devices</h1>
-                <p>
-                  {hardware.total === 0
-                    ? "Nothing plugged in"
-                    : `${hardware.total} external ${hardware.total === 1 ? "device" : "devices"}`}
-                  · double-click for full details
-                </p>
-              </div>
-              <button class="btn" onclick={() => hardware.load()} disabled={hardware.loading}>
-                <span class="spin-wrap" class:spin={hardware.loading}>
-                  <Icon name="refresh" size={16} />
-                </span>
-                {hardware.loading ? "Scanning" : "Rescan"}
-              </button>
-              <button class="btn" onclick={() => goto("/processes")}>
-                <Icon name="activity" size={16} />
-                Processes
-              </button>
-              <button class="btn" onclick={() => goto("/monitor")}>
-                <Icon name="chart" size={16} />
-                Live
-              </button>
-              <ThemeToggle />
-            </div>
-          </Panel>
-          <Panel position="bottom-right">
-            <div class="card legend">
-              <span><i class="line wired"></i> Wired</span>
-              <span><i class="line wireless"></i> Wireless</span>
-            </div>
-          </Panel>
-        </SvelteFlow>
-      {/key}
-    {/if}
-  </div>
-  {#if selected}
-    <DetailsPanel info={selected} onclose={() => (hardware.selectedId = null)} />
-  {/if}
-</div>
-
-<style>
-  .canvas {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-  }
-
-  .flow {
-    flex: 1;
-    min-width: 0;
-    height: 100%;
-  }
-
-  .message {
-    display: grid;
-    place-items: center;
-    height: 100%;
-    color: var(--text-2);
-  }
-  .error {
-    color: var(--danger);
-  }
-
-  .panel {
-    display: flex;
-    align-items: center;
-    gap: var(--s-5);
-    padding: var(--s-3) var(--s-4);
-  }
-  h1 {
-    font-size: 16px;
-    font-weight: 650;
-  }
-  p {
-    color: var(--text-2);
-    font-size: var(--fs-small);
-  }
-  .spin-wrap {
-    display: inline-flex;
-  }
-  .spin {
-    animation: spin 0.9s linear infinite;
-  }
-
-  .canvas :global(.svelte-flow) {
-    --xy-background-color: var(--bg);
-    --xy-background-pattern-dots-color-default: var(--border);
-    --xy-edge-stroke-default: var(--text-3);
-    --xy-edge-stroke-width-default: 1.5;
-    --xy-controls-button-background-color-default: var(--surface);
-    --xy-controls-button-background-color-hover-default: var(--surface-2);
-    --xy-controls-button-color-default: var(--text-2);
-    --xy-controls-button-border-color-default: var(--border);
-    --xy-node-boxshadow-selected-default: 0 0 0 2px var(--accent);
-  }
-  .canvas :global(.svelte-flow__edge.wired .svelte-flow__edge-path) {
-    stroke: var(--text-3);
-    stroke-width: 3;
-  }
-  .canvas :global(.svelte-flow__edge.wireless .svelte-flow__edge-path) {
-    stroke: var(--accent);
-    stroke-width: 3;
-    stroke-dasharray: 1 9;
-    stroke-linecap: round;
-  }
-  .canvas :global(.svelte-flow__edge.uplink .svelte-flow__edge-path) {
-    stroke: var(--ok);
-    stroke-width: 3;
-  }
-  .canvas :global(.svelte-flow__edge.uplink.down .svelte-flow__edge-path) {
-    stroke: var(--danger);
-    stroke-dasharray: 6 6;
-  }
-  .canvas :global(.svelte-flow__edge-label) {
-    padding: 2px 8px;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--surface);
-    color: var(--text-2);
-    font-size: 11.5px;
-    font-weight: 500;
-    white-space: nowrap;
-  }
-  .canvas :global(.svelte-flow__handle) {
-    opacity: 0;
-  }
-  .legend {
-    display: flex;
-    gap: var(--s-4);
-    padding: var(--s-2) var(--s-3);
-    color: var(--text-2);
-    font-size: var(--fs-small);
-  }
-  .legend span {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--s-2);
-  }
-  .line {
-    display: inline-block;
-    width: 28px;
-    height: 0;
-    border-top: 3px solid var(--text-3);
-  }
-  .line.wireless {
-    border-top: 3px dotted var(--accent);
-  }
-  .canvas :global(.svelte-flow__node) {
-    border-radius: var(--radius);
-  }
-</style>
+<MapView
+  bind:nodes={hardware.nodes}
+  bind:edges={hardware.edges}
+  bind:selectedId={hardware.selectedId}
+  scan={hardware.scan}
+  ready={hardware.info !== null}
+  error={hardware.error}
+  loadingText="Scanning…"
+  errorPrefix="Couldn't read hardware:"
+>
+  {#snippet toolbar()}
+    <MapToolbar title="Connected devices" subtitle="{count} · double-click for full details">
+      <RescanButton loading={hardware.loading} onclick={() => hardware.load()} label />
+    </MapToolbar>
+  {/snippet}
+  {#snippet legend()}
+    <MapLegend
+      items={[
+        { label: "Wired", kind: "wired" },
+        { label: "Wireless", kind: "wireless" },
+      ]}
+    />
+  {/snippet}
+</MapView>
