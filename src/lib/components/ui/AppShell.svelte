@@ -7,19 +7,25 @@
 
   let { children }: { children: Snippet } = $props();
   const links: { href: string; label: string; icon: IconName; code: string }[] = [
-    { href: "/", label: "Devices", icon: "usb", code: "01" },
+    { href: "/devices", label: "Devices", icon: "usb", code: "01" },
     { href: "/system", label: "System", icon: "cpu", code: "02" },
     { href: "/monitor", label: "Live monitor", icon: "chart", code: "03" },
     { href: "/processes", label: "Processes", icon: "activity", code: "04" },
+    { href: "/services", label: "Services", icon: "server", code: "05" },
   ];
-  const active = (href: string) =>
-    href === "/" ? page.url.pathname === "/" : page.url.pathname.startsWith(href);
+  const active = (href: string) => page.url.pathname.startsWith(href);
 </script>
 
 <div class="shell">
   <TitleBar />
   <aside class="sidebar">
-    <a class="brand" href="/" aria-label="Viewust home" title="Viewust home">
+    <a
+      class="brand"
+      href="/"
+      aria-label="Overview"
+      title="Overview"
+      aria-current={page.url.pathname === "/" ? "page" : undefined}
+    >
       <svg
         viewBox="0 0 24 24"
         width="26"
@@ -90,6 +96,9 @@
     box-shadow: var(--glow);
     text-shadow: var(--glow-text);
     text-decoration: none;
+  }
+  .brand[aria-current="page"] {
+    box-shadow: var(--glow-strong);
   }
   .brand svg {
     filter: drop-shadow(0 0 3px var(--accent));

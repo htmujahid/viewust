@@ -5,6 +5,8 @@ import type {
   HardwareInfo,
   MemoryModules,
   ProcessDetail,
+  ServiceDetail,
+  ServiceSnapshot,
   Sample,
   Snapshot,
   SystemInfo,
@@ -34,6 +36,9 @@ export const api = {
 
   processList: () => call<Snapshot>("process_list"),
   processDetail: (pid: number) => call<ProcessDetail>("process_detail", { pid }),
+
+  serviceList: () => call<ServiceSnapshot>("service_list"),
+  serviceDetail: (unit: string) => call<ServiceDetail>("service_detail", { unit }),
 
   monitorSample: () => call<Sample>("monitor_sample"),
 } as const;

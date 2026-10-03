@@ -2,11 +2,14 @@
 
 A live map of everything connected to your computer, and a window into it.
 
+- **Overview** – the home page (click the logo): the computer's identity and health at a glance, live
+  processor, memory, graphics and disk tiles, and a summary of every part and connected device.
 - **Devices** – every external device (keyboards, mice, webcams, monitors, drives…) drawn around
   your computer, wired or wireless, plus how the computer reaches the internet.
 - **Inside the computer** – motherboard, processor, memory, drives, graphics card, power.
 - **Processes** – every running program and how it uses memory.
-- **Live monitor** – real-time CPU, memory, storage, graphics and network charts.
+- **Live monitor** – real-time processor, memory, storage, graphics, thermal, power and network charts.
+- **Services** – every systemd service, its state, memory and recent log.
 
 Click anything for a summary, double-click for its full technical page.
 

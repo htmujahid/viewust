@@ -1,42 +1,64 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
 
-  import RescanButton from "$lib/components/ui/RescanButton.svelte";
+  import Masonry from "$lib/components/ui/Masonry.svelte";
+  import Page from "$lib/components/ui/Page.svelte";
   import { hardware } from "$lib/features/devices/store.svelte";
-  import MapLegend from "$lib/map/MapLegend.svelte";
-  import MapToolbar from "$lib/map/MapToolbar.svelte";
-  import MapView from "$lib/map/MapView.svelte";
+  import { internals } from "$lib/features/internals/store.svelte";
+  import { monitor } from "$lib/features/monitor/store.svelte";
+  import DevicesCard from "$lib/features/overview/DevicesCard.svelte";
+  import GroupCard from "$lib/features/overview/GroupCard.svelte";
+  import IdentityCard from "$lib/features/overview/IdentityCard.svelte";
+  import LiveStrip from "$lib/features/overview/LiveStrip.svelte";
+  import { overview } from "$lib/features/overview/store.svelte";
+  import { groupComponents, type Group } from "$lib/features/overview/summary";
 
-  onMount(() => hardware.ensure());
+  type Item = { key: string; cost: number; group: Group | null };
 
-  const count = $derived(
-    hardware.total === 0
-      ? "Nothing plugged in"
-      : `${hardware.total} external ${hardware.total === 1 ? "device" : "devices"}`,
-  );
+  onMount(() => {
+    void hardware.ensure();
+    void internals.ensure();
+    void overview.load();
+    monitor.start();
+  });
+  onDestroy(monitor.stop);
+
+  const info = $derived(hardware.info);
+  const items = $derived<Item[]>([
+    ...groupComponents(internals.info?.components ?? []).map((g) => ({
+      key: g.key,
+      cost: g.cost,
+      group: g,
+    })),
+    ...(info ? [{ key: "connected", cost: 9, group: null }] : []),
+  ]);
 </script>
 
-<MapView
-  bind:nodes={hardware.nodes}
-  bind:edges={hardware.edges}
-  bind:selectedId={hardware.selectedId}
-  scan={hardware.scan}
-  ready={hardware.info !== null}
-  error={hardware.error}
-  loadingText="Scanning…"
-  errorPrefix="Couldn't read hardware:"
->
-  {#snippet toolbar()}
-    <MapToolbar title="Connected devices" subtitle="{count} · double-click for full details">
-      <RescanButton loading={hardware.loading} onclick={() => hardware.load()} label />
-    </MapToolbar>
-  {/snippet}
-  {#snippet legend()}
-    <MapLegend
-      items={[
-        { label: "Wired", kind: "wired" },
-        { label: "Wireless", kind: "wireless" },
-      ]}
-    />
-  {/snippet}
-</MapView>
+<Page>
+  <IdentityCard {info} sample={monitor.latest} services={overview.services} />
+  <LiveStrip sample={monitor.latest} />
+
+  {#if internals.error && !internals.info}
+    <p class="error">Couldn't read the computer's parts: {internals.error}</p>
+  {:else if !internals.info}
+    <div class="skeleton" style="height: 320px"></div>
+  {:else}
+    <Masonry {items}>
+      {#snippet children(item)}
+        {#if item.group}
+          <GroupCard group={item.group} />
+        {:else if info}
+          <DevicesCard {info} />
+        {/if}
+      {/snippet}
+    </Masonry>
+  {/if}
+</Page>
+
+<style>
+  .error {
+    padding: var(--s-6) 0;
+    color: var(--danger);
+    text-align: center;
+  }
+</style>

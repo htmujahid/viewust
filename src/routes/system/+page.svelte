@@ -37,7 +37,7 @@
     <MapToolbar
       title="Inside {internals.info?.computer_name}"
       subtitle="{internals.total} components · double-click for full details"
-      back={{ href: "/", label: "Devices" }}
+      back={{ href: "/", label: "Overview" }}
       notice={internals.memoryError}
     >
       {#if canReadMemory}

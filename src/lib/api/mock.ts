@@ -9,6 +9,8 @@ import type {
   Peripheral,
   ProcessDetail,
   Sample,
+  ServiceDetail,
+  ServiceSnapshot,
   Snapshot,
   SystemInfo,
 } from "$lib/api/types";
@@ -274,6 +276,91 @@ const processDetail = (pid: number): ProcessDetail => ({
   ],
 });
 
+const serviceDefs: [string, string, string, string, string, number | null][] = [
+  ["NetworkManager", "Network Manager", "active", "running", "enabled", 9.7e6],
+  ["ssh", "OpenBSD Secure Shell server", "active", "running", "enabled", 5.1e6],
+  ["cups", "CUPS Scheduler", "active", "running", "enabled", 12.4e6],
+  ["bluetooth", "Bluetooth service", "active", "running", "enabled", 3.2e6],
+  ["docker", "Docker Application Container Engine", "active", "running", "enabled", 148e6],
+  ["gdm", "GNOME Display Manager", "active", "running", "enabled", 61e6],
+  ["cron", "Regular background program processing daemon", "active", "running", "enabled", 0.9e6],
+  ["alsa-restore", "Save/Restore Sound Card State", "active", "exited", "static", null],
+  ["apt-daily", "Daily apt download activities", "inactive", "dead", "static", null],
+  ["postgresql", "PostgreSQL RDBMS", "inactive", "dead", "disabled", null],
+  ["nginx", "A high performance web server", "failed", "failed", "enabled", null],
+  ["snapd", "Snap Daemon", "active", "running", "enabled", 28e6],
+  ["ufw", "Uncomplicated firewall", "active", "exited", "enabled", null],
+  ["avahi-daemon", "Avahi mDNS/DNS-SD Stack", "inactive", "dead", "masked", null],
+];
+
+const serviceList = (): ServiceSnapshot => {
+  const services = serviceDefs.map(([name, description, active, sub, enabled, memory], i) => ({
+    unit: `${name}.service`,
+    name,
+    description,
+    load: "loaded",
+    active,
+    sub,
+    enabled,
+    main_pid: sub === "running" ? 700 + i * 113 : null,
+    memory,
+  }));
+  return {
+    available: true,
+    overview: {
+      total: services.length,
+      running: services.filter((s) => s.sub === "running").length,
+      exited: services.filter((s) => s.sub === "exited").length,
+      failed: services.filter((s) => s.active === "failed").length,
+      inactive: services.filter((s) => s.active === "inactive").length,
+      enabled: services.filter((s) => s.enabled === "enabled").length,
+      memory: services.reduce((n, s) => n + (s.memory ?? 0), 0),
+    },
+    services,
+  };
+};
+
+const serviceDetail = (unit: string): ServiceDetail => {
+  const s = serviceList().services.find((x) => x.unit === unit);
+  if (!s) return { unit, found: false, details: [], logs: [], logs_note: null };
+  return {
+    unit,
+    found: true,
+    details: [
+      row("Service", "Description", s.description),
+      row("Service", "Loaded", s.load),
+      row("Service", "Unit file", `/usr/lib/systemd/system/${unit}`),
+      row("Service", "Starts at boot", s.enabled),
+      row("State", "Status", `${s.active} (${s.sub})`),
+      ...(s.active === "active"
+        ? [row("State", "Active since", "Sat 2026-10-03 22:14:30 PKT")]
+        : []),
+      ...(s.active === "failed"
+        ? [row("State", "Result", "exit-code"), row("State", "Exit status", "1")]
+        : []),
+      ...(s.main_pid ? [row("Process", "Main PID", String(s.main_pid))] : []),
+      ...(s.memory ? [row("Process", "Memory", `${(s.memory / 1e6).toFixed(1)} MiB`)] : []),
+      row("Command", "Command line", `/usr/sbin/${s.name} -D`),
+      row("Run as", "User", "root"),
+      row("Run as", "Restart policy", "on-failure"),
+      row("Dependencies", "Starts after", "network.target, system.slice"),
+      row("Dependencies", "Wanted by", "multi-user.target"),
+    ],
+    logs:
+      s.active === "failed"
+        ? [
+            `2026-10-03T22:14:31+05:00 host ${s.name}[812]: bind() to 0.0.0.0:80 failed (98: Address already in use)`,
+            `2026-10-03T22:14:31+05:00 host systemd[1]: ${unit}: Main process exited, code=exited, status=1/FAILURE`,
+            `2026-10-03T22:14:31+05:00 host systemd[1]: ${unit}: Failed with result 'exit-code'.`,
+          ]
+        : [
+            `2026-10-03T22:14:30+05:00 host systemd[1]: Started ${s.description}.`,
+            `2026-10-03T22:14:31+05:00 host ${s.name}[${s.main_pid ?? 1}]: ready`,
+          ],
+    logs_note: null,
+  };
+};
+
 const wave = (tick: number, base: number, amp: number, phase = 0) =>
   Math.max(0, base + Math.sin(tick / 3 + phase) * amp + Math.sin(tick * 1.7 + phase) * amp * 0.3);
 
@@ -442,6 +529,8 @@ export const fixtures = {
   memoryModules,
   processList,
   processDetail,
+  serviceList,
+  serviceDetail,
   sample,
 };
 
@@ -469,6 +558,10 @@ export function installMockBackend(): void {
         return processList(++tick);
       case "process_detail":
         return processDetail(Number(args.pid));
+      case "service_list":
+        return serviceList();
+      case "service_detail":
+        return serviceDetail(String(args.unit));
       case "monitor_sample":
         return sample(++tick);
       default:

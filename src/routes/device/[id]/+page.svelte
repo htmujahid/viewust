@@ -31,7 +31,7 @@
 
   const internal = $derived(id.startsWith("sys:"));
   const store = $derived(internal ? internals : hardware);
-  const backUrl = $derived(internal ? "/system" : "/");
+  const backUrl = $derived(internal ? "/system" : "/devices");
 
   const info = $derived<NodeInfo | null>(
     (store.nodes.find((n) => n.id === id)?.data?.info as NodeInfo | undefined) ?? null,
