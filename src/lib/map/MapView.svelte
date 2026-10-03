@@ -20,7 +20,7 @@
   import Refit from "./Refit.svelte";
 
   /**
-   * A full-page diagram: the canvas, a floating toolbar and legend, and the
+   * A full-page diagram: a dedicated header, canvas and legend, and the
    * sidebar that opens when a node is clicked. Pages supply the data and the
    * toolbar; this owns everything about how the diagram looks and behaves.
    */
@@ -54,8 +54,8 @@
 
   const nodeTypes = { computer: ComputerNode, device: DeviceNode };
 
-  /** Room kept at the top so the floating toolbar never covers the diagram. */
-  const TOOLBAR_CLEARANCE = "96px";
+  /** Breathing room around the diagram after fitting the viewport. */
+  const TOOLBAR_CLEARANCE = "64px";
   const padding = $derived<NonNullable<FitViewOptions["padding"]>>({
     top: TOOLBAR_CLEARANCE,
     right: fitPadding,
@@ -69,47 +69,57 @@
 </script>
 
 <div class="map">
-  <div class="canvas">
-    {#if error}
-      <p class="message error">{errorPrefix} {error}</p>
-    {:else if !ready}
-      <p class="message">{loadingText}</p>
-    {:else}
-      {#key scan}
-        <SvelteFlow
-          bind:nodes
-          bind:edges
-          {nodeTypes}
-          colorMode={theme.mode}
-          fitView
-          fitViewOptions={{ padding }}
-          minZoom={0.2}
-          nodesConnectable={false}
-          zoomOnDoubleClick={false}
-          onnodeclick={({ node }) => (selectedId = node.id)}
-          onpaneclick={() => (selectedId = null)}
-          deleteKey={null}
-          defaultEdgeOptions={{ type: "smoothstep" }}
-        >
-          <Refit trigger={!!selected} {padding} />
-          <Background gap={20} />
-          <Controls showLock={false} />
-          <Panel position="top-left">{@render toolbar()}</Panel>
-          <Panel position="bottom-right">{@render legend()}</Panel>
-        </SvelteFlow>
-      {/key}
+  <div class="workspace">
+    <div class="canvas">
+      {#if error}
+        <p class="message error">{errorPrefix} {error}</p>
+      {:else if !ready}
+        <p class="message">{loadingText}</p>
+      {:else}
+        {#key scan}
+          <SvelteFlow
+            bind:nodes
+            bind:edges
+            {nodeTypes}
+            colorMode={theme.mode}
+            fitView
+            fitViewOptions={{ padding }}
+            minZoom={0.2}
+            proOptions={{ hideAttribution: true }}
+            nodesConnectable={false}
+            zoomOnDoubleClick={false}
+            onnodeclick={({ node }) => (selectedId = node.id)}
+            onpaneclick={() => (selectedId = null)}
+            deleteKey={null}
+            defaultEdgeOptions={{ type: "smoothstep" }}
+          >
+            <Refit trigger={!!selected} {padding} />
+            <Background gap={20} />
+            <Controls showLock={false} />
+            <Panel position="top-right">{@render toolbar()}</Panel>
+            <Panel position="bottom-right">{@render legend()}</Panel>
+          </SvelteFlow>
+        {/key}
+      {/if}
+    </div>
+    {#if selected}
+      <DetailsPanel info={selected} onclose={() => (selectedId = null)} />
     {/if}
   </div>
-  {#if selected}
-    <DetailsPanel info={selected} onclose={() => (selectedId = null)} />
-  {/if}
 </div>
 
 <style>
   .map {
     display: flex;
-    width: 100vw;
-    height: 100vh;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
+  .workspace {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    position: relative;
   }
   .canvas {
     flex: 1;
@@ -128,7 +138,7 @@
 
   /* The diagram library draws edges and handles itself; theme them here, once. */
   .canvas :global(.svelte-flow) {
-    --xy-background-color: var(--bg);
+    --xy-background-color: transparent;
     --xy-background-pattern-dots-color-default: var(--border);
     --xy-edge-stroke-default: var(--text-3);
     --xy-edge-stroke-width-default: 1.5;
@@ -138,8 +148,13 @@
     --xy-controls-button-border-color-default: var(--border);
     --xy-node-boxshadow-selected-default: 0 0 0 2px var(--accent);
   }
+  .canvas :global(.svelte-flow__controls),
+  .canvas :global(.svelte-flow__controls-button) {
+    border-radius: 0;
+    box-shadow: none;
+  }
   .canvas :global(.svelte-flow__node) {
-    border-radius: var(--radius);
+    border-radius: 0;
   }
   .canvas :global(.svelte-flow__handle) {
     opacity: 0;
@@ -155,18 +170,22 @@
     stroke-width: 3;
     stroke-dasharray: 1 9;
     stroke-linecap: round;
+    filter: drop-shadow(0 0 3px var(--accent));
   }
   .canvas :global(.svelte-flow__edge.memory .svelte-flow__edge-path) {
     stroke: var(--accent);
     stroke-width: 3;
+    filter: drop-shadow(0 0 3px var(--accent));
   }
   .canvas :global(.svelte-flow__edge.power .svelte-flow__edge-path) {
     stroke: var(--warn);
     stroke-width: 4;
+    filter: drop-shadow(0 0 3px var(--warn));
   }
   .canvas :global(.svelte-flow__edge.uplink .svelte-flow__edge-path) {
     stroke: var(--ok);
     stroke-width: 3;
+    filter: drop-shadow(0 0 3px var(--ok));
   }
   .canvas :global(.svelte-flow__edge.uplink.down .svelte-flow__edge-path) {
     stroke: var(--danger);
@@ -175,10 +194,11 @@
   .canvas :global(.svelte-flow__edge-label) {
     padding: 2px 8px;
     border: 1px solid var(--border);
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--surface);
     color: var(--text-2);
-    font-size: 11.5px;
+    font-family: var(--font-mono);
+    font-size: 11px;
     font-weight: 500;
     white-space: nowrap;
   }

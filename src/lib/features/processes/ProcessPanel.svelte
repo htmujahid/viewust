@@ -213,7 +213,8 @@
     flex-direction: column;
     align-self: stretch;
     width: 400px;
-    margin: var(--s-4) var(--s-4) var(--s-4) 0;
+    margin: 0;
+    border-width: 0 0 0 1px;
     overflow: hidden;
   }
   header {
@@ -246,7 +247,7 @@
     width: 28px;
     height: 28px;
     border: 0;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--surface-2);
     color: var(--text-2);
     cursor: pointer;
@@ -302,7 +303,7 @@
   .composition {
     display: flex;
     height: 12px;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--surface-2);
     overflow: hidden;
   }
@@ -324,7 +325,7 @@
   .legend i {
     width: 10px;
     height: 10px;
-    border-radius: 3px;
+    border-radius: 0;
   }
   .legend span {
     flex: 1;
@@ -351,7 +352,7 @@
     width: 100%;
     padding: 6px var(--s-2);
     border: 0;
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     background: transparent;
     text-align: left;
     cursor: pointer;
@@ -362,5 +363,16 @@
   .children small {
     flex: none;
     color: var(--text-3);
+  }
+  @media (max-width: 1050px) {
+    .panel {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 10;
+      width: min(400px, 100%);
+      box-shadow: -12px 0 32px rgb(0 0 0 / 0.2);
+    }
   }
 </style>

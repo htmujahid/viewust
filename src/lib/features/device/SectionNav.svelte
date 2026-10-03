@@ -20,15 +20,21 @@
   }
   a {
     padding: 4px var(--s-3);
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--surface-2);
+    border: 1px solid var(--border);
     color: var(--text-2);
-    font-size: var(--fs-small);
+    font-family: var(--font-mono);
+    font-size: 11px;
     font-weight: 500;
+    letter-spacing: 0.04em;
     text-decoration: none;
+    text-transform: uppercase;
   }
   a:hover {
     background: var(--accent-soft);
+    border-color: var(--accent);
     color: var(--accent);
+    box-shadow: var(--glow);
   }
 </style>

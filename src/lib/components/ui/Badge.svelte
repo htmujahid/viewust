@@ -12,14 +12,19 @@
 <style>
   .badge {
     display: inline-block;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: var(--fs-small);
+    padding: 2px 8px;
+    border: 1px solid currentColor;
+    border-radius: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
     font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     white-space: nowrap;
   }
   .neutral {
     background: var(--surface-2);
+    border-color: var(--border-strong);
     color: var(--text-2);
   }
   .ok {

@@ -2,6 +2,8 @@
   import { theme, type ThemeMode } from "$lib/stores/theme.svelte";
   import Icon, { type IconName } from "./Icon.svelte";
 
+  let { vertical = false }: { vertical?: boolean } = $props();
+
   const options: { mode: ThemeMode; label: string; icon: IconName }[] = [
     { mode: "light", label: "Light", icon: "sun" },
     { mode: "system", label: "System", icon: "system" },
@@ -9,7 +11,7 @@
   ];
 </script>
 
-<div class="toggle" role="radiogroup" aria-label="Theme">
+<div class="toggle" class:vertical role="radiogroup" aria-label="Theme">
   {#each options as o}
     <button
       role="radio"
@@ -28,8 +30,11 @@
     display: flex;
     gap: 2px;
     padding: 3px;
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     background: var(--surface-2);
+  }
+  .vertical {
+    flex-direction: column;
   }
   button {
     display: grid;
@@ -37,7 +42,7 @@
     width: 28px;
     height: 26px;
     border: 0;
-    border-radius: 8px;
+    border-radius: 0;
     background: transparent;
     color: var(--text-3);
     cursor: pointer;
@@ -46,10 +51,8 @@
     color: var(--text);
   }
   button[aria-checked="true"] {
-    background: var(--surface);
+    background: var(--accent-soft);
     color: var(--accent);
-    box-shadow:
-      var(--shadow),
-      0 0 0 1px var(--border);
+    box-shadow: 0 0 0 1px var(--accent);
   }
 </style>

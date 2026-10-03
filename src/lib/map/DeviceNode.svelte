@@ -41,28 +41,34 @@
     align-items: center;
     gap: 6px;
     padding: 3px 10px;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--surface);
     box-shadow: 0 0 0 1px var(--border);
     color: var(--text-2);
-    font-size: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
     font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     white-space: nowrap;
     transform: translateX(-50%);
   }
   .caption i {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
+    border-radius: 0;
   }
   .caption.ok i {
     background: var(--ok);
+    box-shadow: 0 0 6px var(--ok);
   }
   .caption.warn i {
     background: var(--warn);
+    box-shadow: 0 0 6px var(--warn);
   }
   .caption.danger i {
     background: var(--danger);
+    box-shadow: 0 0 6px var(--danger);
   }
   .bars {
     position: absolute;
@@ -72,13 +78,13 @@
     align-items: flex-end;
     gap: 2px;
     padding: 4px 5px;
-    border-radius: 8px;
+    border-radius: 0;
     background: var(--surface);
     box-shadow: 0 0 0 1px var(--border);
   }
   .bars i {
     width: 3px;
-    border-radius: 1px;
+    border-radius: 0;
     background: var(--surface-2);
   }
   .bars i.on {
@@ -92,8 +98,9 @@
     place-items: center;
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--accent);
-    color: #fff;
+    box-shadow: var(--glow);
+    color: var(--accent-ink);
   }
 </style>

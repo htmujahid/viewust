@@ -49,7 +49,7 @@
     sortKey === key ? (sortDesc ? "descending" : "ascending") : "none";
 </script>
 
-<div class="card wrap">
+<div class="card wrap grow">
   <table>
     <thead>
       <tr>
@@ -88,10 +88,10 @@
 </div>
 
 <style>
+  /* Fills the room the page leaves and scrolls inside it; the header row stays put. */
   .wrap {
     overflow: auto;
-    max-height: calc(100vh - 292px);
-    min-height: 240px;
+    min-height: 160px;
   }
   table {
     width: 100%;
@@ -103,18 +103,21 @@
     z-index: 1;
     padding: 0;
     background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--accent);
     text-align: left;
   }
   th button {
     width: 100%;
-    padding: 9px var(--s-3);
+    padding: 12px var(--s-4);
     border: 0;
     background: transparent;
     color: var(--text-2);
-    font-size: var(--fs-small);
+    font-family: var(--font-mono);
+    font-size: 11px;
     font-weight: 600;
+    letter-spacing: 0.08em;
     text-align: inherit;
+    text-transform: uppercase;
     cursor: pointer;
     white-space: nowrap;
   }
@@ -143,10 +146,13 @@
   }
   tbody tr.selected {
     background: var(--accent-soft);
+    box-shadow: inset 3px 0 0 var(--accent);
   }
   td {
-    padding: 7px var(--s-3);
+    padding: 11px var(--s-4);
     border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
     white-space: nowrap;
   }
   tbody tr:last-child td {
@@ -168,6 +174,7 @@
   td.hot {
     color: var(--danger);
     font-weight: 600;
+    text-shadow: 0 0 10px color-mix(in srgb, var(--danger) 55%, transparent);
   }
   .muted {
     color: var(--text-2);

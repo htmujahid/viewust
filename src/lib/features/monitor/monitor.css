@@ -23,6 +23,7 @@
 }
 .m-link {
   color: var(--accent);
+  font-family: var(--font-mono);
   font-size: var(--fs-small);
   font-weight: 600;
   text-decoration: none;

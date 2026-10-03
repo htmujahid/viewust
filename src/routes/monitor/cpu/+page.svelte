@@ -47,38 +47,7 @@
     />
   </MonitorCard>
 
-  <MonitorCard title="Every thread, right now">
-    <div class="heat" role="list">
-      {#each now.cpu.cores as load, i}
-        <div
-          class="cell"
-          role="listitem"
-          title="Thread {i}: {load.toFixed(0)}%"
-          aria-label="Thread {i}: {load.toFixed(0)}%"
-        >
-          <span style:opacity={tone(load)}></span>
-          <b>{i}</b>
-        </div>
-      {/each}
-    </div>
-    <p class="m-muted scale">
-      Lighter means idle, deeper blue means busy. Hover a square for its exact load.
-    </p>
-
-    <h3 class="m-title sub">Busiest threads</h3>
-    <ul class="m-rows">
-      {#each busiest as t (t.i)}
-        <li>
-          <div class="m-line">
-            <span>Thread {t.i}</span><b class="tabular">{m.percent(t.load)}</b>
-          </div>
-          <Meter value={t.load} tone="accent" height={4} />
-        </li>
-      {/each}
-    </ul>
-  </MonitorCard>
-
-  <MonitorCard title="Clock speed">
+  <MonitorCard title="Clock speed" wide={!hasTemp}>
     {#snippet value()}{m.mhz(now.cpu.freq_mhz)} <small>average across threads</small>{/snippet}
 
     <LineChart
@@ -103,23 +72,68 @@
       />
     </MonitorCard>
   {/if}
+  <MonitorCard title="Every thread, right now" wide>
+    <div class="threads">
+      <div class="heat-side">
+        <div class="heat" role="list">
+          {#each now.cpu.cores as load, i}
+            <div
+              class="cell"
+              role="listitem"
+              title="Thread {i}: {load.toFixed(0)}%"
+              aria-label="Thread {i}: {load.toFixed(0)}%"
+            >
+              <span style:opacity={tone(load)}></span>
+              <b>{i}</b>
+            </div>
+          {/each}
+        </div>
+        <p class="m-muted scale">
+          Lighter means idle, deeper blue means busy. Hover a square for its exact load.
+        </p>
+      </div>
 
-  <p class="m-muted m-wide">
-    Looking for which program is using the processor?
-    <a class="m-link" href="/processes">Open processes →</a>
-  </p>
+      <div class="busy-side">
+        <h3 class="m-title sub">Busiest threads</h3>
+        <ul class="m-rows">
+          {#each busiest as t (t.i)}
+            <li>
+              <div class="m-line">
+                <span>Thread {t.i}</span><b class="tabular">{m.percent(t.load)}</b>
+              </div>
+              <Meter value={t.load} tone="accent" height={4} />
+            </li>
+          {/each}
+        </ul>
+      </div>
+    </div>
+  </MonitorCard>
 </MonitorGrid>
 
 <style>
+  /* The thread map spans the card; the ranking below it flows into as many columns as fit. */
+  .threads {
+    display: grid;
+    gap: var(--s-4);
+  }
+  .busy-side .sub {
+    margin: 0 0 var(--s-2);
+  }
+  .busy-side :global(.m-rows) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    column-gap: var(--s-5);
+    margin-top: 0;
+  }
   .heat {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(44px, 1fr));
     gap: 4px;
   }
   .cell {
     position: relative;
     aspect-ratio: 1;
-    border-radius: 6px;
+    border-radius: 0;
     background: var(--surface-2);
     overflow: hidden;
   }

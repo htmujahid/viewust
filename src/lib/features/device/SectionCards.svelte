@@ -14,7 +14,7 @@
   } = $props();
 </script>
 
-<!-- masonry: cards flow into as many columns as fit -->
+<!-- Masonry columns: no row stretches a short card to match a tall neighbour. -->
 <div class="columns">
   {#each sections as s (s.title)}
     <section class="card block" id={sectionSlug(s.title)}>
@@ -38,14 +38,16 @@
 </div>
 
 <style>
+  /* Masonry: cards flow down columns and keep their own content height. */
   .columns {
-    columns: 2 440px;
-    column-gap: var(--s-4);
+    column-width: 360px;
+    column-gap: var(--s-5);
   }
   .block {
     break-inside: avoid;
-    margin-bottom: var(--s-4);
-    padding: var(--s-4);
+    margin-bottom: var(--s-5);
+
+    padding: var(--s-5);
     scroll-margin-top: var(--s-4);
   }
   h2 {
@@ -53,8 +55,12 @@
     font-size: var(--fs-label);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-3);
+    letter-spacing: 0.08em;
+    color: var(--text-2);
+  }
+  h2::before {
+    content: "// ";
+    color: var(--accent);
   }
   .muted {
     color: var(--text-3);

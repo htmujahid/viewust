@@ -53,7 +53,7 @@
     position: absolute;
     inset: -10px;
     border: 2px solid var(--accent);
-    border-radius: var(--radius);
+    border-radius: 0;
     opacity: 0;
     transform: scale(0.96);
     transition:
@@ -68,5 +68,6 @@
   .node.selected::after {
     opacity: 1;
     transform: none;
+    box-shadow: var(--glow);
   }
 </style>

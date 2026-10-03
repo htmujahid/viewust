@@ -25,22 +25,34 @@
     gap: var(--s-1);
     width: fit-content;
     padding: var(--s-1);
-    border-radius: 12px;
-    background: var(--surface-2);
+    border-radius: 0;
+    background: transparent;
+    border-bottom: 1px solid var(--border);
   }
   a {
-    padding: 6px var(--s-4);
-    border-radius: 9px;
+    padding: 10px var(--s-4);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
     color: var(--text-2);
     font-weight: 500;
     text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
   a:hover {
     color: var(--text);
+    background: var(--surface-2);
   }
   a[aria-current="page"] {
-    background: var(--surface);
-    color: var(--text);
-    box-shadow: var(--shadow);
+    background: var(--accent-soft);
+    border-bottom-color: var(--accent);
+    color: var(--accent);
+    text-shadow: var(--glow-text);
+    box-shadow: 0 6px 12px -8px var(--accent);
+  }
+  a[aria-current="page"]::before {
+    content: "> ";
   }
 </style>

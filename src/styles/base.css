@@ -11,14 +11,12 @@ body {
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse 60% 50% at 12% -8%, var(--wash-1), transparent),
+    radial-gradient(ellipse 55% 50% at 100% 108%, var(--wash-2), transparent), var(--bg);
+  background-attachment: fixed;
   color: var(--text);
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    sans-serif;
+  font-family: var(--font-ui);
   font-size: var(--fs-body);
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
@@ -29,6 +27,12 @@ h2,
 h3,
 p {
   margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-mono);
 }
 
 button,
@@ -42,4 +46,63 @@ input:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  box-shadow: var(--glow);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* The HUD backdrop: a faint engineering grid that fades toward the bottom, and CRT scanlines. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+body::before {
+  z-index: -1;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(180deg, #000, transparent 85%);
+}
+body::after {
+  z-index: 100;
+  background: repeating-linear-gradient(0deg, var(--scanline) 0 1px, transparent 1px 3px);
+  opacity: 0.35;
+}
+body {
+  overflow: hidden;
+}
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+input {
+  accent-color: var(--accent);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+.tabular {
+  font-family: var(--font-mono);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
 }

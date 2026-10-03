@@ -1,6 +1,7 @@
 <script lang="ts">
   import "../app.css";
 
+  import AppShell from "$lib/components/ui/AppShell.svelte";
   import { onMount } from "svelte";
 
   import { backendAvailable } from "$lib/api/client";
@@ -13,7 +14,7 @@
 </script>
 
 {#if backendAvailable()}
-  {@render children()}
+  <AppShell>{@render children()}</AppShell>
 {:else}
   <NoBackend />
 {/if}

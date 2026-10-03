@@ -34,8 +34,13 @@
     flex: none;
     width: 190px;
     height: 130px;
-    border-radius: var(--radius);
-    background: radial-gradient(circle at 50% 45%, var(--accent-soft), var(--surface-2) 90%);
+    border-radius: 0;
+    border: 1px solid var(--border);
+    background:
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 16px 16px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 16px 16px,
+      radial-gradient(circle at 50% 60%, var(--wash-1), transparent 70%),
+      var(--surface-2);
   }
   .art :global(svg) {
     position: absolute;
@@ -50,13 +55,18 @@
     color: var(--accent);
     font-size: var(--fs-label);
     font-weight: 600;
+    font-family: var(--font-mono);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
+  }
+  .kind::before {
+    content: "> ";
   }
   h1 {
     font-size: 26px;
     font-weight: 650;
     letter-spacing: -0.01em;
+    text-shadow: var(--glow-text);
     overflow-wrap: anywhere;
   }
   .subtitle {

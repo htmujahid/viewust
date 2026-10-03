@@ -38,7 +38,7 @@
   }
   code {
     padding: 1px 6px;
-    border-radius: 6px;
+    border-radius: 0;
     background: var(--surface-2);
     color: var(--text);
     font-size: 0.9em;

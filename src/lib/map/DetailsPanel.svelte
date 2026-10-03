@@ -84,7 +84,8 @@
     flex-direction: column;
     align-self: stretch;
     width: 340px;
-    margin: var(--s-4) var(--s-4) var(--s-4) 0;
+    margin: 0;
+    border-width: 0 0 0 1px;
     overflow: hidden;
   }
 
@@ -93,7 +94,7 @@
     flex: none;
     height: 150px;
     padding: var(--s-4) 48px;
-    background: radial-gradient(circle at 50% 45%, var(--accent-soft), var(--surface-2) 90%);
+    background: var(--surface-2);
     border-bottom: 1px solid var(--border);
   }
   /* The drawing is pinned to this box; its viewBox scales it to fit. */
@@ -118,7 +119,7 @@
     width: 28px;
     height: 28px;
     border: 0;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--surface);
     color: var(--text-2);
     cursor: pointer;
@@ -132,10 +133,14 @@
   }
   .kind {
     color: var(--accent);
+    font-family: var(--font-mono);
     font-size: var(--fs-label);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.1em;
+  }
+  .kind::before {
+    content: "> ";
   }
   h2 {
     margin-top: 2px;
@@ -158,7 +163,7 @@
     margin: 0 var(--s-4) var(--s-3);
     padding: 8px var(--s-3);
     border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     background: var(--accent-soft);
     color: var(--accent);
     font-weight: 600;
@@ -188,5 +193,16 @@
     padding: var(--s-5) 0;
     color: var(--text-3);
     text-align: center;
+  }
+  @media (max-width: 1050px) {
+    .panel {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 10;
+      width: min(400px, 100%);
+      box-shadow: -12px 0 32px rgb(0 0 0 / 0.45);
+    }
   }
 </style>

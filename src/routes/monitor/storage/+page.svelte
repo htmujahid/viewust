@@ -38,8 +38,29 @@
     />
   </MonitorCard>
 
-  {#each now.disks as d (d.name)}
-    <MonitorCard title={`${d.name}${d.model ? ` · ${d.model}` : ""}`}>
+  <MonitorCard title="Space" wide>
+    <ul class="m-rows">
+      {#each now.volumes as v (v.mount)}
+        <li>
+          <div class="m-line">
+            <span><b>{v.mount}</b> <span class="m-muted">{v.file_system}</span></span>
+            <span class="m-muted tabular"
+              >{formatBytes(v.used)} used of {formatBytes(v.total)} · {formatBytes(
+                v.total - v.used,
+              )} free</span
+            >
+          </div>
+          <Meter value={(v.used / v.total) * 100} height={6} />
+        </li>
+      {/each}
+    </ul>
+  </MonitorCard>
+
+  {#each now.disks as d, i (d.name)}
+    <MonitorCard
+      title={`${d.name}${d.model ? ` · ${d.model}` : ""}`}
+      wide={now.disks.length % 2 === 1 && i === now.disks.length - 1}
+    >
       {#snippet value()}{m.percent(d.busy)} <small>busy</small>{/snippet}
       {#snippet aside()}
         <Facts
@@ -67,24 +88,6 @@
       </div>
     </MonitorCard>
   {/each}
-
-  <MonitorCard title="Space" wide>
-    <ul class="m-rows">
-      {#each now.volumes as v (v.mount)}
-        <li>
-          <div class="m-line">
-            <span><b>{v.mount}</b> <span class="m-muted">{v.file_system}</span></span>
-            <span class="m-muted tabular"
-              >{formatBytes(v.used)} used of {formatBytes(v.total)} · {formatBytes(
-                v.total - v.used,
-              )} free</span
-            >
-          </div>
-          <Meter value={(v.used / v.total) * 100} height={6} />
-        </li>
-      {/each}
-    </ul>
-  </MonitorCard>
 </MonitorGrid>
 
 <style>

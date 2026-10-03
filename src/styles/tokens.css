@@ -1,86 +1,127 @@
-/* Design tokens: colour, spacing, type, radius. Light is the default; dark applies
-   when chosen explicitly, or when the choice is "system" and the OS prefers dark. */
+/* Design tokens: colour, spacing, type, effects. The look is a dev/gamer HUD: a near-black
+   "night" surface, neon cyan as the accent, magenta as the second data series, and soft glows.
+   Dark is the default (also when the OS has no preference); light applies when chosen
+   explicitly, or when the choice is "system" and the OS prefers light. */
 
 :root {
-  --bg: #f4f5f7;
-  --surface: #ffffff;
-  --surface-2: #f0f1f4;
-  --border: #e4e6eb;
-  --text: #16181d;
-  --text-2: #5b6170;
-  --text-3: #8b91a0;
-  --accent: #4f6bed;
-  --accent-soft: #e9edfd;
-  --ok: #1f9d63;
-  --ok-soft: #e2f5ec;
-  --warn: #c98a00;
-  --warn-soft: #fcf1d6;
-  --danger: #d6453d;
-  --danger-soft: #fbe6e4;
-  --radius: 14px;
-  --radius-sm: 10px;
+  --font-mono:
+    "JetBrains Mono", "Fira Code", "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono",
+    monospace;
+  --font-ui: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --bg: #090b12;
+  --rail: #06080d;
+  --surface: #0e121b;
+  --surface-2: #161c29;
+  --border: #222b3d;
+  --border-strong: #34415c;
+  --text: #dbe4f5;
+  --text-2: #a3b0c9;
+  --text-3: #7684a3;
+  --accent: #00e5ff;
+  --accent-ink: #031116;
+  --accent-soft: #072a33;
+  --ok: #39ff88;
+  --ok-soft: #0b2a1b;
+  --warn: #ffc531;
+  --warn-soft: #33280a;
+  --danger: #ff4d6d;
+  --danger-soft: #351019;
+  --device-dark: #1b2332;
+  /* Neon cyan and magenta data series, shared by charts and legends. */
+  --series-1: #00e5ff;
+  --series-2: #ff4fb8;
+
+  /* Effects: glows replace drop shadows; the backdrop is a faint grid with two colour washes. */
+  --glow: 0 0 12px color-mix(in srgb, var(--accent) 38%, transparent);
+  --glow-strong:
+    0 0 0 1px var(--accent), 0 0 16px color-mix(in srgb, var(--accent) 55%, transparent);
+  --glow-text: 0 0 14px color-mix(in srgb, var(--accent) 55%, transparent);
+  --wash-1: rgb(0 229 255 / 0.09);
+  --wash-2: rgb(255 79 184 / 0.07);
+  --grid-line: rgb(0 229 255 / 0.045);
+  --scanline: rgb(0 0 0 / 0.14);
+  --shadow: none;
+
+  --radius: 0;
+  --radius-sm: 0;
   --s-1: 4px;
   --s-2: 8px;
   --s-3: 12px;
   --s-4: 16px;
-  --s-5: 24px;
-  --s-6: 32px;
-  --fs-title: 22px;
+  --s-5: 28px;
+  --s-6: 40px;
+  --fs-title: 28px;
   --fs-body: 14px;
   --fs-small: 12.5px;
   --fs-label: 12px;
-  --shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06);
-  --device-dark: #2d3345;
-  /* data series, in fixed order; validated adjacent-pair CVD-safe on this surface */
-  --series-1: #2a78d6;
-  --series-2: #eb6834;
-  color-scheme: light;
-}
-
-/* Dark applies when chosen explicitly, or when the choice is "system" and the
-   OS prefers dark. Light is the default above. */
-:root[data-theme="dark"] {
-  --bg: #101216;
-  --surface: #181b21;
-  --surface-2: #20242c;
-  --border: #272c36;
-  --text: #eceef3;
-  --text-2: #a3a9b8;
-  --text-3: #747b8c;
-  --accent: #7b92ff;
-  --accent-soft: #232b4d;
-  --ok: #4cc38a;
-  --ok-soft: #173326;
-  --warn: #e5b341;
-  --warn-soft: #3a2f12;
-  --danger: #f07a72;
-  --danger-soft: #3c1d1b;
-  --device-dark: #262b38;
-  --series-1: #3987e5;
-  --series-2: #d95926;
-  --shadow: none;
   color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
+:root[data-theme="light"] {
+  --bg: #e9edf3;
+  --rail: #dde3ec;
+  --surface: #ffffff;
+  --surface-2: #eef1f6;
+  --border: #c5cedb;
+  --border-strong: #9aa8bd;
+  --text: #101827;
+  --text-2: #3b4659;
+  --text-3: #5c6a80;
+  --accent: #0072a3;
+  --accent-ink: #ffffff;
+  --accent-soft: #def1fa;
+  --ok: #0a8a4a;
+  --ok-soft: #dcf5e7;
+  --warn: #a86800;
+  --warn-soft: #fbefd0;
+  --danger: #c4223f;
+  --danger-soft: #fde3e8;
+  --device-dark: #2a3342;
+  --series-1: #0072a3;
+  --series-2: #b8236f;
+  --glow: 0 0 10px color-mix(in srgb, var(--accent) 18%, transparent);
+  --glow-strong:
+    0 0 0 1px var(--accent), 0 0 10px color-mix(in srgb, var(--accent) 28%, transparent);
+  --glow-text: none;
+  --wash-1: rgb(0 114 163 / 0.07);
+  --wash-2: rgb(184 35 111 / 0.05);
+  --grid-line: rgb(16 24 39 / 0.045);
+  --scanline: transparent;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
   :root:not([data-theme]) {
-    --bg: #101216;
-    --surface: #181b21;
-    --surface-2: #20242c;
-    --border: #272c36;
-    --text: #eceef3;
-    --text-2: #a3a9b8;
-    --text-3: #747b8c;
-    --accent: #7b92ff;
-    --accent-soft: #232b4d;
-    --ok: #4cc38a;
-    --ok-soft: #173326;
-    --warn: #e5b341;
-    --warn-soft: #3a2f12;
-    --danger: #f07a72;
-    --danger-soft: #3c1d1b;
-    --device-dark: #262b38;
-    --shadow: none;
-    color-scheme: dark;
+    --bg: #e9edf3;
+    --rail: #dde3ec;
+    --surface: #ffffff;
+    --surface-2: #eef1f6;
+    --border: #c5cedb;
+    --border-strong: #9aa8bd;
+    --text: #101827;
+    --text-2: #3b4659;
+    --text-3: #5c6a80;
+    --accent: #0072a3;
+    --accent-ink: #ffffff;
+    --accent-soft: #def1fa;
+    --ok: #0a8a4a;
+    --ok-soft: #dcf5e7;
+    --warn: #a86800;
+    --warn-soft: #fbefd0;
+    --danger: #c4223f;
+    --danger-soft: #fde3e8;
+    --device-dark: #2a3342;
+    --series-1: #0072a3;
+    --series-2: #b8236f;
+    --glow: 0 0 10px color-mix(in srgb, var(--accent) 18%, transparent);
+    --glow-strong:
+      0 0 0 1px var(--accent), 0 0 10px color-mix(in srgb, var(--accent) 28%, transparent);
+    --glow-text: none;
+    --wash-1: rgb(0 114 163 / 0.07);
+    --wash-2: rgb(184 35 111 / 0.05);
+    --grid-line: rgb(16 24 39 / 0.045);
+    --scanline: transparent;
+    color-scheme: light;
   }
 }

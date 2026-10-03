@@ -1,7 +1,6 @@
 <script lang="ts">
   import MonitorCard from "$lib/features/monitor/MonitorCard.svelte";
   import MonitorGrid from "$lib/features/monitor/MonitorGrid.svelte";
-  import { goto } from "$app/navigation";
   import Facts from "$lib/components/ui/Facts.svelte";
   import LineChart from "$lib/components/charts/LineChart.svelte";
   import { monitor } from "$lib/features/monitor/store.svelte";
@@ -35,8 +34,9 @@
     />
   </MonitorCard>
 
-  {#each now.net as n (n.name)}
+  {#each now.net as n, i (n.name)}
     <MonitorCard
+      wide={now.net.length % 2 === 1 && i === now.net.length - 1}
       title={`${n.name} · ${n.kind === "wifi" ? "Wi-Fi" : "Ethernet"}${n.default_route ? " · your internet connection" : ""}`}
     >
       {#snippet value()}{formatRate(n.rx_bps)} <small>down</small> · {formatRate(n.tx_bps)}
@@ -66,22 +66,11 @@
   {:else}
     <section class="card empty"><p class="m-muted">No active network adapters.</p></section>
   {/each}
-
-  <p class="m-muted m-wide">
-    See how the connection reaches the internet, with the router and signal strength:
-    <button class="m-link plain" onclick={() => goto("/")}>Open the devices map →</button>
-  </p>
 </MonitorGrid>
 
 <style>
   .empty {
     grid-column: 1 / -1;
     padding: var(--s-4);
-  }
-  .plain {
-    padding: 0;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
   }
 </style>

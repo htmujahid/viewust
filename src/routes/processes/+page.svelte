@@ -5,7 +5,6 @@
 
   import Icon from "$lib/components/ui/Icon.svelte";
   import LiveToggle from "$lib/components/ui/LiveToggle.svelte";
-  import NavLinks from "$lib/components/ui/NavLinks.svelte";
   import Page from "$lib/components/ui/Page.svelte";
   import PageHeader from "$lib/components/ui/PageHeader.svelte";
   import ProcessPanel from "$lib/features/processes/ProcessPanel.svelte";
@@ -33,7 +32,7 @@
 
 <div class="layout">
   <div class="content">
-    <Page maxWidth={1600}>
+    <Page maxWidth={1600} fill>
       <PageHeader
         back="/"
         backLabel="Devices"
@@ -47,11 +46,11 @@
             <Icon name="search" size={15} />
             <input
               type="search"
+              aria-label="Search processes"
               placeholder="Search name, owner or PID"
               bind:value={processes.search}
             />
           </label>
-          <NavLinks hide={["processes"]} />
           <LiveToggle bind:live={processes.live} />
         {/snippet}
       </PageHeader>
@@ -101,8 +100,9 @@
 
 <style>
   .layout {
+    position: relative;
     display: flex;
-    height: 100vh;
+    height: 100%;
   }
   .content {
     flex: 1;
@@ -115,12 +115,17 @@
     width: 260px;
     padding: 7px var(--s-3);
     border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     background: var(--surface);
     color: var(--text-3);
   }
   .search:focus-within {
     border-color: var(--accent);
+    box-shadow: var(--glow);
+  }
+  .search input {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
   }
   .search input {
     flex: 1;

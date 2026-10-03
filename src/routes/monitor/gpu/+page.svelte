@@ -12,6 +12,7 @@
 </script>
 
 {#each now.gpus as g, i (g.name + i)}
+  {@const extras = [g.temperature, g.power, g.core_mhz].filter((v) => v !== null).length}
   <div class="card-group">
     <MonitorGrid>
       <MonitorCard title={g.name} wide>
@@ -55,7 +56,7 @@
 
       {#if g.temperature !== null}
         {@const temperature = g.temperature}
-        <MonitorCard title="Temperature">
+        <MonitorCard title="Temperature" wide={extras === 1}>
           {#snippet value()}{m.celsius(temperature)}{/snippet}
           <LineChart
             series={[{ name: "Temperature", color: m.COLOR_1, values: m.gpuTemp(samples, i) }]}
@@ -70,7 +71,7 @@
       {#if g.power !== null}
         {@const power = g.power}
         {@const limit = g.power_limit}
-        <MonitorCard title="Power draw">
+        <MonitorCard title="Power draw" wide={extras % 2 === 1 && g.core_mhz === null}>
           {#snippet value()}{m.watts(power)}{#if limit}
               <small>of {m.watts(limit)} limit</small>{/if}{/snippet}
           <LineChart
@@ -86,7 +87,7 @@
       {#if g.core_mhz !== null}
         {@const core = g.core_mhz}
         {@const memory = g.memory_mhz}
-        <MonitorCard title="Core clock">
+        <MonitorCard title="Core clock" wide={extras % 2 === 1}>
           {#snippet value()}{m.mhz(core)}{#if memory}<small>
                 · memory {m.mhz(memory)}</small
               >{/if}{/snippet}

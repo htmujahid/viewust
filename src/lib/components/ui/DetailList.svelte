@@ -46,10 +46,14 @@
   dt {
     flex: none;
     color: var(--text-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
   }
   dd {
     margin: 0;
     min-width: 0;
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
     font-variant-numeric: tabular-nums;
     font-weight: 500;
     text-align: right;
@@ -62,14 +66,12 @@
   pre {
     margin: 0;
     padding: var(--s-3);
-    border-radius: var(--radius-sm);
-    background: var(--surface-2);
-    font:
-      12px/1.5 ui-monospace,
-      "SF Mono",
-      Menlo,
-      Consolas,
-      monospace;
+    border-radius: 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    color: var(--ok);
+    font: 12px/1.5 var(--font-mono);
     font-weight: 400;
     overflow-x: auto;
   }

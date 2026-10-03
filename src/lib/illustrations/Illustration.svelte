@@ -101,6 +101,7 @@
   }
   svg :global(.led) {
     fill: var(--ok);
+    filter: drop-shadow(0 0 3px var(--ok));
   }
   svg :global(.line) {
     fill: none;
@@ -122,7 +123,7 @@
   }
   svg :global(.glyph) {
     fill: none;
-    stroke: #fff;
+    stroke: var(--accent-ink);
     stroke-width: 3;
   }
   svg :global(.wave) {

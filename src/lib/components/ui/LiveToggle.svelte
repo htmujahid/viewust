@@ -12,11 +12,12 @@
   .dot {
     width: 8px;
     height: 8px;
-    border-radius: 50%;
+    border-radius: 0;
     background: var(--text-3);
   }
   .on .dot {
     background: var(--ok);
+    box-shadow: 0 0 8px var(--ok);
   }
   .pulse {
     animation: pulse 1.6s ease-in-out infinite;

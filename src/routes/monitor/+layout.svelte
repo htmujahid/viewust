@@ -5,9 +5,7 @@
   import { page } from "$app/state";
 
   import LiveToggle from "$lib/components/ui/LiveToggle.svelte";
-  import NavLinks from "$lib/components/ui/NavLinks.svelte";
   import Page from "$lib/components/ui/Page.svelte";
-  import PageHeader from "$lib/components/ui/PageHeader.svelte";
   import TabNav from "$lib/components/ui/TabNav.svelte";
   import { monitor } from "$lib/features/monitor/store.svelte";
   import "$lib/features/monitor/monitor.css";
@@ -37,14 +35,10 @@
 <svelte:window {onkeydown} />
 
 <Page>
-  <PageHeader back="/" backLabel="Devices" title="Live monitor" subtitle="Updated every second">
-    {#snippet actions()}
-      <NavLinks hide={["monitor"]} />
-      <LiveToggle bind:live={monitor.live} />
-    {/snippet}
-  </PageHeader>
-
-  <div class="tabs"><TabNav {tabs} current={page.url.pathname} label="Monitor sections" /></div>
+  <div class="bar">
+    <TabNav {tabs} current={page.url.pathname} label="Monitor sections" />
+    <LiveToggle bind:live={monitor.live} />
+  </div>
 
   {#if monitor.error && !monitor.latest}
     <p class="error">Couldn't read the system: {monitor.error}</p>
@@ -58,8 +52,24 @@
 </Page>
 
 <style>
-  .tabs {
+  /* Tabs and the live toggle share one row and one baseline. */
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--s-3);
     margin-bottom: var(--s-4);
+  }
+  /* The tabs keep their own underline, which only runs as wide as the tabs. */
+  .bar :global(nav) {
+    padding: 0;
+  }
+  .bar :global(nav a) {
+    margin-bottom: -1px;
+  }
+  .bar :global(.btn) {
+    margin-bottom: 2px;
   }
   .content {
     transition: opacity 0.2s;

@@ -1,10 +1,40 @@
 /* Small shared building blocks: cards, buttons, loading placeholders, motion. */
 
 .card {
-  background: var(--surface);
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 5%, var(--surface)),
+    var(--surface) 55%
+  );
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+/* HUD corner brackets. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  --b: linear-gradient(var(--accent), var(--accent));
+  background:
+    var(--b) top left / 12px 2px,
+    var(--b) top left / 2px 12px,
+    var(--b) top right / 12px 2px,
+    var(--b) top right / 2px 12px,
+    var(--b) bottom left / 12px 2px,
+    var(--b) bottom left / 2px 12px,
+    var(--b) bottom right / 12px 2px,
+    var(--b) bottom right / 2px 12px;
+  background-repeat: no-repeat;
+  opacity: 0.7;
+}
+.card:hover {
+  border-color: var(--border-strong);
 }
 
 .tabular {
@@ -21,16 +51,20 @@
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
-  padding: 7px var(--s-4);
+  padding: 9px var(--s-4);
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--shadow);
   color: var(--text);
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    color 0.15s;
 }
 .btn:hover:not(:disabled) {
   background: var(--surface-2);
@@ -42,13 +76,13 @@
 
 .skeleton {
   border-radius: var(--radius);
-  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
-  background-size: 200% 100%;
+  background: var(--surface-2);
+
   animation: shimmer 1.4s infinite;
 }
 @keyframes shimmer {
   to {
-    background-position: -200% 0;
+    opacity: 0.45;
   }
 }
 @keyframes spin {
@@ -61,4 +95,20 @@
   .spin {
     animation: none;
   }
+}
+
+.btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  min-height: 36px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: var(--glow);
+}
+.btn:active:not(:disabled) {
+  background: var(--accent-soft);
 }

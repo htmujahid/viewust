@@ -22,14 +22,16 @@
 </div>
 
 <style>
+  /* A segmented "health bar": the mask cuts the track into cells. */
   .meter {
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--surface-2);
     overflow: hidden;
+    mask-image: repeating-linear-gradient(90deg, #000 0 5px, transparent 5px 7px);
   }
   .fill {
     height: 100%;
-    border-radius: inherit;
+    border-radius: 0;
     transition: width 0.4s ease;
   }
   .accent {

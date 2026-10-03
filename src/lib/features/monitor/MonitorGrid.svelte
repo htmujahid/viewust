@@ -7,15 +7,11 @@
 <div class="grid">{@render children()}</div>
 
 <style>
+  /* Aligned grid: at most two columns, and cards in a row share one height. */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
-    gap: var(--s-4);
-    align-items: start;
-  }
-  @media (max-width: 720px) {
-    .grid {
-      grid-template-columns: 1fr;
-    }
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    gap: var(--s-5);
+    align-items: stretch;
   }
 </style>

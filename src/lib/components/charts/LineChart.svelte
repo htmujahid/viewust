@@ -132,10 +132,10 @@
         <text class="tick" x={pad.left + plotW} y={height - 4} text-anchor="end">now</text>
 
         {#if series[0]}
-          <path d={area(series[0].values)} fill={series[0].color} opacity="0.1" />
+          <path d={area(series[0].values)} fill={series[0].color} opacity="0.14" />
         {/if}
         {#each series as s}
-          <path class="line" d={path(s.values)} stroke={s.color} />
+          <path class="line" d={path(s.values)} stroke={s.color} style:color={s.color} />
         {/each}
 
         {#if hover !== null}
@@ -220,7 +220,7 @@
     display: inline-block;
     width: 14px;
     height: 2px;
-    border-radius: 1px;
+    border-radius: 0;
   }
   .plot {
     position: relative;
@@ -233,11 +233,12 @@
   svg:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 0;
   }
   .grid {
     stroke: var(--border);
     stroke-width: 1;
+    stroke-dasharray: 2 4;
   }
   .cross {
     stroke: var(--text-3);
@@ -245,11 +246,13 @@
   }
   .tick {
     fill: var(--text-3);
+    font-family: var(--font-mono);
     font-size: 11px;
     font-variant-numeric: tabular-nums;
   }
   .line {
     fill: none;
+    filter: drop-shadow(0 0 3px currentColor);
     stroke-width: 2;
     stroke-linejoin: round;
     stroke-linecap: round;
@@ -264,10 +267,10 @@
     z-index: 2;
     min-width: 150px;
     padding: var(--s-2) var(--s-3);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    border: 1px solid var(--accent);
+    border-radius: 0;
     background: var(--surface);
-    box-shadow: 0 4px 16px rgb(0 0 0 / 0.18);
+    box-shadow: var(--glow);
     pointer-events: none;
     transform: translate(-50%, -4px);
   }

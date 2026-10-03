@@ -98,11 +98,6 @@
       <p class="m-muted">This computer has no swap space configured.</p>
     {/if}
   </MonitorCard>
-
-  <p class="m-muted m-wide">
-    Want to know which program is using it?
-    <a class="m-link" href="/processes">Open processes, sorted by memory →</a>
-  </p>
 </MonitorGrid>
 
 <style>
@@ -110,12 +105,12 @@
     display: flex;
     height: 14px;
     gap: 2px;
-    border-radius: 999px;
+    border-radius: 0;
     overflow: hidden;
   }
   .bar span {
     min-width: 2px;
-    border-radius: 3px;
+    border-radius: 0;
     transition: width 0.4s ease;
   }
   .legend {
@@ -129,6 +124,6 @@
   .key i {
     width: 10px;
     height: 10px;
-    border-radius: 3px;
+    border-radius: 0;
   }
 </style>
