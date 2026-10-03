@@ -1,14 +1,10 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  let {
-    maxWidth = 1180,
-    fill = false,
-    children,
-  }: { maxWidth?: number; fill?: boolean; children: Snippet } = $props();
+  let { fill = false, children }: { fill?: boolean; children: Snippet } = $props();
 </script>
 
-<div class="page" class:fill style:--page-max="{maxWidth}px">
+<div class="page" class:fill>
   {@render children()}
 </div>
 

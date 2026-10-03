@@ -7,8 +7,10 @@ A live map of everything connected to your computer, and a window into it.
 - **Devices** – every external device (keyboards, mice, webcams, monitors, drives…) drawn around
   your computer, wired or wireless, plus how the computer reaches the internet.
 - **Inside the computer** – motherboard, processor, memory, drives, graphics card, power.
-- **Processes** – every running program and how it uses memory.
+- **Processes** – every running program and how it uses memory, plus (on Linux) the namespaces that
+  isolate programs from one another.
 - **Live monitor** – real-time processor, memory, storage, graphics, thermal, power and network charts.
+- **Accounts** – users and groups: who is on the computer and what they belong to.
 - **Services** – every systemd service, its state, memory and recent log.
 
 Click anything for a summary, double-click for its full technical page.
@@ -18,11 +20,11 @@ Hardware reading is **Linux-first**; other systems get the basics.
 
 ## Running it
 
-| Command          | What it does                                                                                                                                    |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm tauri dev` | Run the real app (Rust backend + window).                                                                                                       |
-| `pnpm dev:mock`  | Run the interface in a browser with sample data. No desktop shell needed. Add `?net=wifi` or `?net=offline` to try the other connection states. |
-| `pnpm verify`    | Everything CI would check: formatting, type check, unit tests, build, and the Rust format/lint/tests.                                           |
+| Command          | What it does                                                                                                                                                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm tauri dev` | Run the real app (Rust backend + window).                                                                                                                                                          |
+| `pnpm dev:mock`  | Run the interface in a browser with sample data. No desktop shell needed. Add `?net=wifi` or `?net=offline` to try the other connection states, or `?os=windows` to see pages that are Linux-only. |
+| `pnpm verify`    | Everything CI would check: formatting, type check, unit tests, build, and the Rust format/lint/tests.                                                                                              |
 
 Other scripts: `pnpm test`, `pnpm format`, `pnpm check`, `pnpm rust:verify`.
 

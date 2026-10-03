@@ -7,6 +7,8 @@ import type {
   HardwareInfo,
   MemoryModules,
   Peripheral,
+  Accounts,
+  Namespaces,
   ProcessDetail,
   Sample,
   ServiceDetail,
@@ -276,6 +278,128 @@ const processDetail = (pid: number): ProcessDetail => ({
   ],
 });
 
+const accountList = (): Accounts => {
+  const user = (
+    name: string,
+    uid: string,
+    kind: "root" | "system" | "regular",
+    groups: string[],
+    extra: Partial<Accounts["users"][number]> = {},
+  ): Accounts["users"][number] => ({
+    name,
+    uid,
+    primary_group: groups[0] ?? name,
+    groups,
+    full_name: null,
+    home: kind === "regular" ? `/home/${name}` : "/nonexistent",
+    shell: kind === "regular" ? "/bin/bash" : "/usr/sbin/nologin",
+    kind,
+    admin: groups.some((g) => ["sudo", "wheel", "admin", "root"].includes(g)),
+    can_login: kind === "regular" || kind === "root",
+    current: false,
+    processes: 0,
+    memory: 0,
+    ...extra,
+  });
+  const users = [
+    user("talha", "1000", "regular", ["talha", "sudo", "docker", "adm", "users"], {
+      full_name: "Talha M",
+      current: true,
+      processes: 199,
+      memory: 19.8e9,
+    }),
+    user("guest", "1001", "regular", ["guest", "users"], {
+      full_name: "Guest",
+      shell: "/bin/zsh",
+      processes: 0,
+    }),
+    user("root", "0", "root", ["root"], {
+      home: "/root",
+      shell: "/bin/bash",
+      processes: 392,
+      memory: 2.3e9,
+    }),
+    user("www-data", "33", "system", ["www-data"], { processes: 3, memory: 41e6 }),
+    user("daemon", "1", "system", ["daemon"], { processes: 1, memory: 2e6 }),
+    user("systemd-resolve", "991", "system", ["systemd-resolve"], { processes: 1, memory: 8e6 }),
+    user("nobody", "65534", "system", ["nogroup"]),
+  ];
+  const memberships = new Map<string, string[]>();
+  for (const u of users)
+    for (const g of u.groups) memberships.set(g, [...(memberships.get(g) ?? []), u.name]);
+  const gid: Record<string, string> = {
+    root: "0",
+    daemon: "1",
+    adm: "4",
+    sudo: "27",
+    "www-data": "33",
+    users: "100",
+    docker: "999",
+    talha: "1000",
+    guest: "1001",
+    "systemd-resolve": "991",
+    nogroup: "65534",
+    cdrom: "24",
+  };
+  const adminNames = ["sudo", "root", "adm"];
+  const groups = Object.entries(gid).map(([name, id]) => ({
+    name,
+    gid: id,
+    members: memberships.get(name) ?? [],
+    kind:
+      adminNames.includes(name) && name !== "adm"
+        ? ("admin" as const)
+        : Number(id) >= 1000 && Number(id) < 65534
+          ? ("regular" as const)
+          : ("system" as const),
+    admin: adminNames.includes(name) && name !== "adm",
+  }));
+  return { platform: "linux", users, groups };
+};
+
+const namespaceList = (): Namespaces => {
+  const host: Record<string, number> = {
+    pid: 4026531836,
+    net: 4026531833,
+    mnt: 4026531832,
+    user: 4026531837,
+    uts: 4026531838,
+    ipc: 4026531839,
+    cgroup: 4026531835,
+    time: 4026531834,
+  };
+  const proc = (pid: number, name: string, user = "talha") => ({ pid, name, user });
+  const rows: Namespaces["namespaces"] = Object.entries(host).map(([kind, id], i) => ({
+    kind,
+    id,
+    processes: 150 + i * 6,
+    sample: [proc(1148, "gnome-shell"), proc(1222, "pipewire"), proc(1296, "dbus-daemon")],
+    current: true,
+  }));
+  const isolated = (
+    kind: string,
+    id: number,
+    processes: number,
+    sample: ReturnType<typeof proc>[],
+  ) => rows.push({ kind, id, processes, sample, current: false });
+  isolated("user", 4026532801, 6, [proc(8850, "firefox"), proc(8901, "Isolated Web Co")]);
+  isolated("pid", 4026532802, 6, [proc(8850, "firefox"), proc(8901, "Isolated Web Co")]);
+  isolated("net", 4026532803, 2, [proc(8901, "Isolated Web Co")]);
+  isolated("mnt", 4026532804, 6, [proc(8850, "firefox")]);
+  isolated("pid", 4026532900, 4, [proc(9100, "nginx", "root"), proc(9112, "nginx", "www-data")]);
+  isolated("net", 4026532902, 4, [proc(9100, "nginx", "root")]);
+  isolated("mnt", 4026532901, 4, [proc(9100, "nginx", "root")]);
+  isolated("uts", 4026532903, 4, [proc(9100, "nginx", "root")]);
+  isolated("ipc", 4026532904, 4, [proc(9100, "nginx", "root")]);
+  return {
+    supported: true,
+    note: "Read 191 of 534 processes. The rest belong to other users, and only an administrator can look inside them.",
+    inspected: 191,
+    total: 534,
+    namespaces: rows,
+  };
+};
+
 const serviceDefs: [string, string, string, string, string, number | null][] = [
   ["NetworkManager", "Network Manager", "active", "running", "enabled", 9.7e6],
   ["ssh", "OpenBSD Secure Shell server", "active", "running", "enabled", 5.1e6],
@@ -531,6 +655,8 @@ export const fixtures = {
   processDetail,
   serviceList,
   serviceDetail,
+  accountList,
+  namespaceList,
   sample,
 };
 
@@ -540,7 +666,9 @@ export function installMockBackend(): void {
   if (installed) return;
   installed = true;
 
-  const net = new URLSearchParams(globalThis.location?.search ?? "").get("net") ?? "wired";
+  const params = new URLSearchParams(globalThis.location?.search ?? "");
+  const net = params.get("net") ?? "wired";
+  const unsupportedOs = params.get("os") === "windows";
   let tick = 0;
 
   mockIPC((command, payload) => {
@@ -558,6 +686,18 @@ export function installMockBackend(): void {
         return processList(++tick);
       case "process_detail":
         return processDetail(Number(args.pid));
+      case "account_list":
+        return accountList();
+      case "namespace_list":
+        return unsupportedOs
+          ? ({
+              supported: false,
+              note: "Namespaces are a Linux feature. This system isolates programs in other ways, so there is nothing to list here.",
+              inspected: 0,
+              total: 0,
+              namespaces: [],
+            } satisfies Namespaces)
+          : namespaceList();
       case "service_list":
         return serviceList();
       case "service_detail":

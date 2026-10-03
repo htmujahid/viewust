@@ -1,6 +1,6 @@
 use tauri::State;
 
-use super::{ProcessDetail, ProcessService, Snapshot};
+use super::{namespaces, Namespaces, ProcessDetail, ProcessService, Snapshot};
 use crate::common::blocking;
 use crate::error::Result;
 
@@ -14,4 +14,9 @@ pub async fn process_list(service: State<'_, ProcessService>) -> Result<Snapshot
 pub async fn process_detail(service: State<'_, ProcessService>, pid: u32) -> Result<ProcessDetail> {
     let service = service.inner().clone();
     blocking::run(move || service.detail(pid)).await
+}
+
+#[tauri::command]
+pub async fn namespace_list() -> Result<Namespaces> {
+    blocking::run(namespaces::snapshot).await
 }

@@ -84,3 +84,28 @@ pub struct ProcessDetail {
     pub(crate) children: Vec<Child>,
     pub(crate) details: Vec<Detail>,
 }
+
+#[derive(Serialize, Clone)]
+pub struct NsProcess {
+    pub(crate) pid: u32,
+    pub(crate) name: String,
+    pub(crate) user: String,
+}
+
+#[derive(Serialize, Clone)]
+pub struct NamespaceRow {
+    pub(crate) kind: String,
+    pub(crate) id: u64,
+    pub(crate) processes: u32,
+    pub(crate) sample: Vec<NsProcess>,
+    pub(crate) current: bool,
+}
+
+#[derive(Serialize)]
+pub struct Namespaces {
+    pub(crate) supported: bool,
+    pub(crate) note: Option<String>,
+    pub(crate) inspected: usize,
+    pub(crate) total: usize,
+    pub(crate) namespaces: Vec<NamespaceRow>,
+}

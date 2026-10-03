@@ -63,3 +63,25 @@ export interface ProcessDetail {
   children: { pid: number; name: string; memory: number }[];
   details: Detail[];
 }
+
+export interface NsProcess {
+  pid: number;
+  name: string;
+  user: string;
+}
+
+export interface NamespaceRow {
+  kind: string;
+  id: number;
+  processes: number;
+  sample: NsProcess[];
+  current: boolean;
+}
+
+export interface Namespaces {
+  supported: boolean;
+  note: string | null;
+  inspected: number;
+  total: number;
+  namespaces: NamespaceRow[];
+}

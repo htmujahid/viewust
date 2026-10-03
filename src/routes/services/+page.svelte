@@ -39,7 +39,7 @@
 
 <div class="layout">
   <div class="content">
-    <Page maxWidth={1600} fill>
+    <Page fill>
       <PageHeader back="/" backLabel="Devices" title="Services">
         {#snippet actions()}
           <label class="search">

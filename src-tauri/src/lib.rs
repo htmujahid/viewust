@@ -1,3 +1,4 @@
+mod accounts;
 mod common;
 mod connection;
 mod error;
@@ -26,6 +27,8 @@ pub fn run() {
             system::commands::read_memory_modules,
             processes::commands::process_list,
             processes::commands::process_detail,
+            processes::commands::namespace_list,
+            accounts::commands::account_list,
             services::commands::service_list,
             services::commands::service_detail,
             monitor::commands::monitor_sample,

@@ -27,6 +27,8 @@
     system: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
     activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
     chart: '<path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/>',
+    users:
+      '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2A6.5 6.5 0 0 1 21.5 20"/>',
     empty: '<circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2M9 9h.01M15 9h.01"/>',
   };
 
