@@ -8,6 +8,7 @@
   import Page from "$lib/components/ui/Page.svelte";
   import TabNav from "$lib/components/ui/TabNav.svelte";
   import { monitor } from "$lib/features/monitor/store.svelte";
+  import { hasPower, hasThermal } from "$lib/features/monitor/thermal";
   import "$lib/features/monitor/monitor.css";
 
   let { children } = $props();
@@ -21,6 +22,8 @@
     { href: "/monitor/memory", label: "Memory" },
     { href: "/monitor/storage", label: "Storage" },
     ...(monitor.latest?.gpus.length ? [{ href: "/monitor/gpu", label: "Graphics" }] : []),
+    ...(hasThermal(monitor.latest) ? [{ href: "/monitor/thermal", label: "Thermal" }] : []),
+    ...(hasPower(monitor.latest) ? [{ href: "/monitor/power", label: "Power" }] : []),
     { href: "/monitor/network", label: "Network" },
   ]);
 

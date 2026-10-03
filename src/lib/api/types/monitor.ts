@@ -31,6 +31,9 @@ export interface Volume {
 }
 
 export interface GpuSample {
+  id: string;
+  vendor: "nvidia" | "amd" | "intel";
+  kind: "discrete" | "integrated" | "unknown";
   name: string;
   util: number | null;
   memory_used: number | null;
@@ -54,6 +57,46 @@ export interface NetRate {
   default_route: boolean;
 }
 
+export interface TempSensor {
+  id: string;
+  group: string;
+  label: string;
+  celsius: number;
+  high: number | null;
+  critical: number | null;
+}
+
+export interface FanSensor {
+  id: string;
+  group: string;
+  label: string;
+  rpm: number;
+}
+
+export interface Thermal {
+  sensors: TempSensor[];
+  fans: FanSensor[];
+}
+
+export interface Battery {
+  name: string;
+  percent: number;
+  status: string;
+  watts: number | null;
+  seconds_left: number | null;
+  health: number | null;
+  cycles: number | null;
+}
+
+export interface Power {
+  cpu_watts: number | null;
+  cpu_readable: boolean;
+  cpu_limit_sustained: number | null;
+  cpu_limit_boost: number | null;
+  ac_online: boolean | null;
+  batteries: Battery[];
+}
+
 export interface Sample {
   t: number;
   cpu: CpuSample;
@@ -62,4 +105,6 @@ export interface Sample {
   volumes: Volume[];
   gpus: GpuSample[];
   net: NetRate[];
+  thermal: Thermal;
+  power: Power;
 }

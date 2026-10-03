@@ -6,7 +6,7 @@ mod gpu;
 pub mod memory;
 mod model;
 mod network;
-mod pci;
+pub(crate) mod pci;
 mod power;
 mod sound;
 mod storage;

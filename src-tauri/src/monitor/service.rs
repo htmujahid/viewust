@@ -1,8 +1,11 @@
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+use super::gpu::gpus;
 use super::model::*;
+use super::power::{power, Rapl};
 use super::sources::*;
+use super::thermal::thermal;
 use crate::common::sysfs::*;
 use std::collections::HashMap;
 use sysinfo::{Disks, System};
@@ -12,6 +15,7 @@ struct Tables {
     at: Instant,
     disks: HashMap<String, (u64, u64, u64)>,
     net: HashMap<String, (u64, u64)>,
+    rapl: Option<Rapl>,
 }
 
 impl Tables {
@@ -24,6 +28,7 @@ impl Tables {
             at: Instant::now(),
             disks: diskstats(),
             net: netstats(),
+            rapl: None,
         }
     }
 }
@@ -147,6 +152,8 @@ impl MonitorService {
             volumes,
             gpus: gpus(),
             net,
+            thermal: thermal(),
+            power: power(&mut st.rapl),
         }
     }
 }

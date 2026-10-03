@@ -312,6 +312,9 @@ const sample = (tick: number): Sample => ({
   ],
   gpus: [
     {
+      id: "0000:01:00.0",
+      vendor: "nvidia",
+      kind: "discrete",
       name: "NVIDIA GeForce GTX 1060 3GB",
       util: wave(tick, 30, 25),
       memory_used: 875e6,
@@ -322,6 +325,21 @@ const sample = (tick: number): Sample => ({
       core_mhz: 1582,
       memory_mhz: 4006,
       fan: 48,
+    },
+    {
+      id: "0000:00:02.0",
+      vendor: "intel",
+      kind: "integrated",
+      name: "Intel UHD Graphics 630",
+      util: null,
+      memory_used: null,
+      memory_total: null,
+      temperature: null,
+      power: null,
+      power_limit: null,
+      core_mhz: 350 + wave(tick, 0, 300),
+      memory_mhz: null,
+      fan: null,
     },
   ],
   net: [
@@ -336,6 +354,85 @@ const sample = (tick: number): Sample => ({
       default_route: true,
     },
   ],
+  thermal: {
+    sensors: [
+      {
+        id: "hwmon0:temp1",
+        group: "Motherboard",
+        label: "Motherboard",
+        celsius: 28 + wave(tick, 0, 0.6),
+        high: null,
+        critical: null,
+      },
+      {
+        id: "hwmon1:temp1",
+        group: "CPU",
+        label: "Package id 0",
+        celsius: 62 + wave(tick, 0, 7),
+        high: 80,
+        critical: 100,
+      },
+      ...[0, 4, 8, 12, 16, 20].map((c, i) => ({
+        id: `hwmon1:temp${2 + i * 4}`,
+        group: "CPU",
+        label: `Core ${c}`,
+        celsius: 54 + wave(tick, 0, 8, i),
+        high: 80,
+        critical: 100,
+      })),
+      {
+        id: "hwmon2:temp1",
+        group: "NVMe · Samsung 970 EVO",
+        label: "Composite",
+        celsius: 41 + wave(tick, 0, 3, 1),
+        high: 75,
+        critical: 85,
+      },
+      {
+        id: "hwmon2:temp2",
+        group: "NVMe · Samsung 970 EVO",
+        label: "Sensor 1",
+        celsius: 44 + wave(tick, 0, 3, 2),
+        high: 75,
+        critical: 85,
+      },
+      {
+        id: "hwmon3:temp1",
+        group: "Wi-Fi adapter",
+        label: "Wi-Fi adapter",
+        celsius: 36 + wave(tick, 0, 1.5, 3),
+        high: null,
+        critical: null,
+      },
+    ],
+    fans: [
+      { id: "hwmon4:fan1", group: "Motherboard", label: "CPU fan", rpm: 1180 + wave(tick, 0, 140) },
+      {
+        id: "hwmon4:fan2",
+        group: "Motherboard",
+        label: "Case fan",
+        rpm: 760 + wave(tick, 0, 60, 1),
+      },
+    ],
+  },
+  power: {
+    cpu_watts: null,
+    cpu_readable: false,
+    cpu_limit_sustained: 135,
+    cpu_limit_boost: 150,
+    ac_online: false,
+    batteries: [
+      {
+        name: "BAT0",
+        percent: Math.max(5, 78 - tick * 0.05),
+        status: "Discharging",
+        watts: 11 + wave(tick, 0, 3),
+        seconds_left: 14400 - tick * 20,
+        health: 91,
+        cycles: 214,
+      },
+    ],
+  },
 });
 
 export const fixtures = {

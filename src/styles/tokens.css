@@ -25,6 +25,10 @@
   --device-dark: #1b2332;
   --series-1: #00e5ff;
   --series-2: #ff4fb8;
+  --series-3: #ffc531;
+  --series-4: #39ff88;
+  --series-5: #a78bfa;
+  --series-6: #ff8a4c;
 
   --glow: 0 0 12px color-mix(in srgb, var(--accent) 38%, transparent);
   --glow-strong:
@@ -72,6 +76,10 @@
   --device-dark: #2a3342;
   --series-1: #0072a3;
   --series-2: #b8236f;
+  --series-3: #a86800;
+  --series-4: #0a8a4a;
+  --series-5: #6d4fd6;
+  --series-6: #c2410c;
   --glow: 0 0 10px color-mix(in srgb, var(--accent) 18%, transparent);
   --glow-strong:
     0 0 0 1px var(--accent), 0 0 10px color-mix(in srgb, var(--accent) 28%, transparent);
@@ -105,6 +113,10 @@
     --device-dark: #2a3342;
     --series-1: #0072a3;
     --series-2: #b8236f;
+    --series-3: #a86800;
+    --series-4: #0a8a4a;
+    --series-5: #6d4fd6;
+    --series-6: #c2410c;
     --glow: 0 0 10px color-mix(in srgb, var(--accent) 18%, transparent);
     --glow-strong:
       0 0 0 1px var(--accent), 0 0 10px color-mix(in srgb, var(--accent) 28%, transparent);

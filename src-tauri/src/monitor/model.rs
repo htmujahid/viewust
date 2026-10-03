@@ -38,6 +38,9 @@ pub struct Volume {
 
 #[derive(Serialize)]
 pub struct GpuSample {
+    pub(crate) id: String,
+    pub(crate) vendor: &'static str,
+    pub(crate) kind: &'static str,
     pub(crate) name: String,
     pub(crate) util: Option<f64>,
     pub(crate) memory_used: Option<u64>,
@@ -48,6 +51,51 @@ pub struct GpuSample {
     pub(crate) core_mhz: Option<f64>,
     pub(crate) memory_mhz: Option<f64>,
     pub(crate) fan: Option<f64>,
+}
+
+#[derive(Serialize)]
+pub struct TempSensor {
+    pub(crate) id: String,
+    pub(crate) group: String,
+    pub(crate) label: String,
+    pub(crate) celsius: f64,
+    pub(crate) high: Option<f64>,
+    pub(crate) critical: Option<f64>,
+}
+
+#[derive(Serialize)]
+pub struct FanSensor {
+    pub(crate) id: String,
+    pub(crate) group: String,
+    pub(crate) label: String,
+    pub(crate) rpm: f64,
+}
+
+#[derive(Serialize)]
+pub struct Thermal {
+    pub(crate) sensors: Vec<TempSensor>,
+    pub(crate) fans: Vec<FanSensor>,
+}
+
+#[derive(Serialize)]
+pub struct Battery {
+    pub(crate) name: String,
+    pub(crate) percent: f64,
+    pub(crate) status: String,
+    pub(crate) watts: Option<f64>,
+    pub(crate) seconds_left: Option<u64>,
+    pub(crate) health: Option<f64>,
+    pub(crate) cycles: Option<u64>,
+}
+
+#[derive(Serialize)]
+pub struct Power {
+    pub(crate) cpu_watts: Option<f64>,
+    pub(crate) cpu_readable: bool,
+    pub(crate) cpu_limit_sustained: Option<f64>,
+    pub(crate) cpu_limit_boost: Option<f64>,
+    pub(crate) ac_online: Option<bool>,
+    pub(crate) batteries: Vec<Battery>,
 }
 
 #[derive(Serialize)]
@@ -71,4 +119,6 @@ pub struct Sample {
     pub(crate) volumes: Vec<Volume>,
     pub(crate) gpus: Vec<GpuSample>,
     pub(crate) net: Vec<NetRate>,
+    pub(crate) thermal: Thermal,
+    pub(crate) power: Power,
 }

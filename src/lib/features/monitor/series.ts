@@ -2,6 +2,8 @@ import type { Sample } from "$lib/api/types";
 
 export const COLOR_1 = "var(--series-1)";
 export const COLOR_2 = "var(--series-2)";
+export const PALETTE = [1, 2, 3, 4, 5, 6].map((n) => `var(--series-${n})`);
+export const colorAt = (i: number) => PALETTE[i % PALETTE.length];
 
 export const percent = (v: number) => `${v.toFixed(v >= 10 || v === 0 ? 0 : 1)}%`;
 export const last = (xs: (number | null)[]) => xs.at(-1) ?? 0;
@@ -28,17 +30,29 @@ export const diskWrite = (s: Sample[], name?: string): Values =>
 export const diskBusy = (s: Sample[], name: string): Values =>
   s.map((x) => x.disks.find((d) => d.name === name)?.busy ?? null);
 
-export const gpuUtil = (s: Sample[], i: number): Values => s.map((x) => x.gpus[i]?.util ?? null);
-export const gpuMem = (s: Sample[], i: number): Values =>
+const gpuOf = (x: Sample, id: string) => x.gpus.find((g) => g.id === id);
+export const gpuUtil = (s: Sample[], id: string): Values =>
+  s.map((x) => gpuOf(x, id)?.util ?? null);
+export const gpuMem = (s: Sample[], id: string): Values =>
   s.map((x) => {
-    const g = x.gpus[i];
+    const g = gpuOf(x, id);
     return g?.memory_used != null && g.memory_total ? (g.memory_used / g.memory_total) * 100 : null;
   });
-export const gpuTemp = (s: Sample[], i: number): Values =>
-  s.map((x) => x.gpus[i]?.temperature ?? null);
-export const gpuPower = (s: Sample[], i: number): Values => s.map((x) => x.gpus[i]?.power ?? null);
-export const gpuClock = (s: Sample[], i: number): Values =>
-  s.map((x) => x.gpus[i]?.core_mhz ?? null);
+export const gpuTemp = (s: Sample[], id: string): Values =>
+  s.map((x) => gpuOf(x, id)?.temperature ?? null);
+export const gpuPower = (s: Sample[], id: string): Values =>
+  s.map((x) => gpuOf(x, id)?.power ?? null);
+export const gpuClock = (s: Sample[], id: string): Values =>
+  s.map((x) => gpuOf(x, id)?.core_mhz ?? null);
+export const gpuFan = (s: Sample[], id: string): Values => s.map((x) => gpuOf(x, id)?.fan ?? null);
+
+export const cpuWatts = (s: Sample[]): Values => s.map((x) => x.power.cpu_watts);
+export const batteryPercent = (s: Sample[], name: string): Values =>
+  s.map((x) => x.power.batteries.find((b) => b.name === name)?.percent ?? null);
+export const batteryWatts = (s: Sample[], name: string): Values =>
+  s.map((x) => x.power.batteries.find((b) => b.name === name)?.watts ?? null);
+export const fanRpm = (s: Sample[], id: string): Values =>
+  s.map((x) => x.thermal.fans.find((f) => f.id === id)?.rpm ?? null);
 
 export const netDown = (s: Sample[], name?: string): Values =>
   s.map((x) => x.net.filter((n) => !name || n.name === name).reduce((a, n) => a + n.rx_bps, 0));

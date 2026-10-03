@@ -33,7 +33,19 @@ describe("series", () => {
   });
 
   it("reports a missing card as gaps, not zeros", () => {
-    expect(m.gpuUtil(samples, 5)).toEqual([null, null, null]);
+    expect(m.gpuUtil(samples, "0000:ff:00.0")).toEqual([null, null, null]);
+  });
+
+  it("follows a graphics card by its id, not its position", () => {
+    const id = samples[0].gpus[0].id;
+    const reversed = samples.map((s) => ({ ...s, gpus: [...s.gpus].reverse() }));
+    expect(m.gpuUtil(reversed, id)).toEqual(m.gpuUtil(samples, id));
+  });
+
+  it("keeps a card that reports no load as gaps", () => {
+    const igpu = samples[0].gpus.find((g) => g.util === null)!;
+    expect(m.gpuUtil(samples, igpu.id)).toEqual([null, null, null]);
+    expect(m.gpuClock(samples, igpu.id).every((v) => v !== null)).toBe(true);
   });
 
   it("formats readings", () => {
