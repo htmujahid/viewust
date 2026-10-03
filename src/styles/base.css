@@ -12,7 +12,6 @@ body {
   background:
     radial-gradient(ellipse 60% 50% at 12% -8%, var(--wash-1), transparent),
     radial-gradient(ellipse 55% 50% at 100% 108%, var(--wash-2), transparent), var(--bg);
-  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-ui);
   font-size: var(--fs-body);
@@ -52,25 +51,17 @@ a:focus-visible {
   color: var(--accent-ink);
 }
 
-body::before,
-body::after {
+body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
-}
-body::before {
   z-index: -1;
   background-image:
     linear-gradient(var(--grid-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 32px 32px;
   mask-image: linear-gradient(180deg, #000, transparent 85%);
-}
-body::after {
-  z-index: 100;
-  background: repeating-linear-gradient(0deg, var(--scanline) 0 1px, transparent 1px 3px);
-  opacity: 0.35;
 }
 body {
   overflow: hidden;
