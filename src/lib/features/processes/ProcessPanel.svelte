@@ -22,7 +22,6 @@
   const m = $derived(detail?.memory ?? null);
   const used = $derived(m && m.requested > 0 ? (m.resident / m.requested) * 100 : 0);
 
-  // What the resident memory is made of.
   const parts = $derived(
     m
       ? [
@@ -49,7 +48,6 @@
   );
   const partsTotal = $derived(parts.reduce((n, p) => n + p.value, 0) || 1);
 
-  // The remaining rows, minus what the visuals above already show.
   const sections = $derived(
     groupBySection((detail?.details ?? []).filter((r) => r.section !== "Memory requests")),
   );

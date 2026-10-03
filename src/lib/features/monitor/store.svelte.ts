@@ -2,10 +2,8 @@ import { api, errorMessage } from "$lib/api/client";
 import type { Sample } from "$lib/api/types";
 import { Poller } from "$lib/utils/poller";
 
-/** Samples kept for the charts: one per second, so this is the visible window. */
 export const WINDOW = 60;
 
-/** Live readings of the whole machine, polled once a second while a monitor page is open. */
 class Monitor {
   samples = $state.raw<Sample[]>([]);
   error = $state<string | null>(null);

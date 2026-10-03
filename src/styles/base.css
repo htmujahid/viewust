@@ -1,5 +1,3 @@
-/* Element defaults. */
-
 * {
   box-sizing: border-box;
 }
@@ -54,7 +52,6 @@ a:focus-visible {
   color: var(--accent-ink);
 }
 
-/* The HUD backdrop: a faint engineering grid that fades toward the bottom, and CRT scanlines. */
 body::before,
 body::after {
   content: "";

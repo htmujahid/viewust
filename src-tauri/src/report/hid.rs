@@ -1,5 +1,3 @@
-//! HID report descriptors and the input devices the kernel builds from them.
-
 use super::input::*;
 use crate::common::sysfs::*;
 use crate::common::Details;
@@ -17,7 +15,6 @@ pub(crate) fn hid_section(
     let product = dev.product_string().unwrap_or_default();
     let maker = dev.manufacturer_string().unwrap_or_default();
 
-    // The kernel's input devices created for this interface.
     for e in std::fs::read_dir(hid_dir.join("input"))
         .into_iter()
         .flatten()
@@ -96,7 +93,6 @@ pub(crate) fn hid_section(
         );
     }
 
-    // The raw HID report descriptor, decoded.
     let Ok(raw) = std::fs::read(hid_dir.join("report_descriptor")) else {
         return;
     };
@@ -190,8 +186,6 @@ fn signed(v: u32, size: usize) -> i64 {
     }
 }
 
-/// The "global" items of a report descriptor. They persist from one data item
-/// to the next, and can be saved and restored with push/pop.
 #[derive(Clone, Copy, Default)]
 struct Globals {
     page: u32,
@@ -234,7 +228,6 @@ fn parse_hid(raw: &[u8]) -> Vec<App> {
         i += 1 + len;
 
         match (kind, tag) {
-            // global
             (1, 0) => g.page = value,
             (1, 1) => g.min = signed(value, len),
             (1, 2) => g.max = if len == 0 { 0 } else { signed(value, len) },
@@ -251,7 +244,6 @@ fn parse_hid(raw: &[u8]) -> Vec<App> {
                     g = previous;
                 }
             }
-            // local
             (2, 0) => usages.push(if len == 4 {
                 value
             } else {
@@ -259,7 +251,6 @@ fn parse_hid(raw: &[u8]) -> Vec<App> {
             }),
             (2, 1) => umin = Some(value),
             (2, 2) => umax = Some(value),
-            // main
             (0, 0xa) => {
                 if depth == 0 && value == 1 {
                     let u = usages.first().copied().unwrap_or(0);
@@ -309,7 +300,6 @@ fn parse_hid(raw: &[u8]) -> Vec<App> {
     apps
 }
 
-/// Turns the parsed descriptor into short "label → value" facts.
 fn decode_hid(raw: &[u8]) -> Vec<(String, String)> {
     let apps = parse_hid(raw);
     let mut rows = Vec::new();
@@ -383,7 +373,6 @@ fn decode_hid(raw: &[u8]) -> Vec<(String, String)> {
                         if f.kind == "feature" {
                             text = format!("settable, {}…{}", f.min, f.max);
                         }
-                        // counts per inch, when the device declares physical units
                         if f.phys_max != f.phys_min && matches!(f.unit & 0xff, 0x11 | 0x13) {
                             let span = (f.phys_max - f.phys_min) as f64 * 10f64.powi(f.exponent);
                             let inches = if f.unit & 0xff == 0x13 {
@@ -427,7 +416,6 @@ fn decode_hid(raw: &[u8]) -> Vec<(String, String)> {
 mod tests {
     use super::*;
 
-    /// The standard 3-button boot-protocol mouse from the HID specification.
     const MOUSE: &[u8] = &[
         0x05, 0x01, 0x09, 0x02, 0xA1, 0x01, 0x09, 0x01, 0xA1, 0x00, 0x05, 0x09, 0x19, 0x01, 0x29,
         0x03, 0x15, 0x00, 0x25, 0x01, 0x95, 0x03, 0x75, 0x01, 0x81, 0x02, 0x95, 0x01, 0x75, 0x05,
@@ -435,7 +423,6 @@ mod tests {
         0x08, 0x95, 0x03, 0x81, 0x06, 0xC0, 0xC0,
     ];
 
-    /// The standard boot-protocol keyboard.
     const KEYBOARD: &[u8] = &[
         0x05, 0x01, 0x09, 0x06, 0xA1, 0x01, 0x05, 0x07, 0x19, 0xE0, 0x29, 0xE7, 0x15, 0x00, 0x25,
         0x01, 0x75, 0x01, 0x95, 0x08, 0x81, 0x02, 0x95, 0x01, 0x75, 0x08, 0x81, 0x03, 0x95, 0x05,
@@ -483,7 +470,6 @@ mod tests {
 
     #[test]
     fn global_state_is_restored_by_pop() {
-        // push; change the report size; pop → the size is back to what it was
         let apps = parse_hid(&[
             0x05, 0x01, 0x09, 0x02, 0xA1, 0x01, 0x75, 0x08, 0xA4, 0x75, 0x10, 0xB4, 0x95, 0x01,
             0x09, 0x30, 0x81, 0x06, 0xC0,
@@ -493,8 +479,8 @@ mod tests {
 
     #[test]
     fn empty_or_broken_descriptors_do_not_panic() {
-        assert_eq!(decode_hid(&[]).len(), 1); // "Contents: could not be decoded"
-        let _ = decode_hid(&[0xFE, 0xFF]); // long item header cut short
-        let _ = decode_hid(&[0x05]); // item data missing
+        assert_eq!(decode_hid(&[]).len(), 1);
+        let _ = decode_hid(&[0xFE, 0xFF]);
+        let _ = decode_hid(&[0x05]);
     }
 }

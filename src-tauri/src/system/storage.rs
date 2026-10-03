@@ -1,5 +1,3 @@
-//! Internal drives.
-
 use super::model::*;
 use crate::common::cmd::run;
 use crate::common::format::*;
@@ -25,7 +23,6 @@ pub(crate) fn storage() -> Vec<Component> {
     for disk in json["blockdevices"].as_array().into_iter().flatten() {
         let name = text(disk, "name").unwrap_or_default();
         let tran = text(disk, "tran").unwrap_or_default();
-        // Internal fixed disks only: skip loop/ram/optical devices and USB sticks.
         if disk["type"] != "disk" || disk["hotplug"] == true || disk["rm"] == true || tran == "usb"
         {
             continue;

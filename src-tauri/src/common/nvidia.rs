@@ -1,5 +1,3 @@
-//! NVIDIA's `nvidia-smi`, the only way to read these cards' live state without the driver SDK.
-
 use super::cmd::run;
 
 pub(crate) struct Smi {

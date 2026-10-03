@@ -1,5 +1,4 @@
 <script lang="ts">
-  /** A row of page links styled as tabs; the one matching `current` is highlighted. */
   let {
     tabs,
     current,
@@ -7,7 +6,6 @@
   }: {
     tabs: readonly { href: string; label: string }[];
     current: string;
-    /** Accessible name for the group of links. */
     label: string;
   } = $props();
 </script>

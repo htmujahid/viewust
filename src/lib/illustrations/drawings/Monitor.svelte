@@ -1,4 +1,3 @@
-<!-- monitor -->
 <rect class="dark" x="20" y="8" width="120" height="66" rx="6" />
 <rect class="screen" x="25" y="13" width="110" height="56" rx="2" />
 <rect class="accent" x="31" y="19" width="40" height="6" rx="2" />

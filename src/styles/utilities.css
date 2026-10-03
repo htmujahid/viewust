@@ -1,5 +1,3 @@
-/* Small shared building blocks: cards, buttons, loading placeholders, motion. */
-
 .card {
   position: relative;
   background: linear-gradient(
@@ -14,7 +12,6 @@
     border-color 0.15s,
     box-shadow 0.15s;
 }
-/* HUD corner brackets. */
 .card::before {
   content: "";
   position: absolute;

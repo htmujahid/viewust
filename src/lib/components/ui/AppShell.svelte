@@ -20,7 +20,6 @@
   <TitleBar />
   <aside class="sidebar">
     <a class="brand" href="/" aria-label="Viewust home" title="Viewust home">
-      <!-- A chip at the centre with traces running out to the devices connected to it. -->
       <svg
         viewBox="0 0 24 24"
         width="26"

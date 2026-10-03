@@ -1,6 +1,3 @@
-//! DNS servers.
-
-/// "DNS Servers: 1.1.1.1 8.8.8.8" (or "Current DNS Server: …") from `resolvectl status`.
 pub fn dns_servers(text: &str) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
     for line in text.lines().map(str::trim) {

@@ -1,10 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  /**
-   * One card of the live monitor: a small title, an optional headline number,
-   * facts or other content on the right, and the chart (or whatever) below.
-   */
   let {
     title,
     wide = false,
@@ -14,13 +10,9 @@
     children,
   }: {
     title: string;
-    /** Span every column of the grid. */
     wide?: boolean;
-    /** Show a "Details →" link to this page. */
     href?: string;
-    /** The headline number. */
     value?: Snippet;
-    /** Facts shown at the right of the header. */
     aside?: Snippet;
     children: Snippet;
   } = $props();

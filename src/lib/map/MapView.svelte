@@ -19,11 +19,6 @@
   import type { NodeInfo } from "./model";
   import Refit from "./Refit.svelte";
 
-  /**
-   * A full-page diagram: a dedicated header, canvas and legend, and the
-   * sidebar that opens when a node is clicked. Pages supply the data and the
-   * toolbar; this owns everything about how the diagram looks and behaves.
-   */
   let {
     nodes = $bindable(),
     edges = $bindable(),
@@ -40,9 +35,7 @@
     nodes: Node[];
     edges: Edge[];
     selectedId: string | null;
-    /** Changes whenever the layout is rebuilt, so the view re-fits. */
     scan: number;
-    /** False until the first data has arrived. */
     ready: boolean;
     error: string | null;
     loadingText: string;
@@ -54,7 +47,6 @@
 
   const nodeTypes = { computer: ComputerNode, device: DeviceNode };
 
-  /** Breathing room around the diagram after fitting the viewport. */
   const TOOLBAR_CLEARANCE = "64px";
   const padding = $derived<NonNullable<FitViewOptions["padding"]>>({
     top: TOOLBAR_CLEARANCE,
@@ -136,7 +128,6 @@
     color: var(--danger);
   }
 
-  /* The diagram library draws edges and handles itself; theme them here, once. */
   .canvas :global(.svelte-flow) {
     --xy-background-color: transparent;
     --xy-background-pattern-dots-color-default: var(--border);
@@ -160,7 +151,6 @@
     opacity: 0;
   }
 
-  /* line styles: see MapLegend for what each one means */
   .canvas :global(.svelte-flow__edge.wired .svelte-flow__edge-path) {
     stroke: var(--text-3);
     stroke-width: 3;

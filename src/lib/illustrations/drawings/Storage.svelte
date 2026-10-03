@@ -1,4 +1,3 @@
-<!-- storage -->
 <rect class="metal" x="14" y="38" width="42" height="24" rx="3" />
 <rect class="dark" x="22" y="45" width="7" height="4" rx="1" />
 <rect class="dark" x="22" y="52" width="7" height="4" rx="1" />

@@ -8,13 +8,11 @@
     error,
   }: {
     sections: readonly Section[];
-    /** The deep report is still being read. */
     pending: boolean;
     error: string | null;
   } = $props();
 </script>
 
-<!-- Masonry columns: no row stretches a short card to match a tall neighbour. -->
 <div class="columns">
   {#each sections as s (s.title)}
     <section class="card block" id={sectionSlug(s.title)}>
@@ -38,7 +36,6 @@
 </div>
 
 <style>
-  /* Masonry: cards flow down columns and keep their own content height. */
   .columns {
     column-width: 360px;
     column-gap: var(--s-5);

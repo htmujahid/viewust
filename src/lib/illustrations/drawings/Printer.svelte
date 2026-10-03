@@ -1,4 +1,3 @@
-<!-- printer -->
 <rect class="paper" x="46" y="8" width="68" height="32" rx="2" />
 <rect class="faint" x="54" y="16" width="40" height="3" rx="1.5" />
 <rect class="faint" x="54" y="24" width="52" height="3" rx="1.5" />

@@ -1,4 +1,3 @@
-<!-- board -->
 <rect class="pcb" x="4" y="4" width="152" height="152" rx="9" />
 <rect class="dark" x="4" y="32" width="11" height="62" rx="2" />
 <rect class="faint" x="7" y="38" width="5" height="4" rx="1" />

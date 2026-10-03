@@ -1,9 +1,3 @@
-//! How this computer reaches the internet: wired or Wi-Fi, through which
-//! router, with what signal.
-//!
-//! Nothing here sends traffic anywhere. "Online" means a route exists and, when
-//! NetworkManager is present, what it already knows.
-
 mod dns;
 mod route;
 mod wifi;
@@ -19,16 +13,12 @@ use wifi::{band, channel, is_wifi, nmcli_wifi, parse_iw_link, quality_word, sign
 
 #[derive(Serialize)]
 pub struct Connection {
-    /// "ethernet", "wifi" or "other" (VPN, mobile, …).
     kind: &'static str,
     interface: String,
-    /// Short text for the link between the computer and the router.
     link_label: String,
-    /// 0–100 for Wi-Fi, otherwise null.
     signal: Option<u32>,
     router_name: String,
     router_details: Vec<Detail>,
-    /// "full", "limited", "portal", "none" or "unknown" (as NetworkManager sees it).
     connectivity: &'static str,
     internet_details: Vec<Detail>,
 }
@@ -61,7 +51,6 @@ pub fn connection() -> Option<Connection> {
     } else {
         None
     };
-    // `iw` may be missing; NetworkManager knows the network name and strength too.
     let nm_wifi = if wifi && w.is_none() {
         nmcli_wifi()
     } else {
@@ -110,7 +99,6 @@ pub fn connection() -> Option<Connection> {
         }
     };
 
-    // the router's hardware address, from the neighbour table
     let gateway_mac = read("/proc/net/arp").and_then(|t| {
         t.lines().skip(1).find_map(|l| {
             let f: Vec<&str> = l.split_whitespace().collect();

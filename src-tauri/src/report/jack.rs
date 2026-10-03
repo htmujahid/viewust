@@ -1,5 +1,3 @@
-//! An analog audio jack's sound card.
-
 use super::pci::pci_rows;
 use crate::common::sysfs::*;
 use crate::common::Details;

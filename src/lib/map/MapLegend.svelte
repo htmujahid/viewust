@@ -3,7 +3,6 @@
 </script>
 
 <script lang="ts">
-  /** Explains what the line styles in a diagram mean. */
   let { items }: { items: { label: string; kind: LineKind }[] } = $props();
 </script>
 

@@ -1,12 +1,10 @@
 import { api, errorMessage } from "$lib/api/client";
 import type { Detail } from "$lib/api/types";
 
-/** The deep technical report for the device a page is showing. */
 export class DeviceReport {
   rows = $state.raw<Detail[] | null>(null);
   error = $state<string | null>(null);
 
-  /** Id of the request that should win; answers for older ids are dropped. */
   private current = "";
 
   get pending() {

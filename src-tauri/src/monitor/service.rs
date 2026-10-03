@@ -1,8 +1,3 @@
-//! Turning raw counters into one-second readings.
-//!
-//! Counters that only ever grow (disk sectors, network bytes) become rates
-//! using the previous call's values, kept here between calls.
-
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -15,16 +10,14 @@ use sysinfo::{Disks, System};
 struct Tables {
     sys: System,
     at: Instant,
-    disks: HashMap<String, (u64, u64, u64)>, // sectors read, sectors written, ms busy
-    net: HashMap<String, (u64, u64)>,        // bytes received, bytes sent
+    disks: HashMap<String, (u64, u64, u64)>,
+    net: HashMap<String, (u64, u64)>,
 }
 
 impl Tables {
     fn new() -> Self {
         let mut sys = System::new();
         sys.refresh_cpu_all();
-        // CPU load is a difference between two readings; take one now so the
-        // first real sample already has a meaningful value.
         std::thread::sleep(Duration::from_millis(250));
         Self {
             sys,
@@ -35,12 +28,10 @@ impl Tables {
     }
 }
 
-/// Shared handle to the previous readings; registered as Tauri managed state.
 #[derive(Clone, Default)]
 pub struct MonitorService(Arc<Mutex<Option<Tables>>>);
 
 impl MonitorService {
-    /// One reading of everything the monitor shows.
     pub fn sample(&self) -> Sample {
         let mut guard = self.0.lock().unwrap_or_else(|e| e.into_inner());
         let st = guard.get_or_insert_with(Tables::new);
@@ -70,7 +61,6 @@ impl MonitorService {
             .unwrap_or(0)
             * 1024;
 
-        // drives
         let now_disks = diskstats();
         let mut disks: Vec<DiskRate> = now_disks
             .iter()
@@ -88,7 +78,6 @@ impl MonitorService {
         disks.sort_by(|a, b| a.name.cmp(&b.name));
         st.disks = now_disks;
 
-        // network
         let route = default_interface();
         let now_net = netstats();
         let mut net: Vec<NetRate> = now_net

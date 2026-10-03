@@ -1,4 +1,3 @@
-<!-- Shown when the page is opened in a normal browser, where the Rust backend doesn't exist. -->
 <main>
   <div class="card">
     <h1>Viewust needs its desktop window</h1>

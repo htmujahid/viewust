@@ -1,4 +1,3 @@
-<!-- hub -->
 <path class="cable" d="M80 42V24c0-9 8-12 22-12" />
 <rect class="body" x="14" y="42" width="132" height="34" rx="10" />
 {#each [0, 1, 2, 3] as i}

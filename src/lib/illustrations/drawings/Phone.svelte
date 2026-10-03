@@ -1,4 +1,3 @@
-<!-- phone -->
 <rect class="body" x="54" y="4" width="52" height="92" rx="11" />
 <rect class="screen" x="59" y="12" width="42" height="76" rx="5" />
 <rect class="dark" x="71" y="7" width="18" height="3" rx="1.5" />

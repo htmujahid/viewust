@@ -1,8 +1,5 @@
-//! The label/value rows shown in every details panel and page.
-
 use serde::Serialize;
 
-/// One row in the details panel. Rows with the same `section` are grouped.
 #[derive(Serialize, Clone)]
 pub struct Detail {
     section: String,

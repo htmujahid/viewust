@@ -22,7 +22,7 @@ describe("Poller", () => {
     const poller = new Poller(task, 1000);
     poller.start();
     await vi.advanceTimersByTimeAsync(5000);
-    expect(task).toHaveBeenCalledTimes(1); // never queued behind the slow one
+    expect(task).toHaveBeenCalledTimes(1);
     finish();
     await vi.advanceTimersByTimeAsync(1000);
     expect(task).toHaveBeenCalledTimes(2);
@@ -34,7 +34,7 @@ describe("Poller", () => {
     const task = vi.fn(async () => {});
     const poller = new Poller(task, 1000, () => active);
     poller.start();
-    expect(task).toHaveBeenCalledTimes(1); // the first run is unconditional
+    expect(task).toHaveBeenCalledTimes(1);
     await vi.advanceTimersByTimeAsync(3000);
     expect(task).toHaveBeenCalledTimes(1);
     active = true;

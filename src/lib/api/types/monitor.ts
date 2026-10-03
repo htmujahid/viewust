@@ -1,5 +1,3 @@
-// One reading per second, as returned by `monitor_sample`.
-
 export interface CpuSample {
   total: number;
   cores: number[];
@@ -65,5 +63,3 @@ export interface Sample {
   gpus: GpuSample[];
   net: NetRate[];
 }
-
-/** 1536000 → "1.5 MB/s" (decimal, the way network and disk speeds are quoted). */

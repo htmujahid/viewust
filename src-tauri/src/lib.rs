@@ -1,9 +1,3 @@
-//! Viewust: a map of everything connected to this computer, and a window into it.
-//!
-//! Each feature is a module with its own `commands` (the thin Tauri layer, all
-//! `async`), its own model types, and the logic behind them. Shared plumbing
-//! lives in [`common`].
-
 mod common;
 mod connection;
 mod error;

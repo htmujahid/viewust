@@ -1,7 +1,6 @@
 <script lang="ts">
   import Icon from "./Icon.svelte";
 
-  /** Links to the app's other top-level views. The current view leaves its own out. */
   let { hide = [] }: { hide?: ("processes" | "monitor")[] } = $props();
 </script>
 

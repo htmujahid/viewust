@@ -1,5 +1,3 @@
-//! Network adapters.
-
 use super::model::*;
 use super::pci::{pci_model, Pci};
 use crate::common::format::*;
@@ -16,7 +14,6 @@ pub(crate) fn network(pci: &Pci) -> Vec<Component> {
     {
         let name = e.file_name().to_string_lossy().into_owned();
         let p = e.path();
-        // physical adapters have a backing device; bridges, veth and tunnels don't
         if !p.join("device").exists() || name == "lo" {
             continue;
         }

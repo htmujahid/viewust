@@ -1,4 +1,3 @@
-<!-- ssd -->
 <rect class="metal" x="4" y="6" width="112" height="78" rx="7" />
 <rect class="accent" x="14" y="16" width="72" height="44" rx="4" />
 <rect class="soft-fill" x="21" y="24" width="38" height="4" rx="2" />

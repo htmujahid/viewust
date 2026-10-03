@@ -1,5 +1,3 @@
-//! Running external programs.
-
 use std::process::Command;
 
 pub(crate) fn run(program: &str, args: &[&str]) -> Option<String> {

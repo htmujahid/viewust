@@ -1,5 +1,3 @@
-//! Infrastructure shared by every feature. Nothing in here knows about devices.
-
 pub mod blocking;
 pub mod cmd;
 pub mod details;

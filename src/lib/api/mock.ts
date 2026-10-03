@@ -1,13 +1,3 @@
-/**
- * A stand-in for the Rust backend, so the whole UI runs in a plain browser
- * (`pnpm dev:mock`) and in automated tests, with no desktop shell.
- *
- * It uses Tauri's own `mockIPC`, so the frontend code path is identical to the
- * real one: every `invoke` goes through the same wrapper and gets a response of
- * the shape the Rust command returns. Fixtures mirror a real desktop machine.
- *
- * Pick the internet state with `?net=wifi|offline` (default: wired).
- */
 import { mockIPC } from "@tauri-apps/api/mocks";
 
 import type {
@@ -24,8 +14,6 @@ import type {
 } from "$lib/api/types";
 
 const row = (section: string, label: string, value: string): Detail => ({ section, label, value });
-
-// ---- devices ---------------------------------------------------------------
 
 const usbFacts = (product: string, extra: Detail[] = []): Detail[] => [
   row("Device", "Product", product),
@@ -156,8 +144,6 @@ const hardware = (net: string): HardwareInfo => ({
   ],
 });
 
-// ---- the computer's insides -------------------------------------------------
-
 const part = (
   id: string,
   kind: string,
@@ -204,8 +190,6 @@ const memoryModules: MemoryModules = {
     ),
   ),
 };
-
-// ---- processes --------------------------------------------------------------
 
 const processNames = [
   "firefox",
@@ -290,8 +274,6 @@ const processDetail = (pid: number): ProcessDetail => ({
   ],
 });
 
-// ---- live monitor -----------------------------------------------------------
-
 const wave = (tick: number, base: number, amp: number, phase = 0) =>
   Math.max(0, base + Math.sin(tick / 3 + phase) * amp + Math.sin(tick * 1.7 + phase) * amp * 0.3);
 
@@ -356,7 +338,6 @@ const sample = (tick: number): Sample => ({
   ],
 });
 
-/** The same fixtures, for unit tests. */
 export const fixtures = {
   hardware,
   connections,
@@ -367,14 +348,8 @@ export const fixtures = {
   sample,
 };
 
-// ---- wiring -----------------------------------------------------------------
-
 let installed = false;
 
-/**
- * Replaces the Rust backend with fixtures, before the first `invoke`.
- * Safe to call more than once: SvelteKit may re-run the layout's `load`.
- */
 export function installMockBackend(): void {
   if (installed) return;
   installed = true;

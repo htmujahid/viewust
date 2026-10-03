@@ -11,8 +11,6 @@
   const now = $derived(monitor.latest)!;
   const mem = $derived(now.memory);
 
-  // Where the installed memory is right now. Cached memory counts as "available":
-  // the system hands it back the moment a program asks.
   const free = $derived(Math.max(mem.total - mem.used - mem.cached, 0));
   const parts = $derived([
     { label: "In use by programs", value: mem.used, color: "var(--series-1)" },

@@ -1,4 +1,3 @@
-<!-- psu -->
 <path class="cable" d="M138 70c8 0 8-8 8-16M138 80c10 0 10-14 10-24" />
 <path class="line" d="M138 90c12 0 12-22 12-40" />
 <rect class="body" x="6" y="12" width="132" height="90" rx="9" />

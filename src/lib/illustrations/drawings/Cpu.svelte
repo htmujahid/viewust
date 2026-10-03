@@ -1,4 +1,3 @@
-<!-- cpu -->
 {#each [0, 1, 2, 3, 4, 5, 6, 7] as i}
   <rect class="gold" x={17 + i * 9.5} y="2" width="5" height="7" rx="1.5" />
   <rect class="gold" x={17 + i * 9.5} y="91" width="5" height="7" rx="1.5" />

@@ -1,4 +1,3 @@
-<!-- webcam -->
 <path class="body" d="M66 66h28l8 20H58z" />
 <rect class="body" x="46" y="84" width="68" height="6" rx="3" />
 <circle class="body" cx="80" cy="38" r="32" />

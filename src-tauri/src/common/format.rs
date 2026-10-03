@@ -1,5 +1,3 @@
-//! Human-readable numbers.
-
 pub fn format_bytes(bytes: u64) -> String {
     const UNITS: [&str; 5] = ["B", "KiB", "MiB", "GiB", "TiB"];
     let mut value = bytes as f64;
@@ -31,7 +29,7 @@ pub(crate) fn watts(microwatts: u64) -> String {
 }
 
 pub(crate) fn secs(ticks: u64) -> String {
-    let s = ticks as f64 / 100.0; // clock ticks are 100 Hz on Linux
+    let s = ticks as f64 / 100.0;
     if s >= 3600.0 {
         format!(
             "{}h {}m {:.0}s",

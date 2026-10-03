@@ -1,5 +1,3 @@
-//! The power supply, and what is known about power.
-
 use super::model::*;
 use crate::common::nvidia::*;
 use crate::common::sysfs::*;

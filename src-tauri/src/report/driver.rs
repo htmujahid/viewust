@@ -1,5 +1,3 @@
-//! Kernel driver and module facts.
-
 use crate::common::sysfs::*;
 use crate::common::Details;
 use std::process::Command;

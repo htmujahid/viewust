@@ -1,4 +1,3 @@
-<!-- gpu -->
 <rect class="metal" x="0" y="6" width="7" height="82" rx="2" />
 <rect class="dark" x="6" y="6" width="188" height="64" rx="9" />
 <rect class="accent" x="16" y="9" width="170" height="2.4" rx="1.2" />

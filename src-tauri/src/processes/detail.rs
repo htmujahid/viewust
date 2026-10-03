@@ -1,5 +1,3 @@
-//! One process in depth, read from `/proc/<pid>`.
-
 use super::model::*;
 use super::service::ProcessService;
 use crate::common::format::*;
@@ -23,7 +21,6 @@ fn kb_map(text: &str) -> HashMap<String, u64> {
         .collect()
 }
 
-/// Fields of /proc/<pid>/stat after the command name (which may hold spaces).
 fn stat_fields(pid: u32) -> Option<Vec<String>> {
     let text = std::fs::read_to_string(format!("/proc/{pid}/stat")).ok()?;
     let rest = &text[text.rfind(')')? + 2..];
@@ -31,7 +28,6 @@ fn stat_fields(pid: u32) -> Option<Vec<String>> {
 }
 
 impl ProcessService {
-    /// One process in depth, read from `/proc/<pid>`.
     pub fn detail(&self, pid: u32) -> ProcessDetail {
         let dir = format!("/proc/{pid}");
         let Ok(status_text) = std::fs::read_to_string(format!("{dir}/status")) else {
@@ -88,7 +84,6 @@ impl ProcessService {
             restricted = true;
         }
 
-        // Largest memory regions, merged by what they map.
         let mut regions: Vec<Region> = Vec::new();
         if let Ok(smaps) = std::fs::read_to_string(format!("{dir}/smaps")) {
             let mut current: Option<String> = None;
@@ -131,7 +126,6 @@ impl ProcessService {
                 .and_then(|f| f.get(i))
                 .and_then(|v| v.parse::<u64>().ok())
         };
-        // fields counted from 3 (state); index = field number - 3
         let (minflt, majflt, utime, stime) = (sf(7), sf(9), sf(11), sf(12));
 
         let mut d = Details::new();
@@ -156,7 +150,6 @@ impl ProcessService {
                     memory: p.memory(),
                 })
                 .collect();
-            // hash-map order is arbitrary; show the biggest first, always in the same order
             children.sort_by(|a, b| b.memory.cmp(&a.memory).then(a.pid.cmp(&b.pid)));
             let me = st.sys.process(Pid::from_u32(pid));
             (
@@ -320,7 +313,7 @@ impl ProcessService {
         d.add("Segments", "Page tables", format_bytes(memory.page_tables));
 
         if let Some(io) = read(format!("{dir}/io")) {
-            let m = kb_map(&io); // values here are plain byte counts
+            let m = kb_map(&io);
             let g = |k: &str| m.get(k).copied().map(format_bytes);
             d.add_opt("Disk and I/O", "Read from disk", g("read_bytes"));
             d.add_opt("Disk and I/O", "Written to disk", g("write_bytes"));
@@ -371,6 +364,6 @@ mod tests {
         let m = kb_map("Name:\tfirefox\nVmRSS:\t  1024 kB\nThreads:\t5\n");
         assert_eq!(m["VmRSS"], 1024 * 1024);
         assert_eq!(m["Threads"], 5);
-        assert!(!m.contains_key("Name")); // not a number
+        assert!(!m.contains_key("Name"));
     }
 }

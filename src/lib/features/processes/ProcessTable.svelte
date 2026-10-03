@@ -74,7 +74,6 @@
           <td class="right tabular" class:hot={p.cpu >= 50}>{p.cpu.toFixed(1)}%</td>
           <td class="mem">
             <span class="tabular">{formatBytes(p.memory)}</span>
-            <!-- scaled up: even the biggest program is a small slice of all memory -->
             <Meter value={(p.memory / memoryTotal) * 100 * 8} tone="accent" height={4} />
           </td>
           <td class="right tabular muted">{formatBytes(p.virtual_memory)}</td>
@@ -88,7 +87,6 @@
 </div>
 
 <style>
-  /* Fills the room the page leaves and scrolls inside it; the header row stays put. */
   .wrap {
     overflow: auto;
     min-height: 160px;

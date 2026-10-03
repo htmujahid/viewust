@@ -1,5 +1,3 @@
-//! The computer as a whole.
-
 use super::pci::pci_rows;
 use crate::common::format::*;
 use crate::common::sysfs::*;
@@ -8,7 +6,6 @@ use std::path::Path;
 
 #[cfg(target_os = "linux")]
 pub(crate) fn report(d: &mut Details) {
-    // graphics adapters
     let mut seen = Vec::new();
     for e in std::fs::read_dir("/sys/class/drm")
         .into_iter()
@@ -27,7 +24,6 @@ pub(crate) fn report(d: &mut Details) {
         }
     }
 
-    // processor details beyond the basics
     let cpu = Path::new("/sys/devices/system/cpu/cpu0");
     let khz = |f: &str| read(cpu.join("cpufreq").join(f)).and_then(|v| v.parse::<f64>().ok());
     if let (Some(lo), Some(hi)) = (khz("cpuinfo_min_freq"), khz("cpuinfo_max_freq")) {
@@ -62,7 +58,6 @@ pub(crate) fn report(d: &mut Details) {
         }
     }
 
-    // storage volumes
     for disk in sysinfo::Disks::new_with_refreshed_list()
         .iter()
         .filter(|x| x.total_space() > 0)
@@ -80,7 +75,6 @@ pub(crate) fn report(d: &mut Details) {
         );
     }
 
-    // network adapters
     for (name, data) in sysinfo::Networks::new_with_refreshed_list()
         .iter()
         .filter(|(n, _)| n.as_str() != "lo")

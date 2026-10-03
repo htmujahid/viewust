@@ -3,10 +3,6 @@
   import type { Kind } from "./kinds";
   import { artBox, artSize } from "./sizes";
 
-  /**
-   * One illustration. The drawing itself lives in `drawings/`; this sizes it,
-   * and owns the palette every drawing shares (the `:global` rules below).
-   */
   let { kind, cm }: { kind: Kind; cm?: number } = $props();
 
   const size = $derived(artSize(kind, cm));

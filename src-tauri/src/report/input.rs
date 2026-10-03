@@ -1,6 +1,3 @@
-//! Names for the kernel's input-device capability bits.
-
-/// Parses a sysfs bitmap such as `1f0000 0 0` (most significant word first).
 pub(crate) fn bitmap(text: &str) -> Vec<usize> {
     let width = usize::BITS as usize;
     let mut out = Vec::new();
@@ -113,7 +110,6 @@ mod tests {
 
     #[test]
     fn bitmaps_list_set_bits_from_the_least_significant_word() {
-        // a mouse's KEY capability: five buttons starting at BTN_LEFT (0x110 = 272)
         assert_eq!(bitmap("1f0000 0 0 0 0"), vec![272, 273, 274, 275, 276]);
         assert_eq!(bitmap("0"), Vec::<usize>::new());
         assert_eq!(bitmap("garbage"), Vec::<usize>::new());

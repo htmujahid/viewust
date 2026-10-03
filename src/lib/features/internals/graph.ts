@@ -22,15 +22,6 @@ function info(c: Component): NodeInfo {
   };
 }
 
-/**
- * The computer's insides, laid out like an exploded diagram: the motherboard
- * in the middle, the processor above with its memory beside it, the power
- * supply and add-in cards on the left, graphics cards on the right and drives
- * underneath. Power runs from the supply to the board; everything else is data.
- *
- * `modules` replaces the single "System memory" part with one per module once
- * the user has granted permission to read them.
- */
 export function buildInternals(
   system: SystemInfo,
   modules: Component[] | null,
@@ -69,7 +60,6 @@ export function buildInternals(
       } satisfies DeviceData,
     });
 
-  // The board is the origin; everything else is positioned around it.
   const bs = board ? size(board) : { width: 330, height: 330 };
   const left = -bs.width / 2;
   const right = bs.width / 2;
@@ -77,7 +67,6 @@ export function buildInternals(
   const bottom = bs.height / 2;
   if (board) add(board, left, top);
 
-  // right: graphics cards
   const leftColumn = [psu, ...cards].filter(Boolean) as Component[];
   const rightHeight = stack(gpus, "height");
   const leftHeight = stack(leftColumn, "height");
@@ -90,7 +79,6 @@ export function buildInternals(
     y += size(g).height + GAP;
   }
 
-  // left: power supply on top, then add-in cards, each right-aligned to the board
   y = -leftHeight / 2;
   for (const c of leftColumn) {
     const s = size(c);
@@ -102,7 +90,6 @@ export function buildInternals(
     y += s.height + GAP;
   }
 
-  // bottom: drives
   const driveRow = Math.max(bottom + ROW_GAP, sideHalf + 40);
   let x = -stack(drives, "width") / 2;
   for (const d of drives) {
@@ -111,7 +98,6 @@ export function buildInternals(
     x += size(d).width + GAP;
   }
 
-  // top: processor, with memory modules stacked beside it
   const cs = cpu ? size(cpu) : { width: 0, height: 0 };
   const cpuY = top - ROW_GAP - cs.height;
   if (cpu) {

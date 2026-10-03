@@ -1,5 +1,3 @@
-//! What the internals page shows.
-
 use serde::Serialize;
 
 use crate::common::Detail;
@@ -22,6 +20,5 @@ pub struct SystemInfo {
 #[derive(Serialize)]
 pub struct MemoryModules {
     pub(crate) modules: Vec<Component>,
-    /// Total memory slots on the board, including empty ones.
     pub(crate) slots: u32,
 }

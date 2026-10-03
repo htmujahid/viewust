@@ -8,7 +8,6 @@
   }: {
     loading: boolean;
     onclick: () => void;
-    /** Show "Rescan" / "Scanning" next to the icon. */
     label?: boolean;
   } = $props();
 </script>

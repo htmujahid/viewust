@@ -1,12 +1,8 @@
-//! One second's readings.
-
 use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct Cpu {
-    /// Machine-wide load, 0–100.
     pub(crate) total: f32,
-    /// Load of each hardware thread, 0–100.
     pub(crate) cores: Vec<f32>,
     pub(crate) freq_mhz: f32,
     pub(crate) temperature: Option<f32>,
@@ -29,7 +25,6 @@ pub struct DiskRate {
     pub(crate) model: Option<String>,
     pub(crate) read_bps: f64,
     pub(crate) write_bps: f64,
-    /// Share of the last second the drive spent busy, 0–100.
     pub(crate) busy: f64,
 }
 
@@ -69,7 +64,6 @@ pub struct NetRate {
 
 #[derive(Serialize)]
 pub struct Sample {
-    /// Milliseconds since the Unix epoch.
     pub(crate) t: u64,
     pub(crate) cpu: Cpu,
     pub(crate) memory: Memory,

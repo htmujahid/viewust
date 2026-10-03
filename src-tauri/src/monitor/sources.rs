@@ -1,5 +1,3 @@
-//! Where each reading comes from.
-
 use super::model::*;
 use crate::common::sysfs::*;
 use std::collections::HashMap;
@@ -11,7 +9,6 @@ pub(crate) fn diskstats() -> HashMap<String, (u64, u64, u64)> {
         .filter_map(|l| {
             let f: Vec<&str> = l.split_whitespace().collect();
             let name = f.get(2)?;
-            // whole drives only: partitions have no /sys/block entry of their own
             if !std::path::Path::new(&format!("/sys/block/{name}")).exists() {
                 return None;
             }
@@ -42,7 +39,6 @@ pub(crate) fn netstats() -> HashMap<String, (u64, u64)> {
     {
         let name = e.file_name().to_string_lossy().into_owned();
         let p = e.path();
-        // physical adapters only: skip loopback, bridges, containers, tunnels
         if name == "lo" || !p.join("device").exists() {
             continue;
         }
@@ -94,7 +90,6 @@ pub(crate) fn gpus() -> Vec<GpuSample> {
         return nvidia;
     }
 
-    // AMD cards report the same figures through sysfs.
     let mut out = Vec::new();
     for e in std::fs::read_dir("/sys/class/drm")
         .into_iter()

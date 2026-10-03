@@ -1,11 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  /**
-   * A full-height page with a centred column of content. It scrolls as a whole, unless `fill`
-   * is set: then the page stays put and a child marked `class="grow"` takes the remaining
-   * height and scrolls on its own (a table, say).
-   */
   let {
     maxWidth = 1180,
     fill = false,

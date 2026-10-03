@@ -1,5 +1,3 @@
-//! The live process list.
-
 use super::model::*;
 use super::service::ProcessService;
 use crate::common::sysfs::*;
@@ -20,7 +18,6 @@ fn state_name(s: sysinfo::ProcessStatus) -> &'static str {
 }
 
 impl ProcessService {
-    /// Every running process, plus machine-wide totals.
     pub fn snapshot(&self) -> Snapshot {
         self.with_fresh(|st| {
             let total_threads = read("/proc/loadavg")
@@ -35,7 +32,6 @@ impl ProcessService {
                 .sys
                 .processes()
                 .values()
-                // Threads are reported inside their process; only list the processes.
                 .filter(|p| {
                     p.thread_kind()
                         .map_or(true, |k| k == sysinfo::ThreadKind::Kernel)

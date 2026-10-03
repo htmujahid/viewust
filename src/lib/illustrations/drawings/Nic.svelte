@@ -1,4 +1,3 @@
-<!-- nic -->
 <rect class="metal" x="2" y="4" width="16" height="78" rx="2" />
 <rect class="dark" x="5" y="28" width="11" height="14" rx="1.5" />
 <circle class="led" cx="8" cy="34" r="1.2" />

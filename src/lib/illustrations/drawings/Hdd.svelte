@@ -1,4 +1,3 @@
-<!-- hdd -->
 <rect class="metal" x="4" y="4" width="132" height="92" rx="7" />
 <circle class="body" cx="62" cy="50" r="38" />
 <circle class="screen" cx="62" cy="50" r="30" />

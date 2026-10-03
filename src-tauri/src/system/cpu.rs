@@ -1,5 +1,3 @@
-//! The processor.
-
 use super::model::*;
 use crate::common::format::*;
 use crate::common::sysfs::*;

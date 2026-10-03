@@ -1,5 +1,3 @@
-//! A connected monitor.
-
 use super::pci::pci_rows;
 use crate::common::ids::*;
 use crate::common::sysfs::*;
@@ -49,8 +47,6 @@ pub(crate) fn report(d: &mut Details, connector: &str) {
         edid_extra(d, &raw);
     }
 
-    // The graphics adapter driving this connector.
-    // connector/device → the card; card/device → the PCI adapter itself
     let card = dir.join("device");
     let pci = if card.join("vendor").exists() {
         card

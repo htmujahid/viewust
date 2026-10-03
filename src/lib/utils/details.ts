@@ -5,7 +5,6 @@ export interface Section {
   rows: Detail[];
 }
 
-/** Groups flat rows by their `section`, in the order each section first appears. */
 export function groupBySection(rows: readonly Detail[]): Section[] {
   const sections: Section[] = [];
   for (const row of rows) {
@@ -16,10 +15,6 @@ export function groupBySection(rows: readonly Detail[]): Section[] {
   return sections;
 }
 
-/**
- * Puts the sections named in `priority` first, in that order, and leaves the
- * rest in their original order after them.
- */
 export function sortSections(sections: readonly Section[], priority: readonly string[]): Section[] {
   const rank = (title: string) => {
     const i = priority.indexOf(title);
@@ -31,7 +26,6 @@ export function sortSections(sections: readonly Section[], priority: readonly st
     .map((x) => x.section);
 }
 
-/** Plain text for the clipboard. */
 export function sectionsToText(heading: string, sections: readonly Section[]): string {
   return [
     heading,
@@ -39,6 +33,5 @@ export function sectionsToText(heading: string, sections: readonly Section[]): s
   ].join("\n");
 }
 
-/** An id safe to use in a URL fragment, for jumping to a section. */
 export const sectionSlug = (title: string) =>
   "s-" + title.toLowerCase().replace(/[^a-z0-9]+/g, "-");

@@ -1,12 +1,6 @@
 <script lang="ts">
   import { niceMax } from "./scale";
 
-  /**
-   * A live line chart: one shared y-axis, newest sample on the right.
-   * Specs: 2px lines, a faint wash under the first series, an 8px end dot with a
-   * surface ring, hairline grid, a hover/keyboard crosshair that reads out every
-   * series, a legend whenever there are two or more series, and a table view.
-   */
   type Series = { name: string; color: string; values: (number | null)[] };
 
   let {
@@ -21,16 +15,11 @@
   }: {
     series: Series[];
     format: (v: number) => string;
-    /** Fix the top of the axis (e.g. 100 for percentages); otherwise it follows the data. */
     max?: number;
     height?: number;
-    /** Samples shown across the width. */
     window?: number;
-    /** Accessible name for the chart. */
     label: string;
-    /** Smallest value the axis may top out at, so a flat line isn't blown up to fill it. */
     floor?: number;
-    /** Offer the "Show as table" view. */
     table?: boolean;
   } = $props();
 
@@ -44,13 +33,11 @@
         Math.max(floor, ...series.flatMap((s) => s.values.filter((v): v is number => v !== null))),
       ),
   );
-  // room for the widest axis label ("100 MB/s" is wider than "50%")
   const leftPad = $derived(Math.max(46, format(top).length * 6.8 + 16));
   const pad = $derived({ left: leftPad, right: 12, top: 10, bottom: 22 });
   const plotW = $derived(Math.max(width - pad.left - pad.right, 10));
   const plotH = $derived(height - pad.top - pad.bottom);
   const count = $derived(Math.max(...series.map((s) => s.values.length), 0));
-  // newest sample sits at the right edge; the line grows in from the right
   const step = $derived(plotW / Math.max(window - 1, 1));
   const xOf = (i: number) => pad.left + plotW - (count - 1 - i) * step;
 

@@ -1,5 +1,3 @@
-//! Externally attached USB devices.
-
 use nusb::{DeviceInfo, MaybeFuture};
 mod classify;
 mod facts;
@@ -19,8 +17,6 @@ fn speed_name(speed: Option<nusb::Speed>) -> String {
     .into()
 }
 
-/// Linux marks USB devices soldered into the machine (internal webcam,
-/// Bluetooth chip, fingerprint reader) as `fixed`. Those aren't plugged in.
 #[cfg(target_os = "linux")]
 fn is_internal(device: &DeviceInfo) -> bool {
     std::fs::read_to_string(device.sysfs_path().join("removable"))
@@ -32,8 +28,6 @@ fn is_internal(_: &DeviceInfo) -> bool {
     false
 }
 
-/// A dongle that carries wireless input devices (keyboard, mouse, ...) rather
-/// than being one of them.
 fn is_receiver(device: &DeviceInfo, kinds: &[&str]) -> bool {
     let name = format!(
         "{} {}",
@@ -61,12 +55,10 @@ fn is_receiver(device: &DeviceInfo, kinds: &[&str]) -> bool {
     carries_input && (both_inputs || says_receiver)
 }
 
-/// Root hubs are the computer's own USB controllers, not something plugged in.
 fn is_root_hub(device: &DeviceInfo) -> bool {
     device.vendor_id() == 0x1d6b && device.class() == 0x09
 }
 
-/// Every attached USB device, one entry per function it provides.
 pub(crate) fn list() -> Vec<Peripheral> {
     let Ok(devices) = nusb::list_devices().wait() else {
         return Vec::new();
@@ -96,7 +88,6 @@ pub(crate) fn list() -> Vec<Peripheral> {
         };
 
         if receiver {
-            // The dongle is plugged in by cable; what it carries is wireless.
             out.push(make(id.clone(), "wireless", None));
             for kind in kinds {
                 out.push(make(format!("{id}:{kind}"), kind, Some(id.clone())));

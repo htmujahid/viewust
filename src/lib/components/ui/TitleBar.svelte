@@ -2,14 +2,8 @@
   import { onMount } from "svelte";
   import { getCurrentWindow } from "@tauri-apps/api/window";
 
-  /**
-   * The window's own title bar, drawn here because the native one is turned off
-   * (`decorations: false`). Empty space is a drag region; double-clicking it
-   * maximises, as a native bar would.
-   */
   let maximized = $state(false);
 
-  // In a plain browser (mock mode) there is no window to control, so every call is a no-op.
   const win = () => {
     try {
       return getCurrentWindow();

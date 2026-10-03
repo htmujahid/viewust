@@ -1,9 +1,3 @@
-/**
- * Runs `task` every `everyMs` while `isActive()` is true, starting at once.
- *
- * A run never overlaps the previous one: if a read is still in flight when the
- * timer fires, that tick is skipped rather than queued behind it.
- */
 export class Poller {
   #timer: ReturnType<typeof setInterval> | null = null;
   #busy = false;

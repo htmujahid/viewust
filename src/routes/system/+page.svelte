@@ -11,7 +11,6 @@
 
   onMount(() => internals.ensure());
 
-  // The single "System memory" part is replaced by one per module once read.
   const canReadMemory = $derived(
     !internals.modules && internals.nodes.some((n) => n.id === "sys:ram"),
   );

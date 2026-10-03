@@ -1,5 +1,3 @@
-//! The technical report for a USB device.
-
 use super::{descriptors::*, driver::driver_rows, hid::hid_section};
 use crate::common::ids::*;
 use crate::common::sysfs::*;
@@ -44,8 +42,6 @@ pub(crate) fn interfaces(sys: &Path) -> Vec<Iface> {
     out
 }
 
-/// A receiver's keyboard and mouse live on different interfaces; show only the
-/// ones belonging to the node that was opened.
 fn wanted(kind: Option<&str>, i: &Iface) -> bool {
     match kind {
         Some("keyboard") => !(i.class == 3 && i.protocol == 2),
@@ -72,7 +68,6 @@ pub(crate) fn report(d: &mut Details, id: &str) {
     };
     let sys = dev.sysfs_path().to_path_buf();
 
-    // Who made the chip, per the public USB ID registry.
     let (vendor, product) = lookup_ids(
         USB_IDS,
         &format!("{:04x}", dev.vendor_id()),
@@ -111,7 +106,6 @@ pub(crate) fn report(d: &mut Details, id: &str) {
         .filter(|i| wanted(kind, i))
         .collect();
 
-    // Several interfaces often share one driver; describe each driver once.
     let mut drivers: Vec<(String, Vec<u8>)> = Vec::new();
     for iface in &ifaces {
         let driver = std::fs::read_link(iface.path.join("driver"))
@@ -149,7 +143,6 @@ pub(crate) fn report(d: &mut Details, id: &str) {
             .collect();
 
         for (name, path) in &subdirs {
-            // HID interface, e.g. 0003:2717:503F.0002
             if name.matches(':').count() == 2 && path.join("report_descriptor").exists() {
                 hid_section(d, n, path, desc.hid.get(&n).copied(), &dev);
             }
@@ -176,7 +169,6 @@ pub(crate) fn report(d: &mut Details, id: &str) {
         }
     }
 
-    // Endpoints, trimmed to the interfaces we're showing.
     let shown: Vec<u8> = ifaces.iter().map(|i| i.number).collect();
     let eps: Vec<&Endpoint> = desc
         .endpoints
@@ -312,7 +304,6 @@ mod tests {
         let (kbd, mouse) = (iface(3, 1), iface(3, 2));
         assert!(wanted(Some("keyboard"), &kbd) && !wanted(Some("keyboard"), &mouse));
         assert!(wanted(Some("mouse"), &mouse) && !wanted(Some("mouse"), &kbd));
-        // opening the receiver itself (no function) shows everything
         assert!(wanted(None, &kbd) && wanted(None, &mouse));
     }
 }

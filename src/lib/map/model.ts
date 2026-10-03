@@ -3,15 +3,12 @@ import type { Edge } from "@xyflow/svelte";
 import type { Detail } from "$lib/api/types";
 import type { Kind } from "$lib/illustrations/kinds";
 
-/** Everything the details panel shows for a node. */
 export interface NodeInfo {
-  /** Stable id; also what the device page's URL carries. */
   id: string;
   kind: Kind;
   label: string;
   title: string;
   subtitle?: string;
-  /** How it reaches the computer; absent for the computer itself. */
   connection?: "Wired" | "Wireless";
   via?: string;
   details: Detail[];
@@ -19,14 +16,10 @@ export interface NodeInfo {
 
 export interface DeviceData extends Record<string, unknown> {
   kind: Kind;
-  /** The card is just the illustration; this is its hover tooltip. */
   tooltip: string;
   wireless: boolean;
-  /** Real length in cm, to draw this device at its true relative size. */
   cm?: number;
-  /** A small pill under the node, e.g. "Online". */
   caption?: { text: string; tone: "ok" | "warn" | "danger" };
-  /** Wi-Fi strength 0–100, drawn as signal bars. */
   signal?: number;
   info: NodeInfo;
 }
@@ -68,14 +61,12 @@ export const KIND_LABELS: Record<Kind, string> = {
   internet: "Internet",
 };
 
-/** The facts to list for a node: its own, plus how it reaches the computer. */
 export function infoRows(info: NodeInfo): Detail[] {
   return info.via
     ? [{ section: "Connection", label: "Connected through", value: info.via }, ...info.details]
     : info.details;
 }
 
-/** The computer opens its internal-components page; everything else its own. */
 export const deviceUrl = (id: string) =>
   id === "computer" ? "/system" : `/device/${encodeURIComponent(id)}`;
 

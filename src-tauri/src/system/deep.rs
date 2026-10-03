@@ -1,5 +1,3 @@
-//! Extra, longer detail for a component's own page.
-
 use super::pci::{pci_class_name, pci_model, Pci};
 use super::{cpu::cpuinfo, memory::meminfo};
 use crate::common::cmd::run;
@@ -7,7 +5,6 @@ use crate::common::format::*;
 use crate::common::sysfs::*;
 use crate::common::Details;
 
-/// Extra, longer detail for a component's own page.
 pub fn report(d: &mut Details, id: &str) {
     if id == "board" {
         let pci = Pci::load();

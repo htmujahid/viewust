@@ -1,16 +1,12 @@
-//! External monitors.
-
 use super::edid;
 use super::model::Display;
 use tauri::window::Monitor;
 
-/// The laptop's own panel is part of the computer, not an attached device.
 fn is_built_in(name: &str) -> bool {
     let n = name.to_lowercase();
     n.starts_with("edp") || n.starts_with("lvds") || n.starts_with("dsi") || n.contains("built-in")
 }
 
-/// External monitors, each matched to its EDID identity where one can be read.
 pub(crate) fn list(monitors: Vec<Monitor>, primary: Option<Monitor>) -> Vec<Display> {
     let mut edids = edid::connected_edids();
 
@@ -23,8 +19,6 @@ pub(crate) fn list(monitors: Vec<Monitor>, primary: Option<Monitor>) -> Vec<Disp
                 .as_ref()
                 .is_some_and(|p| p.position() == m.position() && p.size() == m.size());
 
-            // Toolkits name a monitor by connector ("DP-3") or by model;
-            // match either, otherwise hand out the next unclaimed one.
             let found = edids
                 .iter()
                 .position(|(connector, e)| *connector == name || e.model() == Some(name.as_str()))

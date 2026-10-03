@@ -1,6 +1,3 @@
-//! Lookups in the system's USB, PCI and PnP ID databases.
-
-/// Looks up `vendor` (and optionally `device`) in a `usb.ids` / `pci.ids` file.
 pub(crate) fn lookup_ids(
     files: &[&str],
     vendor: &str,
@@ -12,8 +9,6 @@ pub(crate) fn lookup_ids(
     lookup_text(&text, vendor, device)
 }
 
-/// Same lookup over text that has already been read (avoids re-reading the
-/// 1 MB `pci.ids` file for every device).
 pub(crate) fn lookup_text(
     text: &str,
     vendor: &str,
@@ -28,7 +23,7 @@ pub(crate) fn lookup_text(
         }
         if !line.starts_with('\t') {
             if vendor_name.is_some() {
-                break; // left the vendor's block
+                break;
             }
             if let Some((id, name)) = line.split_once("  ") {
                 if id.to_lowercase() == vendor {
@@ -104,7 +99,6 @@ mod tests {
 
     #[test]
     fn does_not_leak_into_the_next_vendor() {
-        // 082d belongs to Logitech, so asking Xiaomi for it must not find it
         assert_eq!(lookup_text(DB, "2717", Some("082d")).1, None);
     }
 }

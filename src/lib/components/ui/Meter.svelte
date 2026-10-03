@@ -1,5 +1,4 @@
 <script lang="ts">
-  /** A thin horizontal bar. `value` is 0–100; `tone` overrides the automatic colour. */
   let {
     value,
     tone,
@@ -22,7 +21,6 @@
 </div>
 
 <style>
-  /* A segmented "health bar": the mask cuts the track into cells. */
   .meter {
     border-radius: 0;
     background: var(--surface-2);

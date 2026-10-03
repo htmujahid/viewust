@@ -15,7 +15,6 @@
 
 <NodeFrame {id} {selected} width={size.width} height={size.height} label={data.name}>
   <Handles outputs />
-  <!-- the internet link leaves lower on the right side so it never shares a line with devices -->
   <Handle id="out-r2" type="source" position={Position.Right} style="top: 85%" />
   <Illustration kind="computer" />
 </NodeFrame>

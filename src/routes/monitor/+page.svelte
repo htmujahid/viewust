@@ -10,7 +10,6 @@
   const now = $derived(monitor.latest)!;
 </script>
 
-<!-- A glance at everything. Each card opens its own page with the full picture. -->
 <div class="overview">
   <MonitorGrid>
     <MonitorCard title="Processor" href="/monitor/cpu">

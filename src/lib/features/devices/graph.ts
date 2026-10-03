@@ -13,17 +13,15 @@ import {
   type NodeInfo,
 } from "$lib/map/model";
 
-// Where each kind of device sits around the computer.
-const LEFT: Kind[] = ["keyboard", "mouse", "gamepad", "wireless"]; // input
-const RIGHT: Kind[] = ["webcam", "audio", "microphone"]; // media
-// everything else (storage, printer, hub, ...) goes below; displays go above
+const LEFT: Kind[] = ["keyboard", "mouse", "gamepad", "wireless"];
+const RIGHT: Kind[] = ["webcam", "audio", "microphone"];
 
-const GAP = 28; // between neighbouring devices
+const GAP = 28;
 const COMPUTER = artSize("computer");
 const COMPUTER_W = COMPUTER.width;
 const COMPUTER_H = COMPUTER.height;
-const MIN_COLUMN_GAP = 150; // computer ↔ side columns
-const ROW_GAP = 70; // computer ↔ top / bottom rows
+const MIN_COLUMN_GAP = 150;
+const ROW_GAP = 70;
 
 interface Entry {
   id: string;
@@ -53,14 +51,6 @@ function toEntry(p: Peripheral, children: Peripheral[], via?: string): Entry {
   };
 }
 
-/**
- * Computer in the middle. Displays above, input devices (and the receivers
- * that carry wireless ones) to the left, media to the right, everything else
- * below. Wireless devices fan out one step further from their receiver.
- *
- * Every device is laid out at its own drawn size, so spacing follows the real
- * proportions instead of fixed slots.
- */
 export function buildGraph(info: HardwareInfo): {
   nodes: Node[];
   edges: Edge[];
@@ -106,11 +96,8 @@ export function buildGraph(info: HardwareInfo): {
     Math.max(size(e).height, sum(e.children.map((c) => size(c).height)));
   const rightHeight = sum(right.map((e) => size(e).height));
   const leftHeight = sum(left.map(blockHeight));
-  // The side columns' connectors run vertically; keep the top and bottom rows
-  // beyond them so no line cuts through a device.
   const rowOffset = Math.max(COMPUTER_H / 2 + ROW_GAP, Math.max(leftHeight, rightHeight) / 2 + 40);
 
-  // top: displays, each at its real panel width when the monitor reports it
   const displays = info.displays.map((d, i) => {
     const id = `display:${d.connector ?? i}`;
     return { d, id, ...artSize("monitor", d.width_cm ?? undefined) };
@@ -142,7 +129,6 @@ export function buildGraph(info: HardwareInfo): {
     x += width + GAP;
   }
 
-  // bottom: everything else, left to right
   const bottomWidth = sum(bottom.map((e) => size(e).width));
   x = cx - bottomWidth / 2;
   for (const e of bottom) {
@@ -151,11 +137,9 @@ export function buildGraph(info: HardwareInfo): {
     x += size(e).width + GAP;
   }
 
-  // keep the side columns clear of the wider top / bottom rows
   const overhang = Math.max(topWidth, bottomWidth) / 2 - COMPUTER_W / 2;
   const columnGap = Math.max(MIN_COLUMN_GAP, overhang + 40);
 
-  // right: media, stacked and left-aligned against the computer
   let y = -rightHeight / 2;
   for (const e of right) {
     place(e, COMPUTER_W + columnGap, y, false);
@@ -163,7 +147,6 @@ export function buildGraph(info: HardwareInfo): {
     y += size(e).height + GAP;
   }
 
-  // left: input devices; a receiver gets a block tall enough for what it carries
   y = -leftHeight / 2;
   for (const e of left) {
     const block = blockHeight(e);
@@ -182,20 +165,15 @@ export function buildGraph(info: HardwareInfo): {
     y += block + GAP;
   }
 
-  // internet: computer → router → internet, below the media column
   if (info.connection) {
     const c = info.connection;
     const router = artSize("router");
     const cloud = artSize("internet");
     const wifi = c.kind === "wifi";
-    // the link leaves the computer's right side at 85% of its height; line the
-    // router up with that point so the link is a clean horizontal run
     const linkY = -COMPUTER_H / 2 + COMPUTER_H * 0.85;
     const routerTop = linkY - router.height / 2;
-    // far enough out that the link's label sits on the line, not over the dots
     const x = COMPUTER_W + Math.max(columnGap, 280);
 
-    // media is stacked above the router so the two never overlap
     const mediaBottom = -rightHeight / 2 + rightHeight;
     const shift = Math.min(0, routerTop - GAP - mediaBottom);
     if (shift < 0) {
@@ -253,7 +231,6 @@ export function buildGraph(info: HardwareInfo): {
       } satisfies DeviceData,
     });
 
-    // the link: a cable, or a dotted radio link carrying the speed and band
     edges.push({
       ...edge("computer", "r2", "net:router", "l", wifi),
       type: "default",

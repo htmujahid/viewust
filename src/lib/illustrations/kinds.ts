@@ -1,4 +1,3 @@
-/** Everything that has an illustration: peripherals, the computer, its internal parts, the connection. */
 export type Kind =
   | "computer"
   | "monitor"
@@ -15,7 +14,6 @@ export type Kind =
   | "phone"
   | "securitykey"
   | "generic"
-  // inside the computer
   | "board"
   | "cpu"
   | "ram"
@@ -26,6 +24,5 @@ export type Kind =
   | "psu"
   | "nic"
   | "soundcard"
-  // the connection to the internet
   | "router"
   | "internet";

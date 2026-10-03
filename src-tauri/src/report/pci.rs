@@ -1,5 +1,3 @@
-//! A PCI device's facts and driver.
-
 use super::driver::driver_rows;
 use crate::common::ids::*;
 use crate::common::sysfs::*;

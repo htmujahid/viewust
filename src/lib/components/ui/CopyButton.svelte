@@ -12,9 +12,7 @@
       await navigator.clipboard.writeText(text());
       copied = true;
       setTimeout(() => (copied = false), 1500);
-    } catch {
-      // clipboard unavailable (e.g. blocked by the webview): nothing to confirm
-    }
+    } catch {}
   }
 </script>
 

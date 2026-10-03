@@ -1,5 +1,3 @@
-//! Reading a monitor's identity from its EDID block.
-
 use crate::common::sysfs::*;
 use crate::common::{Detail, Details};
 
@@ -19,7 +17,6 @@ impl Edid {
         self.model.as_deref()
     }
 
-    /// Physical panel width in centimetres, when the monitor reports it.
     pub fn width_cm(&self) -> Option<u32> {
         (self.width_cm > 0).then_some(self.width_cm as u32)
     }
@@ -86,7 +83,6 @@ fn parse_edid(data: &[u8]) -> Option<Edid> {
     })
 }
 
-/// EDID blocks of every connected display, with the connector they're on.
 #[cfg(target_os = "linux")]
 pub fn connected_edids() -> Vec<(String, Edid)> {
     let mut out = Vec::new();
@@ -95,7 +91,6 @@ pub fn connected_edids() -> Vec<(String, Edid)> {
     };
     for entry in entries.flatten() {
         let path = entry.path();
-        // card0-HDMI-A-1 → HDMI-A-1
         let file = entry.file_name().to_string_lossy().into_owned();
         let Some((_, connector)) = file.split_once('-') else {
             continue;
@@ -188,17 +183,15 @@ pub fn display_details(f: &DisplayFacts) -> Vec<Detail> {
 mod tests {
     use super::*;
 
-    /// A minimal valid EDID for a Xiaomi P27FBB-RGGL: 60 × 34 cm, made in week 34 of 2024.
     fn sample() -> Vec<u8> {
         let mut e = vec![0u8; 128];
         e[..8].copy_from_slice(&[0, 255, 255, 255, 255, 255, 255, 0]);
-        e[8..10].copy_from_slice(&[0x61, 0xA9]); // "XMI"
-        e[10..12].copy_from_slice(&[0x13, 0xB0]); // product 0xB013
+        e[8..10].copy_from_slice(&[0x61, 0xA9]);
+        e[10..12].copy_from_slice(&[0x13, 0xB0]);
         e[16] = 34;
         e[17] = 34;
         e[21] = 60;
         e[22] = 34;
-        // monitor-name descriptor
         e[57] = 0xFC;
         e[59..59 + 12].copy_from_slice(b"P27FBB-RGGL\n");
         e

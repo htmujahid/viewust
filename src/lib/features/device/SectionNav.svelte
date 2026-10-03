@@ -1,7 +1,6 @@
 <script lang="ts">
   import { sectionSlug, type Section } from "$lib/utils/details";
 
-  /** Pills that jump to each section of the page. */
   let { sections }: { sections: readonly Section[] } = $props();
 </script>
 

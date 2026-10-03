@@ -1,4 +1,3 @@
-<!-- keyboard -->
 <rect class="body" x="10" y="24" width="140" height="54" rx="8" />
 {#each [0, 1, 2] as row}
   {#each Array(row === 2 ? 9 : 11) as _, i}

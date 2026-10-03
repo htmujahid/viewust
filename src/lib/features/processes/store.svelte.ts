@@ -4,7 +4,6 @@ import { Poller } from "$lib/utils/poller";
 
 export type SortKey = "name" | "pid" | "user" | "cpu" | "memory" | "virtual_memory" | "threads";
 
-/** Live process list, refreshed on a timer while the page is open. */
 class Processes {
   snapshot = $state.raw<Snapshot | null>(null);
   error = $state<string | null>(null);
@@ -58,7 +57,6 @@ class Processes {
     }
   }
 
-  /** Rows after the search, kernel-thread filter and sort are applied. */
   get rows(): ProcessRow[] {
     const all = this.snapshot?.processes ?? [];
     const q = this.search.trim().toLowerCase();

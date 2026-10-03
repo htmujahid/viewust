@@ -31,7 +31,7 @@ describe("artSize", () => {
   });
 
   it("draws the computer larger than any monitor, as the hub of the map", () => {
-    expect(longest("computer")).toBeGreaterThan(longest("monitor", 80) /* a 34-inch ultrawide */);
+    expect(longest("computer")).toBeGreaterThan(longest("monitor", 80));
   });
 
   it("scales a monitor by its real width", () => {

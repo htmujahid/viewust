@@ -30,7 +30,6 @@ import Router from "./Router.svelte";
 import Internet from "./Internet.svelte";
 import Generic from "./Generic.svelte";
 
-/** The drawing for each kind of thing the app can show. */
 export const drawings: Record<Kind, Component> = {
   computer: Computer,
   monitor: Monitor,

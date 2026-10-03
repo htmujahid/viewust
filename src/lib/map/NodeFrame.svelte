@@ -4,10 +4,6 @@
 
   import { deviceUrl } from "./model";
 
-  /**
-   * The box around one drawing on the map: sized to the drawing, with a ring
-   * for hover and selection. Double-clicking opens the node's own page.
-   */
   let {
     id,
     selected,
@@ -20,7 +16,6 @@
     selected: boolean;
     width: number;
     height: number;
-    /** Hover tooltip and accessible name. */
     label: string;
     children: Snippet;
   } = $props();

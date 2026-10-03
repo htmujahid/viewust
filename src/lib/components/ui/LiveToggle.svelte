@@ -1,5 +1,4 @@
 <script lang="ts">
-  /** Pauses and resumes a live page's updates. */
   let { live = $bindable() }: { live: boolean } = $props();
 </script>
 

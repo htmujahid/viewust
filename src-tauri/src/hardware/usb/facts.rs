@@ -1,5 +1,3 @@
-//! The USB facts shown for a device in the sidebar.
-
 use crate::common::sysfs::*;
 use crate::common::{Detail, Details};
 use nusb::DeviceInfo;
@@ -112,7 +110,6 @@ pub fn usb_details(device: &DeviceInfo) -> Vec<Detail> {
         }
         #[cfg(target_os = "linux")]
         {
-            // /sys/.../1-9  →  /sys/.../1-9/1-9:1.0/driver → ".../uvcvideo"
             let sys = device.sysfs_path();
             let dir = format!(
                 "{}:1.{}",

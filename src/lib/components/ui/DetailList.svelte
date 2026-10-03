@@ -1,10 +1,6 @@
 <script lang="ts">
   import type { Detail } from "$lib/api/types";
 
-  /**
-   * Label/value rows. A value that is long, or spans several lines (a hex dump,
-   * a command line), drops under its label instead of squeezing beside it.
-   */
   let {
     rows,
     stackAt = 56,

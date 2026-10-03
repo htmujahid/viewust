@@ -1,4 +1,3 @@
-<!-- ram -->
 <rect class="pcb" x="2" y="4" width="156" height="34" rx="3" />
 <rect class="accent" x="2" y="4" width="156" height="25" rx="4" />
 {#each [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as i}

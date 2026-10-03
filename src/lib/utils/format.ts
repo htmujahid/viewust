@@ -1,5 +1,3 @@
-// Number and duration formatting shared by every page.
-
 export function formatDuration(total: number): string {
   const d = Math.floor(total / 86400);
   const h = Math.floor((total % 86400) / 3600);

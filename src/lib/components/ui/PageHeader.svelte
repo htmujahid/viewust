@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
 
-  // Keep route controls without a page heading or breadcrumb bar.
   let {
     actions,
   }: {

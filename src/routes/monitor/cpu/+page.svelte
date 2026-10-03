@@ -11,7 +11,6 @@
   const now = $derived(monitor.latest)!;
   const tone = (load: number) => 0.08 + (Math.min(load, 100) / 100) * 0.92;
 
-  // threads ranked by how busy they are right now
   const busiest = $derived(
     now.cpu.cores
       .map((load, i) => ({ load, i }))
@@ -111,7 +110,6 @@
 </MonitorGrid>
 
 <style>
-  /* The thread map spans the card; the ranking below it flows into as many columns as fit. */
   .threads {
     display: grid;
     gap: var(--s-4);

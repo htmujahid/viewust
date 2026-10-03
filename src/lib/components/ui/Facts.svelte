@@ -1,5 +1,4 @@
 <script lang="ts">
-  /** A row of small label/value pairs. Items with a null value are skipped. */
   let { items }: { items: { label: string; value: string | null }[] } = $props();
 </script>
 

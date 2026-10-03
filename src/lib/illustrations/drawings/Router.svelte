@@ -1,4 +1,3 @@
-<!-- router -->
 <path class="cable" d="M34 40 L24 8" />
 <path class="cable" d="M116 40 L126 8" />
 <circle class="accent" cx="24" cy="8" r="4" />

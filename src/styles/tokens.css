@@ -1,8 +1,3 @@
-/* Design tokens: colour, spacing, type, effects. The look is a dev/gamer HUD: a near-black
-   "night" surface, neon cyan as the accent, magenta as the second data series, and soft glows.
-   Dark is the default (also when the OS has no preference); light applies when chosen
-   explicitly, or when the choice is "system" and the OS prefers light. */
-
 :root {
   --font-mono:
     "JetBrains Mono", "Fira Code", "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono",
@@ -28,11 +23,9 @@
   --danger: #ff4d6d;
   --danger-soft: #351019;
   --device-dark: #1b2332;
-  /* Neon cyan and magenta data series, shared by charts and legends. */
   --series-1: #00e5ff;
   --series-2: #ff4fb8;
 
-  /* Effects: glows replace drop shadows; the backdrop is a faint grid with two colour washes. */
   --glow: 0 0 12px color-mix(in srgb, var(--accent) 38%, transparent);
   --glow-strong:
     0 0 0 1px var(--accent), 0 0 16px color-mix(in srgb, var(--accent) 55%, transparent);

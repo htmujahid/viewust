@@ -11,7 +11,7 @@ describe("niceMax", () => {
   });
 
   it("leaves 5% of room above the data", () => {
-    expect(niceMax(100)).toBe(200); // exactly 100 would touch the top edge
+    expect(niceMax(100)).toBe(200);
     expect(niceMax(95)).toBe(100);
   });
 

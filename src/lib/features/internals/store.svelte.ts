@@ -3,7 +3,6 @@ import type { Edge, Node } from "@xyflow/svelte";
 import { buildInternals } from "./graph";
 import type { Component, SystemInfo } from "$lib/api/types";
 
-/** The computer's internal parts, shared by the internals page and the device page. */
 class Internals {
   info = $state.raw<SystemInfo | null>(null);
   nodes = $state.raw<Node[]>([]);
@@ -12,10 +11,8 @@ class Internals {
   loading = $state(false);
   error = $state<string | null>(null);
   selectedId = $state<string | null>(null);
-  /** Bumped when the layout is rebuilt so the canvas remounts and re-fits. */
   scan = $state(0);
 
-  /** Per-module memory details, once the user has allowed reading them. */
   modules = $state.raw<Component[] | null>(null);
   slots = $state<number | null>(null);
   readingMemory = $state(false);
@@ -47,7 +44,6 @@ class Internals {
     if (!this.info && !this.loading) await this.load();
   }
 
-  /** Asks the desktop for administrator permission, then reads each RAM module. */
   async readMemory() {
     this.readingMemory = true;
     this.memoryError = null;

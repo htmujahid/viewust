@@ -1,11 +1,8 @@
-//! The default route: which adapter and gateway reach the internet.
-
 pub struct Route {
     pub interface: String,
     pub gateway: String,
 }
 
-/// The lowest-metric default route in /proc/net/route.
 pub fn default_route() -> Option<Route> {
     let text = std::fs::read_to_string("/proc/net/route").ok()?;
     let mut best: Option<(u32, Route)> = None;
@@ -16,7 +13,7 @@ pub fn default_route() -> Option<Route> {
         }
         let flags = u32::from_str_radix(f[3], 16).unwrap_or(0);
         if flags & 0b11 != 0b11 {
-            continue; // needs to be both up and a gateway route
+            continue;
         }
         let metric = f[6].parse::<u32>().unwrap_or(0);
         if best.as_ref().map_or(true, |(m, _)| metric < *m) {
@@ -32,7 +29,6 @@ pub fn default_route() -> Option<Route> {
     best.map(|(_, r)| r)
 }
 
-/// "0101A8C0" (little-endian hex) → "192.168.1.1".
 fn hex_ip(hex: &str) -> Option<String> {
     let v = u32::from_str_radix(hex, 16).ok()?;
     let b = v.to_le_bytes();

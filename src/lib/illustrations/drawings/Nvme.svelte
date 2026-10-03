@@ -1,4 +1,3 @@
-<!-- nvme -->
 <rect class="pcb" x="22" y="4" width="116" height="36" rx="3" />
 <rect class="pcb" x="2" y="8" width="22" height="28" />
 {#each Array(11) as _, i}

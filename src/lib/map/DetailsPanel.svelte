@@ -97,13 +97,11 @@
     background: var(--surface-2);
     border-bottom: 1px solid var(--border);
   }
-  /* The drawing is pinned to this box; its viewBox scales it to fit. */
   .art {
     position: relative;
     width: 100%;
     height: 100%;
   }
-  /* Fill the box and let the viewBox scale the drawing to fit inside it. */
   .art :global(svg) {
     position: absolute;
     inset: 0;

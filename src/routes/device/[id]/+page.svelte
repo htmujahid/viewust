@@ -16,7 +16,6 @@
   import { infoRows, type NodeInfo } from "$lib/map/model";
   import { groupBySection, sectionsToText, sortSections } from "$lib/utils/details";
 
-  /** Identity first, then wiring and power, then the deep technical sections. */
   const SECTION_ORDER = [
     "Device",
     "Monitor",
@@ -30,7 +29,6 @@
 
   const id = $derived(decodeURIComponent(page.params.id ?? ""));
 
-  // Internal parts (ids start with "sys:") live in their own store.
   const internal = $derived(id.startsWith("sys:"));
   const store = $derived(internal ? internals : hardware);
   const backUrl = $derived(internal ? "/system" : "/");
@@ -41,7 +39,6 @@
 
   const report = new DeviceReport();
 
-  // What the map already knew comes first, then the deep report; same-named sections merge.
   const sections = $derived(
     sortSections(
       groupBySection([...(info ? infoRows(info) : []), ...(report.rows ?? [])]),
@@ -54,7 +51,6 @@
     else store.ensure();
   });
 
-  // Read the deep report whenever the device in the URL changes.
   $effect(() => {
     report.load(id);
   });

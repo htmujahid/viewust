@@ -1,5 +1,3 @@
-//! PCI devices, named from the system's `pci.ids` database.
-
 use crate::common::ids::*;
 use crate::common::sysfs::*;
 use std::path::Path;

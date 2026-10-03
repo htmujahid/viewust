@@ -1,4 +1,3 @@
-<!-- soundcard -->
 <rect class="metal" x="2" y="4" width="16" height="78" rx="2" />
 <circle class="ok-fill" cx="10" cy="20" r="4" />
 <circle class="accent" cx="10" cy="34" r="4" />

@@ -1,5 +1,3 @@
-//! USB configuration descriptors: interfaces, endpoints, polling rates.
-
 pub(crate) struct Endpoint {
     pub(crate) interface: u8,
     pub(crate) alt: u8,
@@ -13,7 +11,6 @@ pub(crate) struct Endpoint {
 pub(crate) struct Descriptors {
     pub(crate) config_attributes: Option<u8>,
     pub(crate) endpoints: Vec<Endpoint>,
-    /// interface number → (HID version, country code, report descriptor length)
     pub(crate) hid: std::collections::HashMap<u8, (u16, u8, u16)>,
 }
 
@@ -62,7 +59,6 @@ pub(crate) fn endpoint_text(e: &Endpoint, speed_mbps: f64) -> String {
     };
     let mut text = format!("{dir} · {kind} · {} bytes/packet", e.max_packet);
     if matches!(e.attributes & 3, 1 | 3) && e.interval > 0 {
-        // Low/full speed count milliseconds; high speed counts 125 µs steps.
         let micros = if speed_mbps >= 480.0 {
             125.0 * 2f64.powi(e.interval as i32 - 1)
         } else if e.attributes & 3 == 1 {
@@ -91,13 +87,11 @@ fn fmt_micros(us: f64) -> String {
 mod tests {
     use super::*;
 
-    /// Configuration (bus-powered, remote wake-up), one HID interface with a
-    /// 214-byte report descriptor and an interrupt-IN endpoint polled every 4 ms.
     fn mouse() -> Vec<u8> {
         let mut d = vec![9, 2, 34, 0, 1, 1, 0, 0xA0, 50];
-        d.extend([9, 4, 1, 0, 1, 3, 1, 2, 0]); // interface 1, alt 0
-        d.extend([9, 0x21, 0x11, 0x01, 0, 1, 0x22, 214, 0]); // HID 1.11
-        d.extend([7, 5, 0x82, 0x03, 8, 0, 4]); // endpoint 0x82
+        d.extend([9, 4, 1, 0, 1, 3, 1, 2, 0]);
+        d.extend([9, 0x21, 0x11, 0x01, 0, 1, 0x22, 214, 0]);
+        d.extend([7, 5, 0x82, 0x03, 8, 0, 4]);
         d
     }
 
@@ -121,7 +115,6 @@ mod tests {
             endpoint_text(e, 12.0),
             "IN (to computer) · Interrupt · 8 bytes/packet · polled every 4 ms (250 Hz)"
         );
-        // on a high-speed bus the same interval counts 125 µs steps: 2^(4-1) × 125 µs = 1 ms
         assert!(endpoint_text(e, 480.0).contains("polled every 1 ms (1000 Hz)"));
     }
 

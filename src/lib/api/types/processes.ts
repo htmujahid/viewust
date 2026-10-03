@@ -5,11 +5,8 @@ export interface ProcessRow {
   parent: number | null;
   name: string;
   user: string;
-  /** Percent of one core; can exceed 100. */
   cpu: number;
-  /** In RAM now. */
   memory: number;
-  /** Address space asked for. */
   virtual_memory: number;
   threads: number;
   state: string;

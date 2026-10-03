@@ -1,5 +1,3 @@
-//! Wi-Fi link details from `iw` and `nmcli`.
-
 use crate::common::cmd::run;
 
 #[derive(Default, Debug, PartialEq)]
@@ -12,7 +10,6 @@ pub struct Wifi {
     pub tx_rate: Option<String>,
 }
 
-/// Parses the output of `iw dev <if> link`.
 pub fn parse_iw_link(text: &str) -> Wifi {
     let mut w = Wifi::default();
     for line in text.lines().map(str::trim) {
@@ -43,7 +40,6 @@ pub fn parse_iw_link(text: &str) -> Wifi {
     w
 }
 
-/// Link quality 0–100 from a signal in dBm (the usual −100 … −50 mapping).
 pub fn signal_percent(dbm: i32) -> u32 {
     (2 * (dbm + 100)).clamp(0, 100) as u32
 }
@@ -81,7 +77,6 @@ pub(crate) fn quality_word(percent: u32) -> &'static str {
     }
 }
 
-/// (network name, strength 0–100, frequency MHz) of the active Wi-Fi network from nmcli.
 pub(crate) fn nmcli_wifi() -> Option<(String, u32, u32)> {
     let text = run(
         "nmcli",
@@ -92,7 +87,6 @@ pub(crate) fn nmcli_wifi() -> Option<(String, u32, u32)> {
 
 pub fn parse_nmcli_wifi(text: &str) -> Option<(String, u32, u32)> {
     text.lines().find(|l| l.starts_with('*')).and_then(|l| {
-        // terse mode escapes colons inside values as "\:"
         let parts: Vec<String> = l
             .replace("\\:", "\u{1}")
             .split(':')
@@ -146,7 +140,6 @@ mod tests {
 
     #[test]
     fn reads_the_active_network_from_nmcli() {
-        // terse mode escapes a colon inside a name as "\:"
         let nm = " :Cafe:70:2412 MHz\n*:My\\:Wifi:64:5220 MHz\n";
         assert_eq!(parse_nmcli_wifi(nm), Some(("My:Wifi".into(), 64, 5220)));
         assert_eq!(parse_nmcli_wifi(" :Cafe:70:2412 MHz\n"), None);

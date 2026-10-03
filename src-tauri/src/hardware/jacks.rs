@@ -1,11 +1,6 @@
-//! Analog 3.5 mm jacks with something plugged in.
-
 use super::model::Peripheral;
 use crate::common::{Detail, Details};
 
-/// Analog 3.5 mm jacks with something plugged in. The sound card reports each
-/// jack's state, so a microphone on the front panel is detectable even though
-/// it never appears on the USB bus. Linux only; needs `amixer` (alsa-utils).
 #[cfg(target_os = "linux")]
 pub(crate) fn audio_jacks() -> Vec<Peripheral> {
     use std::process::Command;
@@ -16,14 +11,12 @@ pub(crate) fn audio_jacks() -> Vec<Peripheral> {
 
     let mut out = Vec::new();
     for line in cards.lines() {
-        // " 0 [PCH            ]: HDA-Intel - HDA Intel PCH"
         let Some((index, rest)) = line.trim_start().split_once(' ') else {
             continue;
         };
         let Ok(index) = index.parse::<u32>() else {
             continue;
         };
-        // USB sound cards are already listed from the USB bus.
         if std::path::Path::new(&format!("/proc/asound/card{index}/usbid")).exists() {
             continue;
         }
@@ -37,9 +30,6 @@ pub(crate) fn audio_jacks() -> Vec<Peripheral> {
         };
         let text = String::from_utf8_lossy(&output.stdout);
 
-        // Blocks look like:  numid=32,iface=CARD,name='Front Mic Jack'
-        //                      ; type=BOOLEAN ...
-        //                      : values=on
         let mut current: Option<String> = None;
         for line in text.lines() {
             if line.starts_with("numid=") {

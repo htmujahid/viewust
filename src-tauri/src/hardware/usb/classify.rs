@@ -1,11 +1,7 @@
-//! Working out what a USB device actually is.
-
 use nusb::DeviceInfo;
 
 pub(crate) const HID: u8 = 0x03;
 
-/// Every function a USB device provides. A single receiver can expose a
-/// keyboard and a mouse at once, so this returns more than one kind.
 pub(crate) fn classify(device: &DeviceInfo) -> Vec<&'static str> {
     let name = format!(
         "{} {}",
@@ -32,12 +28,10 @@ pub(crate) fn classify(device: &DeviceInfo) -> Vec<&'static str> {
 
     let webcam = has(&["webcam", "camera", "c920", "c922", "brio"]) || class(0x0e);
     add("webcam", webcam);
-    // A "mic" in the name is matched as a whole word: "Microsoft" contains it.
     let padded = format!(" {name} ");
     let microphone = has(&["microphone", "yeti", "snowball", "podcast", "condenser"])
         || padded.contains(" mic ");
     add("microphone", microphone);
-    // Webcams carry a microphone interface; it isn't a separate device.
     add(
         "audio",
         !webcam
@@ -81,8 +75,6 @@ pub(crate) fn classify(device: &DeviceInfo) -> Vec<&'static str> {
         class(0x06) || has(&["iphone", "ipad", "android", "pixel", "galaxy", "phone"]),
     );
 
-    // Gaming keyboards often expose a spare mouse interface for macros, and
-    // mice a keyboard one. When the product name says which it is, trust it.
     let says_keyboard = has(&["keyboard"]);
     let says_mouse = has(&["mouse", "trackball"]);
     if says_keyboard && !says_mouse {

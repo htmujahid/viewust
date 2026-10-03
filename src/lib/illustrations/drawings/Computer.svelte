@@ -1,5 +1,3 @@
-<!-- computer -->
-<!-- desktop tower, front view -->
 <rect class="body" x="50" y="4" width="60" height="90" rx="7" />
 <rect class="dark" x="57" y="11" width="46" height="9" rx="2" />
 <rect class="faint" x="62" y="14.5" width="26" height="2" rx="1" />

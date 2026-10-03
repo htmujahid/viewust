@@ -1,5 +1,3 @@
-//! Sound cards.
-
 use super::model::*;
 use super::pci::{pci_model, Pci};
 use crate::common::sysfs::*;
@@ -7,7 +5,6 @@ use crate::common::Details;
 use std::path::Path;
 
 pub(crate) fn sound(pci: &Pci) -> Vec<Component> {
-    // HDMI audio on a graphics card shares its PCI slot (minus the function).
     let gpu_slots: Vec<String> = pci
         .0
         .iter()
@@ -34,7 +31,7 @@ pub(crate) fn sound(pci: &Pci) -> Vec<Component> {
             continue;
         };
         if Path::new(&format!("/proc/asound/card{n}/usbid")).exists() {
-            continue; // USB sound devices are listed as peripherals
+            continue;
         }
         let dev = e.path().join("device");
         let Some(slot) = std::fs::canonicalize(&dev)

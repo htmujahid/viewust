@@ -1,4 +1,3 @@
-<!-- microphone -->
 <path class="band thin" d="M54 36v8a26 26 0 0 0 52 0v-8" />
 <path class="line" d="M80 70v14" />
 <rect class="body" x="56" y="83" width="48" height="7" rx="3.5" />

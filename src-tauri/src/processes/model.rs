@@ -1,5 +1,3 @@
-//! What the processes page shows.
-
 use serde::Serialize;
 
 use crate::common::Detail;
@@ -10,11 +8,8 @@ pub struct ProcessRow {
     pub(crate) parent: Option<u32>,
     pub(crate) name: String,
     pub(crate) user: String,
-    /// Percent of one core (can exceed 100 for multi-threaded programs).
     pub(crate) cpu: f32,
-    /// Resident memory: what the process occupies in RAM right now.
     pub(crate) memory: u64,
-    /// Virtual size: the address space the process has asked the system for.
     pub(crate) virtual_memory: u64,
     pub(crate) threads: u32,
     pub(crate) state: &'static str,
@@ -46,10 +41,8 @@ pub struct Snapshot {
 
 #[derive(Serialize, Default)]
 pub struct MemoryBreakdown {
-    /// Address space the process has asked for (VmSize).
     pub(crate) requested: u64,
     pub(crate) peak_requested: u64,
-    /// Physically in RAM right now (VmRSS).
     pub(crate) resident: u64,
     pub(crate) peak_resident: u64,
     pub(crate) anonymous: u64,
@@ -62,7 +55,6 @@ pub struct MemoryBreakdown {
     pub(crate) libraries: u64,
     pub(crate) page_tables: u64,
     pub(crate) locked: u64,
-    /// Proportional share: private memory plus an equal slice of shared pages.
     pub(crate) proportional: Option<u64>,
     pub(crate) private: Option<u64>,
     pub(crate) shared_pages: Option<u64>,
@@ -86,7 +78,6 @@ pub struct Child {
 pub struct ProcessDetail {
     pub(crate) pid: u32,
     pub(crate) running: bool,
-    /// True when the system hides this process's memory map and I/O from us.
     pub(crate) restricted: bool,
     pub(crate) memory: Option<MemoryBreakdown>,
     pub(crate) regions: Vec<Region>,

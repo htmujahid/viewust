@@ -19,7 +19,6 @@
   </div>
   <div class="card tile">
     <p class="label">CPU</p>
-    <!-- machine-wide load is already 0–100 across every thread -->
     <p class="value tabular">{o.cpu.toFixed(0)}% <small>across {o.cpu_count} threads</small></p>
     <Meter value={o.cpu} />
   </div>

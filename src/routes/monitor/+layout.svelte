@@ -12,8 +12,6 @@
 
   let { children } = $props();
 
-  // Sampling lives here, in the section's layout, so the history keeps building
-  // while you move between the pages below.
   onMount(monitor.start);
   onDestroy(monitor.stop);
 
@@ -52,7 +50,6 @@
 </Page>
 
 <style>
-  /* Tabs and the live toggle share one row and one baseline. */
   .bar {
     display: flex;
     flex-wrap: wrap;
@@ -61,7 +58,6 @@
     gap: var(--s-3);
     margin-bottom: var(--s-4);
   }
-  /* The tabs keep their own underline, which only runs as wide as the tabs. */
   .bar :global(nav) {
     padding: 0;
   }

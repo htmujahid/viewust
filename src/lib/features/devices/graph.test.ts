@@ -9,7 +9,6 @@ import { buildGraph } from "./graph";
 
 const info = (net = "wired"): HardwareInfo => fixtures.hardware(net);
 
-/** Pixel rectangle each node occupies, from its position and its drawing's size. */
 function rects(graph: ReturnType<typeof buildGraph>) {
   return graph.nodes.map((n) => {
     const data = n.data as Partial<DeviceData>;

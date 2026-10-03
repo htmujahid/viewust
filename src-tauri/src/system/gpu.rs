@@ -1,5 +1,3 @@
-//! Graphics cards.
-
 use super::model::*;
 use super::pci::{pci_model, Pci};
 use crate::common::format::*;

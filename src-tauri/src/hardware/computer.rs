@@ -1,5 +1,3 @@
-//! Facts about the computer itself, for the sidebar.
-
 use crate::common::format::*;
 use crate::common::sysfs::*;
 use crate::common::{Detail, Details};

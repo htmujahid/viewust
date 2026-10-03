@@ -1,5 +1,3 @@
-//! System memory, and the opt-in read of individual modules.
-
 use super::model::*;
 use crate::common::format::*;
 use crate::common::Details;
@@ -57,9 +55,6 @@ pub(crate) fn memory() -> Component {
     }
 }
 
-/// Reads each memory module with `dmidecode`, asking for administrator
-/// permission through the desktop's own password prompt. Only runs when the
-/// user asks for it.
 pub(crate) fn read_modules() -> Result<MemoryModules> {
     let program = [
         "/usr/sbin/dmidecode",
@@ -74,7 +69,6 @@ pub(crate) fn read_modules() -> Result<MemoryModules> {
         .output()
         .map_err(|e| AppError::Other(format!("could not ask for permission: {e}")))?;
     if !out.status.success() {
-        // pkexec exits 126 when the prompt is dismissed and 127 when authentication fails
         return Err(match out.status.code() {
             Some(126) | Some(127) => AppError::PermissionDenied,
             _ => AppError::Other("Permission was declined or the read failed".into()),
@@ -138,7 +132,6 @@ fn parse_dmidecode(text: &str) -> MemoryModules {
     MemoryModules { modules, slots }
 }
 
-/// "Kingston KF548C38-16", or "16 GB DDR5" when the module reports no maker.
 fn module_name(
     maker: Option<String>,
     part: Option<String>,

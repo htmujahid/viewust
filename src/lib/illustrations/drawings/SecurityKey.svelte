@@ -1,4 +1,3 @@
-<!-- securitykey -->
 <rect class="accent" x="20" y="30" width="92" height="40" rx="12" />
 <circle class="screen" cx="38" cy="50" r="5.5" />
 <circle class="screen" cx="80" cy="50" r="12" />

@@ -1,24 +1,16 @@
-//! The one error type every command returns.
-//!
-//! It serialises to its message, which is what the frontend shows.
-
 use serde::{Serialize, Serializer};
 
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {
-    /// A tool this feature depends on isn't installed.
     #[error("{0} is not installed")]
     MissingTool(&'static str),
 
-    /// The user declined an administrator prompt, or it failed.
     #[error("Permission was declined")]
     PermissionDenied,
 
-    /// The background thread doing the work panicked or was cancelled.
     #[error("The read was interrupted: {0}")]
     Interrupted(String),
 
-    /// Anything else, already phrased for a person.
     #[error("{0}")]
     Other(String),
 }

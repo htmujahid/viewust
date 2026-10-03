@@ -1,4 +1,3 @@
-<!-- generic -->
 <path class="cable" d="M112 50h36" />
 <rect class="body" x="30" y="30" width="84" height="40" rx="9" />
 <rect class="dark" x="40" y="42" width="48" height="16" rx="3" />
