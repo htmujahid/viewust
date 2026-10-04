@@ -4,28 +4,10 @@ use sysinfo::{Groups, ProcessRefreshKind, ProcessesToUpdate, System, UpdateKind,
 
 use super::model::{Accounts, GroupRow, UserRow};
 
-pub(crate) fn platform() -> &'static str {
-    if cfg!(target_os = "linux") {
-        "linux"
-    } else if cfg!(target_os = "macos") {
-        "macos"
-    } else if cfg!(windows) {
-        "windows"
-    } else {
-        "other"
-    }
-}
-
-const ADMIN_GROUPS: &[&str] = &["sudo", "wheel", "admin", "root", "Administrators"];
+const ADMIN_GROUPS: &[&str] = &["sudo", "wheel", "admin", "root"];
+/// Ids below 1000 belong to the system; 65534 and above is `nobody` and friends.
+const REGULAR_IDS: std::ops::Range<u32> = 1000..65534;
 const NO_LOGIN: &[&str] = &["nologin", "false", "sync", "shutdown", "halt"];
-const WINDOWS_SERVICE_ACCOUNTS: &[&str] = &[
-    "SYSTEM",
-    "LOCAL SERVICE",
-    "NETWORK SERVICE",
-    "DefaultAccount",
-    "WDAGUtilityAccount",
-    "Guest",
-];
 
 #[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub(crate) struct Passwd {
@@ -64,67 +46,43 @@ pub(crate) fn can_login(shell: Option<&str>) -> Option<bool> {
     Some(!NO_LOGIN.contains(&program))
 }
 
-pub(crate) fn user_kind(
-    platform: &str,
-    uid: &str,
-    name: &str,
-    shell: Option<&str>,
-) -> &'static str {
-    if platform == "windows" {
-        return if WINDOWS_SERVICE_ACCOUNTS.contains(&name) || name.ends_with('$') {
-            "system"
-        } else {
-            "regular"
-        };
-    }
+pub(crate) fn user_kind(uid: &str, shell: Option<&str>) -> &'static str {
     let Ok(n) = uid.parse::<u32>() else {
         return "regular";
     };
-    let first_regular = if platform == "macos" { 500 } else { 1000 };
     if n == 0 {
         "root"
-    } else if n < first_regular || n >= 65534 || can_login(shell) == Some(false) {
+    } else if !REGULAR_IDS.contains(&n) || can_login(shell) == Some(false) {
         "system"
     } else {
         "regular"
     }
 }
 
-pub(crate) fn group_kind(platform: &str, gid: &str, name: &str) -> &'static str {
+pub(crate) fn group_kind(gid: &str, name: &str) -> &'static str {
     if ADMIN_GROUPS.contains(&name) {
         return "admin";
     }
-    if platform == "windows" {
-        return "regular";
-    }
-    let first_regular = if platform == "macos" { 500 } else { 1000 };
     match gid.parse::<u32>() {
-        Ok(n) if n < first_regular || n >= 65534 => "system",
+        Ok(n) if !REGULAR_IDS.contains(&n) => "system",
         _ => "regular",
     }
 }
 
 pub(crate) fn current_user() -> Option<String> {
-    ["USER", "LOGNAME", "USERNAME"]
+    ["USER", "LOGNAME"]
         .iter()
         .find_map(|k| std::env::var(k).ok())
         .filter(|u| !u.is_empty())
 }
 
-#[cfg(unix)]
 fn passwd() -> HashMap<String, Passwd> {
     std::fs::read_to_string("/etc/passwd")
         .map(|t| parse_passwd(&t))
         .unwrap_or_default()
 }
 
-#[cfg(not(unix))]
-fn passwd() -> HashMap<String, Passwd> {
-    HashMap::new()
-}
-
 pub(crate) fn snapshot() -> Accounts {
-    let platform = platform();
     let users = Users::new_with_refreshed_list();
     let group_list = Groups::new_with_refreshed_list();
     let passwd = passwd();
@@ -173,7 +131,7 @@ pub(crate) fn snapshot() -> Accounts {
             let (processes, memory) = usage.get(&uid).copied().unwrap_or((0, 0));
             UserRow {
                 name: u.name().to_owned(),
-                kind: user_kind(platform, &uid, u.name(), pw.shell.as_deref()),
+                kind: user_kind(&uid, pw.shell.as_deref()),
                 admin: groups.iter().any(|g| ADMIN_GROUPS.contains(&g.as_str())),
                 can_login: can_login(pw.shell.as_deref()),
                 current: me.as_deref() == Some(u.name()),
@@ -206,7 +164,7 @@ pub(crate) fn snapshot() -> Accounts {
         .map(|g| {
             let gid = (**g.id()).to_string();
             GroupRow {
-                kind: group_kind(platform, &gid, g.name()),
+                kind: group_kind(&gid, g.name()),
                 admin: ADMIN_GROUPS.contains(&g.name()),
                 members: members.get(g.name()).cloned().unwrap_or_default(),
                 name: g.name().to_owned(),
@@ -217,7 +175,6 @@ pub(crate) fn snapshot() -> Accounts {
     groups.sort_by_key(|g| g.name.to_lowercase());
 
     Accounts {
-        platform,
         users: rows,
         groups,
     }
@@ -286,32 +243,19 @@ broken-line
     }
 
     #[test]
-    fn users_are_classified_per_platform() {
-        assert_eq!(user_kind("linux", "0", "root", Some("/bin/bash")), "root");
-        assert_eq!(user_kind("linux", "1", "daemon", None), "system");
-        assert_eq!(
-            user_kind("linux", "1000", "talha", Some("/bin/bash")),
-            "regular"
-        );
-        assert_eq!(
-            user_kind("linux", "1001", "svc", Some("/usr/sbin/nologin")),
-            "system"
-        );
-        assert_eq!(user_kind("linux", "65534", "nobody", None), "system");
-        assert_eq!(user_kind("macos", "501", "me", Some("/bin/zsh")), "regular");
-        assert_eq!(user_kind("macos", "300", "_svc", None), "system");
-        assert_eq!(user_kind("windows", "S-1-5-18", "SYSTEM", None), "system");
-        assert_eq!(user_kind("windows", "S-1-5-21-1", "Talha", None), "regular");
-        assert_eq!(user_kind("windows", "S-1-5-21-2", "PC$", None), "system");
+    fn users_are_classified_by_id_and_shell() {
+        assert_eq!(user_kind("0", Some("/bin/bash")), "root");
+        assert_eq!(user_kind("1", None), "system");
+        assert_eq!(user_kind("1000", Some("/bin/bash")), "regular");
+        assert_eq!(user_kind("1001", Some("/usr/sbin/nologin")), "system");
+        assert_eq!(user_kind("65534", None), "system");
     }
 
     #[test]
     fn groups_are_classified_and_admin_groups_stand_out() {
-        assert_eq!(group_kind("linux", "27", "sudo"), "admin");
-        assert_eq!(group_kind("linux", "100", "users"), "system");
-        assert_eq!(group_kind("linux", "1000", "talha"), "regular");
-        assert_eq!(group_kind("windows", "544", "Administrators"), "admin");
-        assert_eq!(group_kind("windows", "545", "Users"), "regular");
+        assert_eq!(group_kind("27", "sudo"), "admin");
+        assert_eq!(group_kind("100", "users"), "system");
+        assert_eq!(group_kind("1000", "talha"), "regular");
     }
 
     #[test]

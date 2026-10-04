@@ -103,7 +103,6 @@ pub struct NamespaceRow {
 
 #[derive(Serialize)]
 pub struct Namespaces {
-    pub(crate) supported: bool,
     pub(crate) note: Option<String>,
     pub(crate) inspected: usize,
     pub(crate) total: usize,

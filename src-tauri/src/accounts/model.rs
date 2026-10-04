@@ -28,7 +28,6 @@ pub struct GroupRow {
 
 #[derive(Serialize)]
 pub struct Accounts {
-    pub(crate) platform: &'static str,
     pub(crate) users: Vec<UserRow>,
     pub(crate) groups: Vec<GroupRow>,
 }

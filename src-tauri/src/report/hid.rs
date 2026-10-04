@@ -3,7 +3,6 @@ use crate::common::sysfs::*;
 use crate::common::Details;
 use std::path::Path;
 
-#[cfg(target_os = "linux")]
 pub(crate) fn hid_section(
     d: &mut Details,
     iface: u8,

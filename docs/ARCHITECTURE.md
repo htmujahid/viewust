@@ -19,16 +19,17 @@ feature/
   …             the logic, split by concern
 ```
 
-| Module       | Responsibility                                                                                      |
-| ------------ | --------------------------------------------------------------------------------------------------- |
-| `hardware`   | external devices: USB (`usb/`), audio jacks, monitors (`edid.rs`)                                   |
-| `connection` | the route to the internet: wired/Wi-Fi, gateway, DNS, signal                                        |
-| `system`     | internal parts: board, CPU, memory, drives, GPU, network, sound, power                              |
-| `report`     | the deep technical report for one device (descriptors, HID, drivers…)                               |
-| `processes`  | the process list and one process in depth                                                           |
-| `monitor`    | one-second live samples                                                                             |
-| `common`     | shared plumbing with no domain knowledge: details rows, formatting, sysfs, ID databases, `blocking` |
-| `error`      | the one `AppError` every command returns; serialises to a plain message                             |
+| Module        | Responsibility                                                                                      |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `hardware`    | external devices: USB (`usb/`), audio jacks, monitors (`edid.rs`)                                   |
+| `connection`  | the route to the internet: wired/Wi-Fi, gateway, DNS, signal                                        |
+| `system`      | internal parts: board, CPU, memory, drives, GPU, network, sound, power                              |
+| `report`      | the deep technical report for one device (descriptors, HID, drivers…)                               |
+| `filesystems` | mounted filesystems, grouped by storage kind: mounts, `df` space, `lsblk` device stack              |
+| `processes`   | the process list and one process in depth                                                           |
+| `monitor`     | one-second live samples                                                                             |
+| `common`      | shared plumbing with no domain knowledge: details rows, formatting, sysfs, ID databases, `blocking` |
+| `error`       | the one `AppError` every command returns; serialises to a plain message                             |
 
 **Conventions**
 
@@ -42,8 +43,9 @@ feature/
   explicit button that asks the desktop for permission (`system::memory::read_modules`).
 - **Be honest about gaps.** If the OS doesn't report something (the power supply, a mouse's sensor),
   say so in the result rather than guessing.
-- **Linux-only code is `#[cfg(target_os = "linux")]`** with a fallback, so the crate still compiles
-  elsewhere.
+- **Linux only, on purpose.** There are no `cfg` gates or per-OS fallbacks: modules read `/proc`,
+  `/sys`, `/etc` and tools like `lsblk`, `df`, `systemctl` and `udevadm` directly, so each view can
+  go as deep as the platform allows. Other operating systems will get their own codebase.
 - **Parsers are pure functions with tests** (`parse_dmidecode`, `decode_hid`, `parse_edid`, …). Keep
   that split: reading a file is one function, interpreting its text is another.
 - Lints: `unsafe_code = "forbid"`, clippy clean (`-D warnings` in `pnpm rust:verify`).

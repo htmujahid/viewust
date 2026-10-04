@@ -4,7 +4,6 @@ use crate::common::Details;
 use std::path::PathBuf;
 use std::process::Command;
 
-#[cfg(target_os = "linux")]
 pub(crate) fn report(d: &mut Details, rest: &str) {
     let Some(card) = rest.split('-').next().and_then(|c| c.parse::<u32>().ok()) else {
         return;

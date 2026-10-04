@@ -83,7 +83,6 @@ fn parse_edid(data: &[u8]) -> Option<Edid> {
     })
 }
 
-#[cfg(target_os = "linux")]
 pub fn connected_edids() -> Vec<(String, Edid)> {
     let mut out = Vec::new();
     let Ok(entries) = std::fs::read_dir("/sys/class/drm") else {
@@ -107,11 +106,6 @@ pub fn connected_edids() -> Vec<(String, Edid)> {
     }
     out.sort_by(|a, b| a.0.cmp(&b.0));
     out
-}
-
-#[cfg(not(target_os = "linux"))]
-pub fn connected_edids() -> Vec<(String, Edid)> {
-    Vec::new()
 }
 
 pub struct DisplayFacts<'a> {

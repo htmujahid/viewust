@@ -11,8 +11,9 @@
     { href: "/system", label: "System", icon: "cpu", code: "02" },
     { href: "/monitor", label: "Live monitor", icon: "chart", code: "03" },
     { href: "/processes", label: "Processes", icon: "activity", code: "04" },
-    { href: "/services", label: "Services", icon: "server", code: "05" },
-    { href: "/accounts", label: "Accounts", icon: "users", code: "06" },
+    { href: "/filesystems", label: "Filesystems", icon: "storage", code: "05" },
+    { href: "/services", label: "Services", icon: "server", code: "06" },
+    { href: "/accounts", label: "Accounts", icon: "users", code: "07" },
   ];
   const active = (href: string) => page.url.pathname.startsWith(href);
 </script>

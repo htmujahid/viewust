@@ -71,7 +71,6 @@ pub fn usb_details(device: &DeviceInfo) -> Vec<Detail> {
     d.add("Connection", "Bus", device.bus_id());
     d.add("Connection", "Address", device.device_address().to_string());
 
-    #[cfg(target_os = "linux")]
     {
         let sys = device.sysfs_path();
         d.add_opt("Connection", "Port", read(sys.join("devpath")));
@@ -108,7 +107,6 @@ pub fn usb_details(device: &DeviceInfo) -> Vec<Detail> {
         if let Some(name) = i.interface_string() {
             parts.push(name.to_owned());
         }
-        #[cfg(target_os = "linux")]
         {
             let sys = device.sysfs_path();
             let dir = format!(

@@ -13,7 +13,6 @@ use crate::common::{Detail, Details};
 
 pub fn build(id: &str) -> Vec<Detail> {
     let mut d = Details::new();
-    #[cfg(target_os = "linux")]
     {
         if id == "computer" {
             computer::report(&mut d);
@@ -27,15 +26,6 @@ pub fn build(id: &str) -> Vec<Detail> {
         } else {
             usb::report(&mut d, id);
         }
-    }
-    #[cfg(not(target_os = "linux"))]
-    {
-        let _ = id;
-        d.add(
-            "Technical",
-            "Availability",
-            "Low-level details are only available on Linux for now",
-        );
     }
     d.finish()
 }

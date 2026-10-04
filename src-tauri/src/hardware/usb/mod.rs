@@ -17,15 +17,9 @@ fn speed_name(speed: Option<nusb::Speed>) -> String {
     .into()
 }
 
-#[cfg(target_os = "linux")]
 fn is_internal(device: &DeviceInfo) -> bool {
     std::fs::read_to_string(device.sysfs_path().join("removable"))
         .is_ok_and(|v| v.trim() == "fixed")
-}
-
-#[cfg(not(target_os = "linux"))]
-fn is_internal(_: &DeviceInfo) -> bool {
-    false
 }
 
 fn is_receiver(device: &DeviceInfo, kinds: &[&str]) -> bool {

@@ -53,14 +53,12 @@
 
 <ProcessesShell>
   {#snippet actions()}
-    {#if snapshot?.supported}
-      <SearchBox
-        bind:value={namespaces.search}
-        placeholder="Search type, ID or program"
-        label="Search namespaces"
-      />
-      <LiveToggle bind:live={namespaces.live} />
-    {/if}
+    <SearchBox
+      bind:value={namespaces.search}
+      placeholder="Search type, ID or program"
+      label="Search namespaces"
+    />
+    <LiveToggle bind:live={namespaces.live} />
   {/snippet}
 
   {#if namespaces.error && !snapshot}
@@ -68,11 +66,6 @@
   {:else if !snapshot}
     <div class="skeleton" style="height: 96px; margin-bottom: 16px"></div>
     <div class="skeleton" style="height: 420px"></div>
-  {:else if !snapshot.supported}
-    <div class="card empty">
-      <h2>Not available on this system</h2>
-      <p>{snapshot.note}</p>
-    </div>
   {:else}
     <StatTiles
       items={[
@@ -186,14 +179,6 @@
     background: var(--warn-soft);
     color: var(--warn);
     font-size: var(--fs-small);
-  }
-  .empty {
-    padding: var(--s-6);
-    text-align: center;
-  }
-  .empty p {
-    margin-top: var(--s-2);
-    color: var(--text-2);
   }
   .procs {
     margin: 0;

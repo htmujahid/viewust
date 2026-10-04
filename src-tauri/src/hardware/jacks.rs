@@ -1,7 +1,6 @@
 use super::model::Peripheral;
 use crate::common::{Detail, Details};
 
-#[cfg(target_os = "linux")]
 pub(crate) fn audio_jacks() -> Vec<Peripheral> {
     use std::process::Command;
 
@@ -50,12 +49,6 @@ pub(crate) fn audio_jacks() -> Vec<Peripheral> {
     out
 }
 
-#[cfg(not(target_os = "linux"))]
-pub(crate) fn audio_jacks() -> Vec<Peripheral> {
-    Vec::new()
-}
-
-#[cfg(target_os = "linux")]
 fn jack_device(card: u32, jack: &str, card_name: Option<String>) -> Option<Peripheral> {
     let label = jack.trim_end_matches(" Jack");
     let lower = label.to_lowercase();
@@ -87,7 +80,6 @@ fn jack_device(card: u32, jack: &str, card_name: Option<String>) -> Option<Perip
     })
 }
 
-#[cfg(target_os = "linux")]
 fn jack_details(card: u32, jack: &str, card_name: Option<&str>) -> Vec<Detail> {
     let mut d = Details::new();
     d.add("Connection", "Type", "3.5 mm analog jack");

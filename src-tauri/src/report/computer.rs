@@ -4,7 +4,6 @@ use crate::common::sysfs::*;
 use crate::common::Details;
 use std::path::Path;
 
-#[cfg(target_os = "linux")]
 pub(crate) fn report(d: &mut Details) {
     let mut seen = Vec::new();
     for e in std::fs::read_dir("/sys/class/drm")

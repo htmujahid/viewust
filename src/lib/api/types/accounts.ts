@@ -23,7 +23,6 @@ export interface GroupRow {
 }
 
 export interface Accounts {
-  platform: "linux" | "macos" | "windows" | "other";
   users: UserRow[];
   groups: GroupRow[];
 }

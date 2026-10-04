@@ -4,7 +4,6 @@ use crate::common::sysfs::*;
 use crate::common::Details;
 use std::path::Path;
 
-#[cfg(target_os = "linux")]
 pub(crate) fn pci_rows(d: &mut Details, section: &str, device_dir: &Path) {
     let hex = |f: &str| read(device_dir.join(f)).map(|v| v.trim_start_matches("0x").to_owned());
     let (vendor, device) = (hex("vendor"), hex("device"));

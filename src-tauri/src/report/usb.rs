@@ -50,7 +50,6 @@ fn wanted(kind: Option<&str>, i: &Iface) -> bool {
     }
 }
 
-#[cfg(target_os = "linux")]
 pub(crate) fn report(d: &mut Details, id: &str) {
     use nusb::MaybeFuture;
 
@@ -196,7 +195,6 @@ pub(crate) fn report(d: &mut Details, id: &str) {
     }
 }
 
-#[cfg(target_os = "linux")]
 fn audio_streams(d: &mut Details, iface: u8, card: u32) {
     let section = format!("Interface {iface} · audio");
     d.add_opt(

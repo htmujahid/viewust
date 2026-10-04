@@ -4,6 +4,9 @@ import type {
   Component,
   Connection,
   Detail,
+  FilesystemKind,
+  FilesystemRow,
+  FilesystemSnapshot,
   HardwareInfo,
   MemoryModules,
   Peripheral,
@@ -354,7 +357,7 @@ const accountList = (): Accounts => {
           : ("system" as const),
     admin: adminNames.includes(name) && name !== "adm",
   }));
-  return { platform: "linux", users, groups };
+  return { users, groups };
 };
 
 const namespaceList = (): Namespaces => {
@@ -392,11 +395,107 @@ const namespaceList = (): Namespaces => {
   isolated("uts", 4026532903, 4, [proc(9100, "nginx", "root")]);
   isolated("ipc", 4026532904, 4, [proc(9100, "nginx", "root")]);
   return {
-    supported: true,
     note: "Read 191 of 534 processes. The rest belong to other users, and only an administrator can look inside them.",
     inspected: 191,
     total: 534,
     namespaces: rows,
+  };
+};
+
+const GB = 1e9;
+
+const filesystemDefs: [
+  string,
+  string,
+  string,
+  FilesystemKind,
+  number | null,
+  number,
+  { label?: string; ro?: boolean; note?: string }?,
+][] = [
+  [
+    "/",
+    "/dev/nvme0n1p2",
+    "ext4",
+    "disk",
+    474 * GB,
+    217 * GB,
+    { note: "nvme0n1p2 (part) → nvme0n1 (disk)" },
+  ],
+  ["/boot/efi", "/dev/nvme0n1p1", "vfat", "disk", 1.1 * GB, 0.006 * GB],
+  ["/home", "/dev/mapper/vg-home", "btrfs", "disk", 930 * GB, 812 * GB, { label: "home" }],
+  ["/mnt/archive", "/dev/sda1", "xfs", "disk", 4000 * GB, 1210 * GB, { label: "archive" }],
+  ["/media/talha/STICK", "/dev/sdb1", "exfat", "removable", 62 * GB, 11 * GB, { label: "STICK" }],
+  [
+    "/media/talha/Backup",
+    "/dev/sdc1",
+    "ntfs3",
+    "removable",
+    1000 * GB,
+    968 * GB,
+    { label: "Backup" },
+  ],
+  ["/run/media/talha/INSTALL", "/dev/sr0", "iso9660", "optical", 3.4 * GB, 3.4 * GB, { ro: true }],
+  ["/mnt/nas", "nas.local:/volume1/media", "nfs4", "network", 7200 * GB, 5100 * GB],
+  ["/mnt/work", "//fileserver/work", "cifs", "network", 2000 * GB, 1980 * GB],
+  ["/dev/shm", "tmpfs", "tmpfs", "memory", 16 * GB, 0.1 * GB],
+  ["/run", "tmpfs", "tmpfs", "memory", 6.5 * GB, 0.003 * GB],
+  ["/tmp", "tmpfs", "tmpfs", "memory", 16 * GB, 0.8 * GB],
+  ["/snap/core22/1722", "/dev/loop0", "squashfs", "image", 0.07 * GB, 0.07 * GB, { ro: true }],
+  ["/snap/firefox/4650", "/dev/loop1", "squashfs", "image", 0.26 * GB, 0.26 * GB, { ro: true }],
+  ["/var/lib/docker/overlay2/merged", "overlay", "overlay", "overlay", 474 * GB, 217 * GB],
+  ["/proc", "proc", "proc", "virtual", null, 0],
+  ["/sys", "sysfs", "sysfs", "virtual", null, 0],
+  ["/sys/fs/cgroup", "cgroup2", "cgroup2", "virtual", null, 0],
+  ["/dev", "devtmpfs", "devtmpfs", "memory", 16 * GB, 0],
+];
+
+const filesystemList = (): FilesystemSnapshot => {
+  const filesystems: FilesystemRow[] = filesystemDefs.map(
+    ([mount, source, fstype, kind, size, used, extra]) => {
+      const read_only = extra?.ro ?? false;
+      const available = size === null ? null : size - used;
+      return {
+        mount,
+        source,
+        fstype,
+        kind,
+        read_only,
+        size,
+        used: size === null ? null : used,
+        available,
+        inodes_total: size === null ? null : Math.round(size / 16384),
+        inodes_used: size === null ? null : Math.round(used / 65536),
+        label: extra?.label ?? null,
+        details: [
+          row("Filesystem", "Type", fstype),
+          row("Filesystem", "Mounted at", mount),
+          row("Filesystem", "Source", source),
+          row("Filesystem", "Access", read_only ? "Read-only" : "Read and write"),
+          ...(size === null
+            ? []
+            : [
+                row("Space", "Size", `${(size / 2 ** 30).toFixed(1)} GiB`),
+                row("Space", "Used", `${(used / 2 ** 30).toFixed(1)} GiB`),
+                row("Space", "Available", `${((available ?? 0) / 2 ** 30).toFixed(1)} GiB`),
+              ]),
+          ...(extra?.note ? [row("Device", "Built on", extra.note)] : []),
+          row("Options", "Mount options", read_only ? "ro,relatime" : "rw,relatime"),
+        ],
+      };
+    },
+  );
+  const counted = filesystems.filter(
+    (f) => ["disk", "removable", "network"].includes(f.kind) && f.size !== null,
+  );
+  return {
+    overview: {
+      size: counted.reduce((n, f) => n + (f.size ?? 0), 0),
+      used: counted.reduce((n, f) => n + (f.used ?? 0), 0),
+      available: counted.reduce((n, f) => n + (f.available ?? 0), 0),
+      volumes: counted.length,
+    },
+    filesystems,
   };
 };
 
@@ -653,6 +752,7 @@ export const fixtures = {
   memoryModules,
   processList,
   processDetail,
+  filesystemList,
   serviceList,
   serviceDetail,
   accountList,
@@ -668,7 +768,6 @@ export function installMockBackend(): void {
 
   const params = new URLSearchParams(globalThis.location?.search ?? "");
   const net = params.get("net") ?? "wired";
-  const unsupportedOs = params.get("os") === "windows";
   let tick = 0;
 
   mockIPC((command, payload) => {
@@ -689,15 +788,9 @@ export function installMockBackend(): void {
       case "account_list":
         return accountList();
       case "namespace_list":
-        return unsupportedOs
-          ? ({
-              supported: false,
-              note: "Namespaces are a Linux feature. This system isolates programs in other ways, so there is nothing to list here.",
-              inspected: 0,
-              total: 0,
-              namespaces: [],
-            } satisfies Namespaces)
-          : namespaceList();
+        return namespaceList();
+      case "filesystem_list":
+        return filesystemList();
       case "service_list":
         return serviceList();
       case "service_detail":

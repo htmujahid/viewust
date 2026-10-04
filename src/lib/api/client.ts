@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 import type {
   Detail,
+  FilesystemSnapshot,
   HardwareInfo,
   MemoryModules,
   ProcessDetail,
@@ -41,6 +42,8 @@ export const api = {
 
   accountList: () => call<Accounts>("account_list"),
   namespaceList: () => call<Namespaces>("namespace_list"),
+
+  filesystemList: () => call<FilesystemSnapshot>("filesystem_list"),
 
   serviceList: () => call<ServiceSnapshot>("service_list"),
   serviceDetail: (unit: string) => call<ServiceDetail>("service_detail", { unit }),

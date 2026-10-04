@@ -10,7 +10,6 @@ pub(crate) fn details() -> Vec<Detail> {
 
     let mut d = Details::new();
 
-    #[cfg(target_os = "linux")]
     {
         let dmi = |f: &str| read(format!("/sys/class/dmi/id/{f}"));
         d.add_opt("System", "Manufacturer", dmi("sys_vendor"));

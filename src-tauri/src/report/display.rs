@@ -3,7 +3,6 @@ use crate::common::ids::*;
 use crate::common::sysfs::*;
 use crate::common::Details;
 
-#[cfg(target_os = "linux")]
 pub(crate) fn report(d: &mut Details, connector: &str) {
     let Some(dir) = std::fs::read_dir("/sys/class/drm").ok().and_then(|it| {
         it.flatten().map(|e| e.path()).find(|p| {

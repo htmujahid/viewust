@@ -79,7 +79,6 @@ export interface NamespaceRow {
 }
 
 export interface Namespaces {
-  supported: boolean;
   note: string | null;
   inspected: number;
   total: number;
