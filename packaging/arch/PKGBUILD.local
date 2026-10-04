@@ -1,0 +1,37 @@
+# Local build: packages the working tree instead of a release tag.
+pkgname=viewust
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="A live map of everything connected to this computer, and a window into it"
+arch=('x86_64')
+url="https://github.com/htmujahid/viewust"
+license=('MIT')
+depends=('webkit2gtk-4.1' 'gtk3')
+optdepends=(
+  'udisks2: mount drives from the Disk usage page'
+  'curl: internet speed test'
+  'alsa-utils: audio jack detection'
+  'wireplumber: audio device volumes on the audio monitor'
+  'xdg-utils: open folders in the file manager'
+  'polkit: service control and RAM-module details'
+  'dmidecode: RAM-module details'
+)
+makedepends=('rust' 'nodejs' 'pnpm')
+source=("$pkgname-$pkgver.tar.gz" 'viewust.desktop')
+sha256sums=('SKIP' 'SKIP')
+
+build() {
+  cd "$pkgname-$pkgver"
+  pnpm install --frozen-lockfile
+  pnpm tauri build --no-bundle
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  install -Dm755 src-tauri/target/release/viewust "$pkgdir/usr/bin/viewust"
+  install -Dm644 "$srcdir/viewust.desktop" "$pkgdir/usr/share/applications/viewust.desktop"
+  for size in 32x32 128x128; do
+    install -Dm644 "src-tauri/icons/$size.png" \
+      "$pkgdir/usr/share/icons/hicolor/$size/apps/viewust.png"
+  done
+}

@@ -1,0 +1,106 @@
+# Builds every Linux package and attaches it to a draft GitHub release.
+#
+#   git tag v0.2.0 && git push origin v0.2.0
+#
+# then review the draft on the Releases page and press publish. A manual run
+# (workflow_dispatch) builds the same artifacts without touching releases.
+#
+# Builders run on Ubuntu 22.04 on purpose: binaries inherit the build machine's
+# glibc floor, so an old base is what makes them run almost everywhere.
+
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bundles:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-22.04
+            arch: x86_64
+          - runner: ubuntu-22.04-arm # free for public repos; drop this entry on a private one
+            arch: aarch64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: System libraries Tauri links against
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev librsvg2-dev \
+            libssl-dev patchelf build-essential curl wget file
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: The same gate as local `pnpm verify`
+        run: pnpm verify
+
+      - name: Build and attach to the draft release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Only a tag push creates/updates the release; a manual run just builds.
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: ${{ startsWith(github.ref, 'refs/tags/') && format('Viewust {0}', github.ref_name) || '' }}
+          releaseDraft: true
+          args: --bundles deb rpm appimage
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bundles-${{ matrix.arch }}
+          path: |
+            src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/bundle/appimage/*.AppImage
+
+  arch-package:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Build chain from pacman
+        run: |
+          pacman -Syu --noconfirm --needed base-devel rust nodejs pnpm \
+            webkit2gtk-4.1 gtk3 librsvg openssl git
+
+      - uses: actions/checkout@v4
+
+      - name: makepkg via the shared recipe
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          case "$VERSION" in v*|main|"") VERSION=0.0.0;; esac
+          VERSION="$VERSION" OUT=dist bash packaging/arch/makepkg-inner.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arch-package
+          path: dist/*.pkg.tar.zst
+
+      - name: Attach to the draft release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: dist/*.pkg.tar.zst

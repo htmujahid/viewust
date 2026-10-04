@@ -33,6 +33,26 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "category": "Utility",
+    "shortDescription": "A live map of everything connected to this computer",
+    "longDescription": "Viewust shows the computer itself: the devices plugged in, the parts inside, live load, and the operating system from boot to user space. Linux only, read-only by design.",
+    "linux": {
+      "deb": {
+        "recommends": [
+          "udisks2",
+          "curl",
+          "alsa-utils",
+          "wireplumber",
+          "xdg-utils",
+          "polkitd",
+          "dmidecode"
+        ],
+        "section": "utils"
+      },
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    }
   }
 }

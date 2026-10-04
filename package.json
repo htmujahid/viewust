@@ -17,7 +17,8 @@
     "format:check": "prettier --check .",
     "rust:verify": "cd src-tauri && cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test",
     "verify": "pnpm format:check && pnpm check && pnpm test && pnpm build && pnpm rust:verify",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "dist": "bash scripts/dist.sh"
   },
   "license": "MIT",
   "dependencies": {

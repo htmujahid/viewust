@@ -135,6 +135,19 @@ store under `lib/features/<name>/`, and add its card to the OS dashboard or `lib
 5. Backend: teach `hardware/usb/classify.rs` to recognise it, and where it sits on the map in
    `features/devices/graph.ts` (`LEFT` / `RIGHT` zones; everything else goes below).
 
+## Building and releasing
+
+- `pnpm tauri dev` runs the real app; `pnpm dev:mock` runs every page in a browser on fixtures.
+- `pnpm dist` builds the `.deb`, `.rpm` and `.AppImage` and gathers them into `dist/`;
+  `WITH_ARCH=1` adds the pacman package (Docker, `packaging/arch/build-arch.sh`), and
+  `SKIP_BUILD=1` only re-collects. Build on the oldest distro you support — binaries inherit the
+  build machine's glibc/WebKitGTK floor. Runtime tools (udisks2, curl, alsa-utils, wireplumber,
+  xdg-utils, polkitd, dmidecode) are declared as Debian Recommends.
+- Releases: push a tag like `v0.2.0` and `.github/workflows/release.yml` builds everything on
+  Ubuntu 22.04 (x86_64 + arm64) plus the Arch package (shared recipe:
+  `packaging/arch/makepkg-inner.sh`) and attaches it all to a draft GitHub release.
+  `packaging/arch/PKGBUILD` is the AUR-ready variant for when the repository is tagged.
+
 ## Checks
 
 `pnpm verify` runs: Prettier, `svelte-check` (with unused-code errors on), Vitest, the production

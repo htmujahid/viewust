@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Viewust
+Comment=A live map of everything connected to this computer
+Exec=viewust
+Icon=viewust
+Terminal=false
+Categories=Utility;System;
