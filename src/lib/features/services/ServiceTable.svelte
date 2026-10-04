@@ -45,59 +45,67 @@
 </script>
 
 <div class="card wrap grow">
-  <table>
-    <thead>
-      <tr>
-        {#each columns as c}
-          <th class:right={c.right} aria-sort={ariaSort(c.key)} title={c.hint}>
-            <button onclick={() => onsort(c.key)}>
-              {c.label}
-              <span class="arrow" class:active={sortKey === c.key}>
-                {sortKey === c.key ? (sortDesc ? "↓" : "↑") : "↕"}
-              </span>
-            </button>
-          </th>
-        {/each}
-      </tr>
-    </thead>
-    <tbody>
-      {#each rows as r (r.unit)}
-        {@const status = statusOf(r)}
-        {@const boot = bootOf(r.enabled)}
-        <tr
-          class:selected={selectedUnit === r.unit}
-          onclick={() => onselect(r.unit)}
-          oncontextmenu={(e) => oncontext(r, e)}
-        >
-          <td class="name">
-            <span class="truncate" title={r.unit}>{r.name}</span>
-            {#if r.description}<small class="truncate muted" title={r.description}
-                >{r.description}</small
-              >{/if}
-          </td>
-          <td><Badge tone={status.tone}>{status.label}</Badge></td>
-          <td><Badge tone={boot.tone}>{boot.label}</Badge></td>
-          <td class="right tabular muted">{r.main_pid ?? "—"}</td>
-          <td class="mem">
-            {#if r.memory !== null}
-              <span class="tabular">{formatBytes(r.memory)}</span>
-              <Meter value={(r.memory / biggest) * 100} tone="accent" height={4} />
-            {:else}
-              <span class="muted">—</span>
-            {/if}
-          </td>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          {#each columns as c}
+            <th class:right={c.right} aria-sort={ariaSort(c.key)} title={c.hint}>
+              <button onclick={() => onsort(c.key)}>
+                {c.label}
+                <span class="arrow" class:active={sortKey === c.key}>
+                  {sortKey === c.key ? (sortDesc ? "↓" : "↑") : "↕"}
+                </span>
+              </button>
+            </th>
+          {/each}
         </tr>
-      {:else}
-        <tr><td colspan="5" class="empty">{emptyText}</td></tr>
-      {/each}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {#each rows as r (r.unit)}
+          {@const status = statusOf(r)}
+          {@const boot = bootOf(r.enabled)}
+          <tr
+            class:selected={selectedUnit === r.unit}
+            onclick={() => onselect(r.unit)}
+            oncontextmenu={(e) => oncontext(r, e)}
+          >
+            <td class="name">
+              <span class="truncate" title={r.unit}>{r.name}</span>
+              {#if r.description}<small class="truncate muted" title={r.description}
+                  >{r.description}</small
+                >{/if}
+            </td>
+            <td><Badge tone={status.tone}>{status.label}</Badge></td>
+            <td><Badge tone={boot.tone}>{boot.label}</Badge></td>
+            <td class="right tabular muted">{r.main_pid ?? "—"}</td>
+            <td class="mem">
+              {#if r.memory !== null}
+                <span class="tabular">{formatBytes(r.memory)}</span>
+                <Meter value={(r.memory / biggest) * 100} tone="accent" height={4} />
+              {:else}
+                <span class="muted">—</span>
+              {/if}
+            </td>
+          </tr>
+        {:else}
+          <tr><td colspan="5" class="empty">{emptyText}</td></tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <style>
   .wrap {
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
     min-height: 160px;
+  }
+  .scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
   }
   table {
     width: 100%;

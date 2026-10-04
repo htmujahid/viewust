@@ -26,6 +26,7 @@ const ART: Record<
   nvme: { box: [0, 0, 140, 44], px: 130 },
   ssd: { box: [0, 0, 120, 90], px: 115 },
   hdd: { box: [0, 0, 140, 100], px: 130 },
+  fan: { box: [0, 0, 110, 110], px: 92 },
   psu: { box: [0, 0, 150, 110], px: 150 },
   nic: { box: [0, 0, 140, 90], px: 115 },
   soundcard: { box: [0, 0, 140, 90], px: 115 },

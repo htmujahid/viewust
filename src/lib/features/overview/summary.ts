@@ -11,6 +11,7 @@ const GROUPS: { key: string; title: string; kinds: string[] }[] = [
   { key: "board", title: "Motherboard", kinds: ["board"] },
   { key: "cpu", title: "Processor", kinds: ["cpu"] },
   { key: "memory", title: "Memory", kinds: ["ram"] },
+  { key: "cooling", title: "Cooling", kinds: ["fan"] },
   { key: "graphics", title: "Graphics", kinds: ["gpu"] },
   { key: "storage", title: "Storage", kinds: ["hdd", "ssd", "nvme", "storage"] },
   { key: "network", title: "Network adapters", kinds: ["nic", "wireless"] },

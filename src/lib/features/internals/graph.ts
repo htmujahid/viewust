@@ -42,6 +42,7 @@ export function buildInternals(
   const gpus = of("gpu");
   const cards = of("nic", "soundcard");
   const drives = of("nvme", "ssd", "hdd");
+  const fans = of("fan");
 
   const size = (c: Component) => artSize(toKind(c.kind));
   const stack = (items: Component[], axis: "width" | "height") =>
@@ -104,6 +105,19 @@ export function buildInternals(
     add(cpu, -cs.width / 2, cpuY);
     if (board) edges.push(edge(cpu.id, "b", board.id, "t", false));
   }
+  // Fans sit on the processor's left, the way the cooler sits on the chip.
+  let fy = cpuY + cs.height / 2 - stack(fans, "height") / 2;
+  for (const f of fans) {
+    const s = size(f);
+    if (cpu) {
+      add(f, -cs.width / 2 - COLUMN_GAP - s.width, fy);
+      edges.push(edge(f.id, "r", cpu.id, "l", false));
+    } else {
+      add(f, left - COLUMN_GAP - s.width, fy);
+    }
+    fy += s.height + GAP;
+  }
+
   let ry = cpuY + cs.height / 2 - stack(ram, "height") / 2;
   for (const m of ram) {
     add(m, cs.width / 2 + COLUMN_GAP, ry);

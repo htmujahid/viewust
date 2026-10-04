@@ -52,50 +52,58 @@
 </script>
 
 <div class="card wrap grow">
-  <table>
-    <thead>
-      <tr>
-        {#each columns as c}
-          <th class:right={c.right} aria-sort={ariaSort(c.key)} title={c.hint}>
-            <button onclick={() => onsort(c.key)}>
-              {c.label}
-              <span class="arrow" class:active={sortKey === c.key}>
-                {sortKey === c.key ? (sortDesc ? "↓" : "↑") : "↕"}
-              </span>
-            </button>
-          </th>
-        {/each}
-      </tr>
-    </thead>
-    <tbody>
-      {#each rows as p (p.pid)}
-        <tr
-          class:selected={selectedPid === p.pid}
-          onclick={() => onselect(p.pid)}
-          oncontextmenu={(e) => oncontext(p, e)}
-        >
-          <td class="name"><span class="truncate" title={p.name}>{p.name}</span></td>
-          <td class="right tabular muted">{p.pid}</td>
-          <td class="muted">{p.user}</td>
-          <td class="right tabular" class:hot={p.cpu >= 50}>{p.cpu.toFixed(1)}%</td>
-          <td class="mem">
-            <span class="tabular">{formatBytes(p.memory)}</span>
-            <Meter value={(p.memory / memoryTotal) * 100 * 8} tone="accent" height={4} />
-          </td>
-          <td class="right tabular muted">{formatBytes(p.virtual_memory)}</td>
-          <td class="right tabular muted">{p.threads}</td>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          {#each columns as c}
+            <th class:right={c.right} aria-sort={ariaSort(c.key)} title={c.hint}>
+              <button onclick={() => onsort(c.key)}>
+                {c.label}
+                <span class="arrow" class:active={sortKey === c.key}>
+                  {sortKey === c.key ? (sortDesc ? "↓" : "↑") : "↕"}
+                </span>
+              </button>
+            </th>
+          {/each}
         </tr>
-      {:else}
-        <tr><td colspan="7" class="empty">{emptyText}</td></tr>
-      {/each}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {#each rows as p (p.pid)}
+          <tr
+            class:selected={selectedPid === p.pid}
+            onclick={() => onselect(p.pid)}
+            oncontextmenu={(e) => oncontext(p, e)}
+          >
+            <td class="name"><span class="truncate" title={p.name}>{p.name}</span></td>
+            <td class="right tabular muted">{p.pid}</td>
+            <td class="muted">{p.user}</td>
+            <td class="right tabular" class:hot={p.cpu >= 50}>{p.cpu.toFixed(1)}%</td>
+            <td class="mem">
+              <span class="tabular">{formatBytes(p.memory)}</span>
+              <Meter value={(p.memory / memoryTotal) * 100 * 8} tone="accent" height={4} />
+            </td>
+            <td class="right tabular muted">{formatBytes(p.virtual_memory)}</td>
+            <td class="right tabular muted">{p.threads}</td>
+          </tr>
+        {:else}
+          <tr><td colspan="7" class="empty">{emptyText}</td></tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <style>
   .wrap {
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
     min-height: 160px;
+  }
+  .scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
   }
   table {
     width: 100%;

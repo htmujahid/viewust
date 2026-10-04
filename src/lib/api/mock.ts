@@ -194,6 +194,14 @@ const components: Component[] = [
   part("sys:cpu", "cpu", "12th Gen Intel(R) Core(TM) i7-12700KF", "12 cores · 20 threads", [
     row("Power and heat", "Sustained power limit (PL1)", "135 W"),
   ]),
+  part("sys:fan:nct6683:1", "fan", "CPU fan", "1180 rpm", [
+    row("Fan", "Speed", "1180 rpm"),
+    row("Fan", "Sensor chip", "nct6683"),
+  ]),
+  part("sys:fan:nct6683:2", "fan", "Fan 2", "820 rpm", [
+    row("Fan", "Speed", "820 rpm"),
+    row("Fan", "Sensor chip", "nct6683"),
+  ]),
   part("sys:ram", "ram", "System memory", "30.7 GiB", [
     row("Memory", "Usable", "30.7 GiB"),
     row("Memory modules", "Status", "Not read yet."),

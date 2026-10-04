@@ -43,47 +43,55 @@
 </script>
 
 <div class="card wrap grow">
-  <table>
-    <thead>
-      <tr>
-        {#each columns as c (c.key)}
-          <th class:right={c.right} aria-sort={ariaSort(c.key)} title={c.hint}>
-            {#if c.sortable === false}
-              <span class="plain">{c.label}</span>
-            {:else}
-              <button onclick={() => onsort(c.key)}>
-                {c.label}
-                <span class="arrow" class:active={sortKey === c.key}>
-                  {sortKey === c.key ? (sortDesc ? "↓" : "↑") : "↕"}
-                </span>
-              </button>
-            {/if}
-          </th>
-        {/each}
-      </tr>
-    </thead>
-    <tbody>
-      {#each rows as row (rowKey(row))}
-        <tr
-          class:selected={selectedKey === rowKey(row)}
-          onclick={() => onselect(rowKey(row))}
-          oncontextmenu={oncontext && ((e) => oncontext(row, e))}
-        >
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
           {#each columns as c (c.key)}
-            <td class:right={c.right}>{@render cell(row, c)}</td>
+            <th class:right={c.right} aria-sort={ariaSort(c.key)} title={c.hint}>
+              {#if c.sortable === false}
+                <span class="plain">{c.label}</span>
+              {:else}
+                <button onclick={() => onsort(c.key)}>
+                  {c.label}
+                  <span class="arrow" class:active={sortKey === c.key}>
+                    {sortKey === c.key ? (sortDesc ? "↓" : "↑") : "↕"}
+                  </span>
+                </button>
+              {/if}
+            </th>
           {/each}
         </tr>
-      {:else}
-        <tr><td colspan={columns.length} class="empty">{emptyText}</td></tr>
-      {/each}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {#each rows as row (rowKey(row))}
+          <tr
+            class:selected={selectedKey === rowKey(row)}
+            onclick={() => onselect(rowKey(row))}
+            oncontextmenu={oncontext && ((e) => oncontext(row, e))}
+          >
+            {#each columns as c (c.key)}
+              <td class:right={c.right}>{@render cell(row, c)}</td>
+            {/each}
+          </tr>
+        {:else}
+          <tr><td colspan={columns.length} class="empty">{emptyText}</td></tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <style>
   .wrap {
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
     min-height: 160px;
+  }
+  .scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
   }
   table {
     width: 100%;

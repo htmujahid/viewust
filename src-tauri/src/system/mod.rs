@@ -2,6 +2,7 @@ mod board;
 pub mod commands;
 mod cpu;
 pub mod deep;
+mod fans;
 mod gpu;
 pub mod memory;
 mod model;
@@ -20,6 +21,7 @@ pub fn collect() -> SystemInfo {
     components.extend(storage::storage());
     components.extend(network::network(&pci));
     components.extend(sound::sound(&pci));
+    components.extend(fans::components(&fans::fans()));
     components.push(power::power());
     SystemInfo {
         computer_name: sysinfo::System::host_name().unwrap_or_else(|| "This computer".into()),

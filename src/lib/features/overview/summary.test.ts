@@ -14,6 +14,7 @@ describe("overview summary", () => {
       "board",
       "cpu",
       "memory",
+      "cooling",
       "graphics",
       "storage",
       "network",

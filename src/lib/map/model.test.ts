@@ -17,6 +17,7 @@ describe("watching a device live", () => {
       expect(monitorUrl(net), net).toBe("/monitor/network");
     }
     expect(monitorUrl("psu")).toBe("/monitor/power");
+    expect(monitorUrl("fan")).toBe("/monitor/thermal");
     for (const sound of ["audio", "soundcard", "microphone"] as Kind[]) {
       expect(monitorUrl(sound), sound).toBe("/monitor/audio");
     }

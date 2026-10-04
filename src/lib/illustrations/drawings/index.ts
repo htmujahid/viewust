@@ -23,6 +23,7 @@ import Gpu from "./Gpu.svelte";
 import Nvme from "./Nvme.svelte";
 import Ssd from "./Ssd.svelte";
 import Hdd from "./Hdd.svelte";
+import Fan from "./Fan.svelte";
 import Psu from "./Psu.svelte";
 import Nic from "./Nic.svelte";
 import SoundCard from "./SoundCard.svelte";
@@ -52,6 +53,7 @@ export const drawings: Record<Kind, Component> = {
   nvme: Nvme,
   ssd: Ssd,
   hdd: Hdd,
+  fan: Fan,
   psu: Psu,
   nic: Nic,
   soundcard: SoundCard,

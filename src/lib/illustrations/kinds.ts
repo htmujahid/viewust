@@ -21,6 +21,7 @@ export type Kind =
   | "nvme"
   | "ssd"
   | "hdd"
+  | "fan"
   | "psu"
   | "nic"
   | "soundcard"

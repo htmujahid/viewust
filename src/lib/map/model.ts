@@ -54,6 +54,7 @@ export const KIND_LABELS: Record<Kind, string> = {
   nvme: "NVMe drive",
   ssd: "Solid-state drive",
   hdd: "Hard disk",
+  fan: "Fan",
   psu: "Power supply",
   nic: "Network adapter",
   soundcard: "Sound card",
@@ -89,6 +90,8 @@ export function monitorUrl(kind: Kind): string | null {
     case "internet":
     case "wireless":
       return "/monitor/network";
+    case "fan":
+      return "/monitor/thermal";
     case "psu":
       return "/monitor/power";
     case "audio":

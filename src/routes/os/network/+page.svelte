@@ -171,9 +171,11 @@
     overflow-x: auto;
   }
   .table :global(.wrap) {
-    overflow: visible;
     min-height: 0;
     border: 0;
+  }
+  .table :global(.scroll) {
+    overflow: visible;
   }
   .muted {
     color: var(--text-2);
