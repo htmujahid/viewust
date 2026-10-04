@@ -67,6 +67,39 @@ export function infoRows(info: NodeInfo): Detail[] {
     : info.details;
 }
 
+/** Where to watch a device of this kind live, when the monitor has a page for it. */
+export function monitorUrl(kind: Kind): string | null {
+  switch (kind) {
+    case "computer":
+      return "/monitor";
+    case "cpu":
+      return "/monitor/cpu";
+    case "ram":
+      return "/monitor/memory";
+    case "gpu":
+    case "monitor":
+      return "/monitor/gpu";
+    case "nvme":
+    case "ssd":
+    case "hdd":
+    case "storage":
+      return "/monitor/storage";
+    case "nic":
+    case "router":
+    case "internet":
+    case "wireless":
+      return "/monitor/network";
+    case "psu":
+      return "/monitor/power";
+    case "audio":
+    case "soundcard":
+    case "microphone":
+      return "/monitor/audio";
+    default:
+      return null;
+  }
+}
+
 export const deviceUrl = (id: string) =>
   id === "computer" ? "/system" : `/device/${encodeURIComponent(id)}`;
 
