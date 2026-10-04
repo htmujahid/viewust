@@ -2,6 +2,7 @@ import type {
   Accounts,
   Cgroups,
   Connections,
+  Containers,
   DiskDevices,
   EnvVar,
   Filesystems,
@@ -11,6 +12,7 @@ import type {
   OsLogins,
   OsLogs,
   OsNetwork,
+  Vms,
   OsSecurity,
   OsSummary,
   Packages,
@@ -186,6 +188,34 @@ export function loginFacts(l: OsLogins | null): Fact[] {
   ];
 }
 
+export function containerFacts(c: Containers | null): Fact[] {
+  if (!c) return [];
+  if (c.runtime === null) return [fact("Runtime", "None installed", "warn")];
+  return [
+    fact("Runtime", c.runtime),
+    ...(c.note
+      ? [
+          fact("State", "Not answering", "warn"),
+          fact("To browse it", "Start its service, or join its group"),
+        ]
+      : [
+          fact("Running", String(c.running), c.running ? "ok" : undefined),
+          fact("Stopped", String(c.containers.length - c.running)),
+          fact("Images", String(c.images.length)),
+        ]),
+  ];
+}
+
+export function vmFacts(v: Vms | null): Fact[] {
+  if (!v) return [];
+  if (v.managers.length === 0) return [fact("Manager", "None installed", "warn")];
+  return [
+    fact("Managers", v.managers.join(", ")),
+    fact("Running", String(v.running), v.running ? "ok" : undefined),
+    fact("Defined", String(v.vms.length)),
+  ];
+}
+
 export function userFacts(a: Accounts | null): Fact[] {
   if (!a) return [];
   const people = a.users.filter((u) => u.kind === "regular").length;
@@ -223,17 +253,28 @@ export function securityFacts(s: OsSecurity | null): Fact[] {
   ];
 }
 
-export function packageFacts(p: Packages | null): Fact[] {
+export function packageFacts(p: Packages | null, s: OsSummary | null = null): Fact[] {
   if (!p) return [];
   if (p.manager === null) return [fact("Package manager", "None found", "warn")];
-  return [fact("Manager", p.manager), fact("Installed", String(p.packages.length))];
+  const software = (label: string) =>
+    s?.details.find((d) => d.section === "Software" && d.label === label)?.value;
+  return [
+    fact("Manager", p.manager),
+    fact("Installed", String(p.packages.length)),
+    ...(software("Snap packages") ? [fact("Snap packages", software("Snap packages")!)] : []),
+    ...(software("Flatpak apps") ? [fact("Flatpak apps", software("Flatpak apps")!)] : []),
+  ];
 }
 
 export function envFacts(e: EnvVar[] | null): Fact[] {
   if (!e) return [];
   const hidden = e.filter((v) => v.hidden).length;
+  const value = (key: string) => e.find((v) => v.key === key && !v.hidden)?.value;
+  const path = value("PATH");
   return [
     fact("Variables", String(e.length)),
-    ...(hidden ? [fact("Hidden secrets", String(hidden))] : []),
+    fact("Hidden secrets", String(hidden), hidden ? undefined : "ok"),
+    ...(path ? [fact("PATH entries", String(path.split(":").filter(Boolean).length))] : []),
+    ...(value("SHELL") ? [fact("Shell", value("SHELL")!)] : []),
   ];
 }

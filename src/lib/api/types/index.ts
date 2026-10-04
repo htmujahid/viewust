@@ -1,6 +1,7 @@
 export type * from "./common";
 export type * from "./connection";
 export type * from "./disk-usage";
+export type * from "./health";
 export type * from "./hardware";
 export type * from "./internals";
 export type * from "./processes";

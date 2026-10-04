@@ -15,6 +15,21 @@ class Theme {
     this.mode = load();
   }
 
+  /** What the screen actually shows right now, with "system" resolved. */
+  get effective(): "light" | "dark" {
+    if (this.mode !== "system") return this.mode;
+    try {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    } catch {
+      return "dark";
+    }
+  }
+
+  /** Flips to the opposite of whatever is on screen. */
+  toggle() {
+    this.set(this.effective === "dark" ? "light" : "dark");
+  }
+
   set(mode: ThemeMode) {
     this.mode = mode;
     const root = document.documentElement;

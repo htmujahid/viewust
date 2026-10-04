@@ -3,12 +3,15 @@ import type {
   Accounts,
   Cgroups,
   Connections,
+  Containers,
   DiskDevices,
   Filesystems,
   Namespaces,
   OsLogins,
   OsLogs,
   OsNetwork,
+  VirtOverview,
+  Vms,
   ServiceSnapshot,
   Snapshot,
 } from "$lib/api/types";
@@ -28,6 +31,9 @@ class OsOverview {
   readonly connections = new Loaded<Connections>(() => api.osConnections());
   readonly logs = new Loaded<OsLogs>(() => api.osLogs());
   readonly logins = new Loaded<OsLogins>(() => api.osLogins());
+  readonly containers = new Loaded<Containers>(() => api.osContainers());
+  readonly vms = new Loaded<Vms>(() => api.osVms());
+  readonly virt = new Loaded<VirtOverview>(() => api.virtOverview());
 
   readonly all = [
     this.processes,
@@ -41,6 +47,9 @@ class OsOverview {
     this.connections,
     this.logs,
     this.logins,
+    this.containers,
+    this.vms,
+    this.virt,
   ];
 
   ensure = () => this.all.forEach((l) => l.ensure());

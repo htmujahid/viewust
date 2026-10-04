@@ -21,6 +21,7 @@ feature/
 
 | Module       | Responsibility                                                                                      |
 | ------------ | --------------------------------------------------------------------------------------------------- |
+| `health`     | the one verdict page: root-free checks across services, logs, disks, memory, heat, kernel           |
 | `hardware`   | external devices: USB (`usb/`), audio jacks, monitors (`edid.rs`)                                   |
 | `connection` | the route to the internet: wired/Wi-Fi, gateway, DNS, signal                                        |
 | `system`     | internal parts: board, CPU, memory, drives, GPU, network, sound, power                              |

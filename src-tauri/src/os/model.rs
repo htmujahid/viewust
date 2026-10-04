@@ -111,6 +111,78 @@ pub struct OsLogins {
     pub(crate) sessions: Vec<LoginSession>,
 }
 
+#[derive(Serialize, Debug, PartialEq)]
+pub struct ContainerRow {
+    pub(crate) name: String,
+    pub(crate) image: String,
+    pub(crate) state: String,
+    pub(crate) status: String,
+}
+
+#[derive(Serialize, Debug, PartialEq)]
+pub struct ImageRow {
+    pub(crate) name: String,
+    pub(crate) size: String,
+}
+
+#[derive(Serialize)]
+pub struct Containers {
+    /// "docker" or "podman"; none when neither is installed
+    pub(crate) runtime: Option<&'static str>,
+    pub(crate) note: Option<String>,
+    pub(crate) running: usize,
+    pub(crate) containers: Vec<ContainerRow>,
+    pub(crate) images: Vec<ImageRow>,
+}
+
+#[derive(Serialize, Debug, PartialEq)]
+pub struct VmRow {
+    pub(crate) name: String,
+    pub(crate) state: String,
+    pub(crate) manager: &'static str,
+}
+
+#[derive(Serialize)]
+pub struct Vms {
+    pub(crate) managers: Vec<&'static str>,
+    pub(crate) running: usize,
+    pub(crate) vms: Vec<VmRow>,
+    pub(crate) note: Option<String>,
+}
+
+#[derive(Serialize, Debug, PartialEq)]
+pub struct DockerDf {
+    pub(crate) kind: String,
+    pub(crate) count: String,
+    pub(crate) size: String,
+    pub(crate) reclaimable: String,
+}
+
+#[derive(Serialize, Debug, PartialEq)]
+pub struct VirtSlice {
+    pub(crate) name: String,
+    pub(crate) groups: usize,
+    pub(crate) pids: Option<u64>,
+    pub(crate) memory: Option<u64>,
+}
+
+#[derive(Serialize)]
+pub struct VirtOverview {
+    /// "Intel VT-x" or "AMD-V"
+    pub(crate) cpu: Option<&'static str>,
+    pub(crate) kvm_device: bool,
+    pub(crate) kvm_module: Option<String>,
+    pub(crate) nested: Option<bool>,
+    pub(crate) inside_vm: Option<String>,
+    pub(crate) inside_container: Option<String>,
+    /// Overlay filesystems mounted right now: running containers' roots
+    pub(crate) overlay_mounts: usize,
+    /// Whether the kernel passes packets on, which guest NAT depends on
+    pub(crate) ip_forward: bool,
+    pub(crate) docker_df: Vec<DockerDf>,
+    pub(crate) slices: Vec<VirtSlice>,
+}
+
 #[derive(Serialize)]
 pub struct OsMemory {
     pub(crate) total: u64,

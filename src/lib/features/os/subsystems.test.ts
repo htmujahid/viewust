@@ -5,6 +5,7 @@ import { fixtures } from "$lib/api/mock";
 import {
   bootloaderFact,
   connectionFacts,
+  containerFacts,
   groupFacts,
   logFacts,
   loginFacts,
@@ -17,6 +18,7 @@ import {
   serviceFacts,
   summaryFacts,
   userFacts,
+  vmFacts,
 } from "./subsystems";
 
 const by = (facts: { label: string; value: string; tone?: string }[], label: string) =>
@@ -111,6 +113,17 @@ describe("subsystem facts", () => {
     expect(by(logins, "From elsewhere")).toMatchObject({ value: "1", tone: "warn" });
     expect(by(logins, "Users")?.value).toBe("2");
     expect(by(connectionFacts(fixtures.osConnectionsMock()), "Established")?.value).toBe("3");
+  });
+
+  it("tell a missing runtime from a sleeping one", () => {
+    expect(
+      containerFacts({ runtime: null, note: "x", running: 0, containers: [], images: [] })[0].tone,
+    ).toBe("warn");
+    expect(by(containerFacts(fixtures.osContainersMock()), "Running")?.value).toBe("2");
+    const asleep = { ...fixtures.osContainersMock(), note: "not answering" };
+    expect(by(containerFacts(asleep), "State")?.tone).toBe("warn");
+    expect(by(vmFacts(fixtures.osVmsMock()), "Defined")?.value).toBe("2");
+    expect(vmFacts({ managers: [], running: 0, vms: [], note: "x" })[0].tone).toBe("warn");
   });
 
   it("cope with a machine without a package manager", () => {

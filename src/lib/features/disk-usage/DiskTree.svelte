@@ -226,7 +226,6 @@
 
 <style>
   .tree {
-    margin: 0;
     outline: 0;
   }
   .head,

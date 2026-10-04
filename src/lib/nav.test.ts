@@ -4,7 +4,14 @@ import { activeEntry, SIDEBAR } from "./nav";
 
 describe("navigation", () => {
   it("puts the hardware pages and the operating system in the sidebar", () => {
-    expect(SIDEBAR.map((e) => e.href)).toEqual(["/devices", "/system", "/monitor", "/os"]);
+    expect(SIDEBAR.map((e) => e.href)).toEqual([
+      "/devices",
+      "/system",
+      "/monitor",
+      "/os",
+      "/health",
+      "/virtualization",
+    ]);
   });
 
   it("lights the operating system anywhere inside it", () => {
@@ -22,6 +29,14 @@ describe("navigation", () => {
     ]) {
       expect(activeEntry(path), path).toBe("/os");
     }
+  });
+
+  it("lights health and virtualization on their own pages", () => {
+    expect(activeEntry("/health")).toBe("/health");
+    expect(activeEntry("/healthy-snacks")).toBeNull();
+    expect(activeEntry("/virtualization")).toBe("/virtualization");
+    expect(activeEntry("/virtualization/containers")).toBe("/virtualization");
+    expect(activeEntry("/virtualization/vms")).toBe("/virtualization");
   });
 
   it("lights the right hardware entry on nested routes", () => {

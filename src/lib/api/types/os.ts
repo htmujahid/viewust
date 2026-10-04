@@ -147,3 +147,62 @@ export interface OsLogins {
   available: boolean;
   sessions: LoginSession[];
 }
+
+export interface ContainerRow {
+  name: string;
+  image: string;
+  state: string;
+  status: string;
+}
+
+export interface Containers {
+  /** "docker" or "podman"; null when neither is installed */
+  runtime: string | null;
+  note: string | null;
+  running: number;
+  containers: ContainerRow[];
+  images: { name: string; size: string }[];
+}
+
+export interface VmRow {
+  name: string;
+  state: string;
+  manager: string;
+}
+
+export interface Vms {
+  managers: string[];
+  running: number;
+  vms: VmRow[];
+  note: string | null;
+}
+
+export interface DockerDf {
+  kind: string;
+  count: string;
+  size: string;
+  reclaimable: string;
+}
+
+export interface VirtSlice {
+  name: string;
+  groups: number;
+  pids: number | null;
+  memory: number | null;
+}
+
+export interface VirtOverview {
+  /** "Intel VT-x" or "AMD-V" */
+  cpu: string | null;
+  kvm_device: boolean;
+  kvm_module: string | null;
+  nested: boolean | null;
+  inside_vm: string | null;
+  inside_container: string | null;
+  /** Overlay filesystems mounted right now: running containers' roots */
+  overlay_mounts: number;
+  /** Whether the kernel passes packets on, which guest NAT depends on */
+  ip_forward: boolean;
+  docker_df: DockerDf[];
+  slices: VirtSlice[];
+}

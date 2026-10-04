@@ -1,6 +1,7 @@
 import { mockIPC } from "@tauri-apps/api/mocks";
 
 import type {
+  AudioSample,
   Component,
   Connection,
   Detail,
@@ -9,10 +10,14 @@ import type {
   ModuleInfo,
   Cgroups,
   Connections,
+  Containers,
+  HealthReport,
   OsMemory,
   OsLogins,
   OsLogs,
   OsNetwork,
+  VirtOverview,
+  Vms,
   OsSecurity,
   OsSummary,
   PackageRow,
@@ -30,6 +35,7 @@ import type {
   Namespaces,
   ProcessDetail,
   Sample,
+  SpeedTest,
   ServiceDetail,
   ServiceSnapshot,
   Snapshot,
@@ -1013,6 +1019,140 @@ const osEnvironment = (): EnvVar[] =>
     }))
     .sort((a, b) => a.key.localeCompare(b.key));
 
+const healthReport = (): HealthReport => ({
+  problems: 1,
+  warnings: 2,
+  fine: 8,
+  checks: [
+    { severity: "danger", title: "Services", detail: "1 service has failed", link: "/services" },
+    { severity: "warn", title: "Disk space", detail: "/home is 87% full", link: "/os/filesystems" },
+    {
+      severity: "warn",
+      title: "Updates",
+      detail:
+        "Kernel 7.0.0-34-generic is installed but 7.0.0-31-generic is running; restart to use it",
+      link: "/os/boot",
+    },
+    {
+      severity: "ok",
+      title: "System log",
+      detail: "3 errors in the journal this boot",
+      link: "/os/logs",
+    },
+    { severity: "ok", title: "Memory", detail: "70% available · swap 0% used", link: "/os/memory" },
+    {
+      severity: "ok",
+      title: "Processor pressure",
+      detail: "No real waiting (0.0%)",
+      link: "/monitor/cpu",
+    },
+    {
+      severity: "ok",
+      title: "Memory pressure",
+      detail: "No real waiting (0.0%)",
+      link: "/monitor/memory",
+    },
+    { severity: "ok", title: "Disk pressure", detail: "No real waiting (0.2%)", link: "/monitor" },
+    {
+      severity: "ok",
+      title: "Temperatures",
+      detail: "Hottest sensor is nvme Composite at 52 °C",
+      link: "/monitor",
+    },
+    { severity: "ok", title: "Kernel", detail: "No kernel errors or warnings", link: "/os/kernel" },
+    { severity: "ok", title: "Battery", detail: "Holds 91% of its design capacity", link: null },
+  ],
+});
+
+const osContainersMock = (): Containers => ({
+  runtime: "docker",
+  note: null,
+  running: 2,
+  containers: [
+    { name: "web", image: "nginx:1.27", state: "running", status: "Up 2 hours" },
+    { name: "db", image: "postgres:16", state: "running", status: "Up 2 hours (healthy)" },
+    { name: "jobs", image: "viewust/worker:dev", state: "exited", status: "Exited (0) 3 days ago" },
+  ],
+  images: [
+    { name: "nginx:1.27", size: "67.7MB" },
+    { name: "postgres:16", size: "432MB" },
+    { name: "viewust/worker:dev", size: "1.21GB" },
+    { name: "ubuntu:24.04", size: "78.1MB" },
+  ],
+});
+
+const osVmsMock = (): Vms => ({
+  managers: ["libvirt", "systemd-machined"],
+  running: 1,
+  vms: [
+    { name: "win11-work", state: "running", manager: "libvirt" },
+    { name: "fedora-test", state: "shut off", manager: "libvirt" },
+  ],
+  note: null,
+});
+
+const virtOverviewMock = (): VirtOverview => ({
+  cpu: "Intel VT-x",
+  kvm_device: true,
+  kvm_module: "kvm_intel",
+  nested: true,
+  inside_vm: null,
+  inside_container: null,
+  overlay_mounts: 2,
+  ip_forward: true,
+  docker_df: [
+    { kind: "Images", count: "4", size: "1.809GB", reclaimable: "1.731GB (95%)" },
+    { kind: "Containers", count: "3", size: "24.5MB", reclaimable: "0B (0%)" },
+    { kind: "Local Volumes", count: "2", size: "310MB", reclaimable: "0B (0%)" },
+  ],
+  slices: [
+    { name: "machine.slice guests", groups: 1, pids: 142, memory: 4.2 * GB },
+    { name: "docker containers", groups: 2, pids: 23, memory: 0.4 * GB },
+  ],
+});
+
+const audioSample = (tick: number): AudioSample => ({
+  cards: [
+    { index: 0, name: "HDA Intel PCH", driver: "HDA-Intel" },
+    { index: 1, name: "HD Pro Webcam C920", driver: "USB-Audio" },
+    { index: 2, name: "HDA NVidia", driver: "HDA-Intel" },
+  ],
+  sinks: [
+    { name: "Built-in Audio Analog Stereo", volume: 64, muted: false, default: true },
+    { name: "GP106 Digital Stereo (HDMI)", volume: 98, muted: true, default: false },
+  ],
+  sources: [
+    { name: "HD Pro Webcam C920 Analog Stereo", volume: 88, muted: false, default: true },
+    { name: "Built-in Audio Analog Stereo", volume: 100, muted: false, default: false },
+  ],
+  streams: [
+    {
+      card: "HDA Intel PCH",
+      name: "ALC897 Analog",
+      direction: "playback",
+      rate: 48000,
+      channels: 2,
+      format: "S32_LE",
+      program: "pipewire",
+    },
+    ...(tick % 6 < 3
+      ? [
+          {
+            card: "HD Pro Webcam C920",
+            name: "USB Audio",
+            direction: "capture",
+            rate: 32000,
+            channels: 2,
+            format: "S16_LE",
+            program: "firefox",
+          },
+        ]
+      : []),
+  ],
+  playing: 1,
+  capturing: tick % 6 < 3 ? 1 : 0,
+});
+
 const serviceDefs: [string, string, string, string, string, number | null][] = [
   ["NetworkManager", "Network Manager", "active", "running", "enabled", 9.7e6],
   ["ssh", "OpenBSD Secure Shell server", "active", "running", "enabled", 5.1e6],
@@ -1279,6 +1419,11 @@ export const fixtures = {
   osConnectionsMock,
   osLogsMock,
   osLoginsMock,
+  healthReport,
+  osContainersMock,
+  osVmsMock,
+  virtOverviewMock,
+  audioSample,
   diskDevices,
   directoryUsage,
   serviceList,
@@ -1343,6 +1488,14 @@ export function installMockBackend(): void {
         return osLogsMock();
       case "os_logins":
         return osLoginsMock();
+      case "health_report":
+        return healthReport();
+      case "os_containers":
+        return osContainersMock();
+      case "os_vms":
+        return osVmsMock();
+      case "virt_overview":
+        return virtOverviewMock();
       case "disk_devices":
         return diskDevices();
       case "directory_usage":
@@ -1367,6 +1520,21 @@ export function installMockBackend(): void {
         return serviceDetail(String(args.unit));
       case "monitor_sample":
         return sample(++tick);
+      case "audio_sample":
+        return audioSample(tick);
+      case "speed_test":
+        return new Promise<SpeedTest>((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                latency_ms: 18.4,
+                download_bps: 11.6e6,
+                upload_bps: 2.4e6,
+                server: "speed.cloudflare.com",
+              }),
+            2500,
+          ),
+        );
       default:
         throw new Error(`mock backend: unknown command "${command}"`);
     }

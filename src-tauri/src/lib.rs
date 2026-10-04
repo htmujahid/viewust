@@ -4,6 +4,7 @@ mod connection;
 mod disk_usage;
 mod error;
 mod hardware;
+mod health;
 mod monitor;
 mod os;
 mod processes;
@@ -31,6 +32,7 @@ pub fn run() {
         .manage(disk_usage::UsageService::default())
         .invoke_handler(tauri::generate_handler![
             hardware::commands::hardware_info,
+            health::commands::health_report,
             report::commands::device_report,
             system::commands::system_info,
             system::commands::read_memory_modules,
@@ -48,6 +50,8 @@ pub fn run() {
             services::commands::service_detail,
             services::commands::service_action,
             monitor::commands::monitor_sample,
+            monitor::commands::audio_sample,
+            monitor::commands::speed_test,
             os::commands::os_summary,
             os::commands::kernel_modules,
             os::commands::kernel_module_info,
@@ -60,6 +64,9 @@ pub fn run() {
             os::commands::os_connections,
             os::commands::os_logs,
             os::commands::os_logins,
+            os::commands::os_containers,
+            os::commands::os_vms,
+            os::commands::virt_overview,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

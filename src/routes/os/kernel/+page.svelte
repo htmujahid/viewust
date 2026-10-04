@@ -155,7 +155,7 @@
 
 <style>
   .facts {
-    margin: 0 0 var(--s-5);
+    margin-bottom: var(--s-5);
     padding: var(--s-4) var(--s-5);
   }
   .facts h2 {

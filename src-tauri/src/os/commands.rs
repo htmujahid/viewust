@@ -1,9 +1,10 @@
 use super::model::{
-    Cgroups, Connections, EnvVar, KernelModule, ModuleInfo, OsLogins, OsLogs, OsMemory, OsNetwork,
-    OsSecurity, OsSummary, Packages,
+    Cgroups, Connections, Containers, EnvVar, KernelModule, ModuleInfo, OsLogins, OsLogs, OsMemory,
+    OsNetwork, OsSecurity, OsSummary, Packages, VirtOverview, Vms,
 };
 use super::{
-    cgroups, environment, info, logins, logs, memory, modules, network, packages, security,
+    cgroups, containers, environment, info, logins, logs, memory, modules, network, packages,
+    security, virt, vms,
 };
 use crate::common::blocking;
 use crate::error::Result;
@@ -66,4 +67,19 @@ pub async fn os_logs() -> Result<OsLogs> {
 #[tauri::command]
 pub async fn os_logins() -> Result<OsLogins> {
     blocking::run(logins::snapshot).await
+}
+
+#[tauri::command]
+pub async fn os_containers() -> Result<Containers> {
+    blocking::run(containers::snapshot).await
+}
+
+#[tauri::command]
+pub async fn os_vms() -> Result<Vms> {
+    blocking::run(vms::snapshot).await
+}
+
+#[tauri::command]
+pub async fn virt_overview() -> Result<VirtOverview> {
+    blocking::run(virt::overview).await
 }

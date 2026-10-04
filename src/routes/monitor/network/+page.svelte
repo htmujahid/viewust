@@ -1,5 +1,6 @@
 <script lang="ts">
   import MonitorCard from "$lib/features/monitor/MonitorCard.svelte";
+  import SpeedTestCard from "$lib/features/monitor/SpeedTestCard.svelte";
   import MonitorGrid from "$lib/features/monitor/MonitorGrid.svelte";
   import Facts from "$lib/components/ui/Facts.svelte";
   import LineChart from "$lib/components/charts/LineChart.svelte";
@@ -67,6 +68,8 @@
     <section class="card empty"><p class="m-muted">No active network adapters.</p></section>
   {/each}
 </MonitorGrid>
+
+<SpeedTestCard />
 
 <style>
   .empty {

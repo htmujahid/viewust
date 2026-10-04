@@ -167,7 +167,7 @@
 
 <style>
   .table {
-    margin: 0 0 var(--s-5);
+    margin-bottom: var(--s-5);
     overflow-x: auto;
   }
   .table :global(.wrap) {

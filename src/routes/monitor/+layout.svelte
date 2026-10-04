@@ -25,6 +25,7 @@
     ...(hasThermal(monitor.latest) ? [{ href: "/monitor/thermal", label: "Thermal" }] : []),
     ...(hasPower(monitor.latest) ? [{ href: "/monitor/power", label: "Power" }] : []),
     { href: "/monitor/network", label: "Network" },
+    { href: "/monitor/audio", label: "Audio" },
   ]);
 
   function onkeydown(e: KeyboardEvent) {

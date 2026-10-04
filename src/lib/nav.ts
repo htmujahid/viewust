@@ -21,6 +21,14 @@ export const SIDEBAR: SidebarEntry[] = [
     code: "04",
     match: ["/os", "/processes", "/services", "/disk-usage", "/accounts"],
   },
+  { href: "/health", label: "Health", icon: "sensor", code: "05", match: ["/health"] },
+  {
+    href: "/virtualization",
+    label: "Virtualization",
+    icon: "box",
+    code: "06",
+    match: ["/virtualization"],
+  },
 ];
 
 /** Which sidebar entry a path belongs to, or null for the overview. */

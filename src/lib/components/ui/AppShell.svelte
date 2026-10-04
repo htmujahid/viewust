@@ -56,7 +56,7 @@
         </a>
       {/each}
     </nav>
-    <div class="appearance"><ThemeToggle vertical /></div>
+    <div class="appearance"><ThemeToggle /></div>
   </aside>
   <main>{@render children()}</main>
 </div>

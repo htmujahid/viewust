@@ -1,10 +1,13 @@
 import { invoke } from "@tauri-apps/api/core";
 
 import type {
+  AudioSample,
   Cgroups,
   Connections,
+  Containers,
   Detail,
   EnvVar,
+  HealthReport,
   DirectoryUsage,
   DiskDevices,
   Filesystems,
@@ -27,6 +30,9 @@ import type {
   ServiceSnapshot,
   Sample,
   Signal,
+  SpeedTest,
+  VirtOverview,
+  Vms,
   Snapshot,
   SystemInfo,
 } from "$lib/api/types";
@@ -87,4 +93,12 @@ export const api = {
   osLogins: () => call<OsLogins>("os_logins"),
 
   monitorSample: () => call<Sample>("monitor_sample"),
+  audioSample: () => call<AudioSample>("audio_sample"),
+  /** Measures the line by really using it; takes about half a minute. */
+  speedTest: () => call<SpeedTest>("speed_test"),
+
+  healthReport: () => call<HealthReport>("health_report"),
+  osContainers: () => call<Containers>("os_containers"),
+  osVms: () => call<Vms>("os_vms"),
+  virtOverview: () => call<VirtOverview>("virt_overview"),
 } as const;

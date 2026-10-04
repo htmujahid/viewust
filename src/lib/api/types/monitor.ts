@@ -108,3 +108,45 @@ export interface Sample {
   thermal: Thermal;
   power: Power;
 }
+
+export interface AudioDevice {
+  name: string;
+  volume: number;
+  muted: boolean;
+  default: boolean;
+}
+
+export interface AudioStream {
+  card: string;
+  name: string;
+  /** "playback" or "capture" */
+  direction: string;
+  rate: number | null;
+  channels: number | null;
+  format: string | null;
+  /** The program that owns the stream, when the kernel says */
+  program: string | null;
+}
+
+export interface AudioCard {
+  index: number;
+  name: string;
+  driver: string;
+}
+
+export interface AudioSample {
+  cards: AudioCard[];
+  sinks: AudioDevice[];
+  sources: AudioDevice[];
+  streams: AudioStream[];
+  playing: number;
+  capturing: number;
+}
+
+export interface SpeedTest {
+  /** Time to first byte of a tiny request, the best of three */
+  latency_ms: number | null;
+  download_bps: number | null;
+  upload_bps: number | null;
+  server: string;
+}

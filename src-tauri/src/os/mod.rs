@@ -1,5 +1,6 @@
 mod cgroups;
 pub mod commands;
+mod containers;
 mod environment;
 mod info;
 mod logins;
@@ -11,3 +12,5 @@ mod network;
 mod packages;
 mod release;
 mod security;
+mod virt;
+mod vms;

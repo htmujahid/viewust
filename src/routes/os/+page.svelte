@@ -273,7 +273,7 @@
           icon: "box",
           title: "Packages",
           text: "Every installed package and the manager behind it",
-          facts: packageFacts(os.packages.data),
+          facts: packageFacts(os.packages.data, summary),
           loading: os.packages.loading,
           error: os.packages.error,
         },

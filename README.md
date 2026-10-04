@@ -6,12 +6,17 @@ doing right now.
 ## What it shows
 
 - **Overview** – the computer at a glance: identity, health, live load, and a summary of every part.
+- **Health** – one verdict across the whole machine: failed services, journal errors, full disks,
+  memory and pressure, temperatures against their limits, kernel warnings, a pending kernel
+  restart, battery wear — each linking to where to look closer.
 
 **Hardware** – the physical computer:
 
 - **Devices** – external devices (keyboards, mice, monitors, drives…) and the route to the internet.
 - **System** – the internal parts: motherboard, processor, memory, drives, graphics, power.
-- **Live monitor** – real-time processor, memory, storage, graphics, thermal, power and network charts.
+- **Live monitor** – real-time processor, memory, storage, graphics, thermal, power and network
+  charts, plus a live audio view: what is playing or recording (and by which program), at what
+  rate and format, every output and input with volume and mute, and the sound cards behind them.
 
 **Operating system** – what it runs:
 
@@ -37,6 +42,10 @@ doing right now.
   computer is talking to, address by address.
 - **Logs** – the journal's size and boots kept, and every error-level message of this boot.
 - **Logins** – the signed-in sessions: user, kind, where from (remote ones flagged), since when.
+- **Virtualization** (top level) – the machine from the guests' side: whether the processor and
+  kernel can host (VT-x/AMD-V, /dev/kvm, nested), whether this system is itself a guest, the
+  docker/podman containers and libvirt/machined VMs, and what guests take in storage (overlay
+  roots, runtime disk use), control groups, namespaces and virtual networks.
 - **Accounts** – users and groups.
 
 The sidebar carries the three hardware pages and the Operating system; processes, services, disk
