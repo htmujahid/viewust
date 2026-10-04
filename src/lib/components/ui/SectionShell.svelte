@@ -11,19 +11,22 @@
     label,
     actions,
     panel,
+    scroll = false,
     children,
   }: {
     tabs: readonly { href: string; label: string }[];
     label: string;
     actions?: Snippet;
     panel?: Snippet;
+    /** Let the whole page scroll, for content made of several blocks rather than one table. */
+    scroll?: boolean;
     children: Snippet;
   } = $props();
 </script>
 
 <div class="layout">
   <div class="content">
-    <Page fill>
+    <Page fill={!scroll}>
       <div class="bar">
         <TabNav {tabs} current={page.url.pathname} {label} />
         {#if actions}<div class="actions">{@render actions()}</div>{/if}

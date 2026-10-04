@@ -10,10 +10,16 @@ doing right now.
 - **System** – the internal parts: motherboard, processor, memory, drives, graphics, power.
 - **Live monitor** – real-time processor, memory, storage, graphics, thermal, power and network charts.
 - **Processes** – running programs and their memory use, plus Linux namespaces.
-- **Filesystems** – every mounted filesystem grouped by storage system (internal disks, removable,
-  network, memory, containers…), with space, type and the device stack beneath it.
+- **Disk usage** – every connected drive (internal, USB, optical, network shares) as a tree: drive →
+  partitions (through encrypted or LVM layers) → folders, to see what is taking the space. Drives
+  that aren't mounted are listed too, with a Mount button so you can browse them.
 - **Services** – systemd services, their state and recent logs.
 - **Accounts** – users and groups.
+- **Operating system** – the distribution and version, kernel, boot and firmware (UEFI, Secure Boot,
+  startup time), desktop session, language and time, security (AppArmor/SELinux, lockdown),
+  virtualization and software, plus tabs for loaded kernel modules (with their settings), every
+  installed package, and the session's environment variables (secrets are never loaded). Links to
+  all the related pages are on its overview.
 
 Click anything for a summary; double-click a device or part for its full technical page.
 
@@ -37,8 +43,10 @@ Right-click anything in a table or on the map for a menu:
 
 - **Processes** – view, copy, jump to the owner's account, pause/resume, quit, force kill.
 - **Services** – view, jump to the main process, start, stop, restart, enable or disable at boot.
-- **Filesystems** – view, open in the file manager, copy paths, unmount.
+- **Disk usage** – expand or collapse, mount a drive, open in the file manager, copy the path,
+  rescan a folder.
 - **Accounts, groups, namespaces, devices** – view, copy, and jump to related pages.
+- **Operating system** – view a kernel module, copy names, versions and values.
 
 Viewing is read-only and needs no permission. Anything that changes the system asks first: stopping
 a program or unmounting a drive shows a confirmation, and actions that need administrator rights

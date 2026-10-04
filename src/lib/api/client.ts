@@ -2,10 +2,15 @@ import { invoke } from "@tauri-apps/api/core";
 
 import type {
   Detail,
-  FilesystemAction,
-  FilesystemSnapshot,
+  EnvVar,
+  DirectoryUsage,
+  DiskDevices,
   HardwareInfo,
+  KernelModule,
   MemoryModules,
+  ModuleInfo,
+  OsSummary,
+  Packages,
   ProcessDetail,
   Accounts,
   Namespaces,
@@ -47,14 +52,23 @@ export const api = {
   accountList: () => call<Accounts>("account_list"),
   namespaceList: () => call<Namespaces>("namespace_list"),
 
-  filesystemList: () => call<FilesystemSnapshot>("filesystem_list"),
-  filesystemAction: (mount: string, action: FilesystemAction) =>
-    call<void>("filesystem_action", { mount, action }),
+  diskDevices: () => call<DiskDevices>("disk_devices"),
+  directoryUsage: (path: string, refresh = false) =>
+    call<DirectoryUsage>("directory_usage", { path, refresh }),
+  pathOpen: (path: string) => call<void>("path_open", { path }),
+  /** Mounts a filesystem and returns where it is now. */
+  diskMount: (device: string) => call<string>("disk_mount", { device }),
 
   serviceList: () => call<ServiceSnapshot>("service_list"),
   serviceDetail: (unit: string) => call<ServiceDetail>("service_detail", { unit }),
   serviceAction: (unit: string, action: ServiceAction) =>
     call<void>("service_action", { unit, action }),
+
+  osSummary: () => call<OsSummary>("os_summary"),
+  kernelModules: () => call<KernelModule[]>("kernel_modules"),
+  kernelModuleInfo: (name: string) => call<ModuleInfo>("kernel_module_info", { name }),
+  osPackages: () => call<Packages>("os_packages"),
+  osEnvironment: () => call<EnvVar[]>("os_environment"),
 
   monitorSample: () => call<Sample>("monitor_sample"),
 } as const;

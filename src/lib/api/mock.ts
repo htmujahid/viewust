@@ -4,9 +4,17 @@ import type {
   Component,
   Connection,
   Detail,
-  FilesystemKind,
-  FilesystemRow,
-  FilesystemSnapshot,
+  EnvVar,
+  KernelModule,
+  ModuleInfo,
+  OsSummary,
+  PackageRow,
+  Packages,
+  DirectoryUsage,
+  Disk,
+  DiskDevices,
+  UsageEntry,
+  DiskVolume,
   HardwareInfo,
   MemoryModules,
   Peripheral,
@@ -404,100 +412,356 @@ const namespaceList = (): Namespaces => {
 
 const GB = 1e9;
 
-const filesystemDefs: [
-  string,
-  string,
-  string,
-  FilesystemKind,
-  number | null,
-  number,
-  { label?: string; ro?: boolean; note?: string }?,
-][] = [
-  [
-    "/",
-    "/dev/nvme0n1p2",
-    "ext4",
-    "disk",
-    474 * GB,
-    217 * GB,
-    { note: "nvme0n1p2 (part) → nvme0n1 (disk)" },
-  ],
-  ["/boot/efi", "/dev/nvme0n1p1", "vfat", "disk", 1.1 * GB, 0.006 * GB],
-  ["/home", "/dev/mapper/vg-home", "btrfs", "disk", 930 * GB, 812 * GB, { label: "home" }],
-  ["/mnt/archive", "/dev/sda1", "xfs", "disk", 4000 * GB, 1210 * GB, { label: "archive" }],
-  ["/media/talha/STICK", "/dev/sdb1", "exfat", "removable", 62 * GB, 11 * GB, { label: "STICK" }],
-  [
-    "/media/talha/Backup",
-    "/dev/sdc1",
-    "ntfs3",
-    "removable",
-    1000 * GB,
-    968 * GB,
-    { label: "Backup" },
-  ],
-  ["/run/media/talha/INSTALL", "/dev/sr0", "iso9660", "optical", 3.4 * GB, 3.4 * GB, { ro: true }],
-  ["/mnt/nas", "nas.local:/volume1/media", "nfs4", "network", 7200 * GB, 5100 * GB],
-  ["/mnt/work", "//fileserver/work", "cifs", "network", 2000 * GB, 1980 * GB],
-  ["/dev/shm", "tmpfs", "tmpfs", "memory", 16 * GB, 0.1 * GB],
-  ["/run", "tmpfs", "tmpfs", "memory", 6.5 * GB, 0.003 * GB],
-  ["/tmp", "tmpfs", "tmpfs", "memory", 16 * GB, 0.8 * GB],
-  ["/snap/core22/1722", "/dev/loop0", "squashfs", "image", 0.07 * GB, 0.07 * GB, { ro: true }],
-  ["/snap/firefox/4650", "/dev/loop1", "squashfs", "image", 0.26 * GB, 0.26 * GB, { ro: true }],
-  ["/var/lib/docker/overlay2/merged", "overlay", "overlay", "overlay", 474 * GB, 217 * GB],
-  ["/proc", "proc", "proc", "virtual", null, 0],
-  ["/sys", "sysfs", "sysfs", "virtual", null, 0],
-  ["/sys/fs/cgroup", "cgroup2", "cgroup2", "virtual", null, 0],
-  ["/dev", "devtmpfs", "devtmpfs", "memory", 16 * GB, 0],
-];
+const vol = (
+  path: string,
+  size: number,
+  role: DiskVolume["role"],
+  extra: Partial<DiskVolume> = {},
+): DiskVolume => ({
+  path,
+  name: path.split("/").pop() ?? path,
+  size,
+  fstype: role === "filesystem" ? "ext4" : role === "swap" ? "swap" : null,
+  label: null,
+  mount: null,
+  used: null,
+  available: null,
+  role,
+  mountable: false,
+  children: [],
+  ...extra,
+});
 
-const filesystemList = (): FilesystemSnapshot => {
-  const filesystems: FilesystemRow[] = filesystemDefs.map(
-    ([mount, source, fstype, kind, size, used, extra]) => {
-      const read_only = extra?.ro ?? false;
-      const available = size === null ? null : size - used;
-      return {
-        mount,
-        source,
-        fstype,
-        kind,
-        read_only,
-        size,
-        used: size === null ? null : used,
-        available,
-        inodes_total: size === null ? null : Math.round(size / 16384),
-        inodes_used: size === null ? null : Math.round(used / 65536),
-        label: extra?.label ?? null,
-        details: [
-          row("Filesystem", "Type", fstype),
-          row("Filesystem", "Mounted at", mount),
-          row("Filesystem", "Source", source),
-          row("Filesystem", "Access", read_only ? "Read-only" : "Read and write"),
-          ...(size === null
-            ? []
-            : [
-                row("Space", "Size", `${(size / 2 ** 30).toFixed(1)} GiB`),
-                row("Space", "Used", `${(used / 2 ** 30).toFixed(1)} GiB`),
-                row("Space", "Available", `${((available ?? 0) / 2 ** 30).toFixed(1)} GiB`),
-              ]),
-          ...(extra?.note ? [row("Device", "Built on", extra.note)] : []),
-          row("Options", "Mount options", read_only ? "ro,relatime" : "rw,relatime"),
-        ],
-      };
+const mounted = (
+  path: string,
+  size: number,
+  used: number,
+  mount: string,
+  extra: Partial<DiskVolume> = {},
+) => vol(path, size, "filesystem", { mount, used, available: size - used, ...extra });
+
+/** Volumes the person has mounted during this session. */
+const mountedHere = new Map<string, string>();
+
+const diskDevices = (): DiskDevices => {
+  const disks: Disk[] = [
+    {
+      path: "/dev/nvme0n1",
+      name: "nvme0n1",
+      model: "Samsung SSD 980 PRO 1TB",
+      size: 1000 * GB,
+      kind: "nvme",
+      removable: false,
+      volumes: [
+        mounted("/dev/nvme0n1p1", 1.1 * GB, 0.006 * GB, "/boot/efi", { fstype: "vfat" }),
+        vol("/dev/nvme0n1p2", 16 * GB, "swap"),
+        vol("/dev/nvme0n1p3", 980 * GB, "container", {
+          fstype: "crypto_LUKS",
+          children: [
+            mounted("/dev/mapper/cryptroot", 970 * GB, 217 * GB, "/", { fstype: "btrfs" }),
+          ],
+        }),
+      ],
     },
-  );
-  const counted = filesystems.filter(
-    (f) => ["disk", "removable", "network"].includes(f.kind) && f.size !== null,
-  );
+    {
+      path: "/dev/sda",
+      name: "sda",
+      model: "ST1000LM035-1RK172",
+      size: 1000 * GB,
+      kind: "hdd",
+      removable: false,
+      volumes: [
+        vol("/dev/sda1", 0.5 * GB, "filesystem", { fstype: "vfat", mountable: true }),
+        vol("/dev/sda2", 999 * GB, "filesystem", {
+          fstype: "ntfs",
+          label: "New Volume",
+          mountable: true,
+        }),
+      ],
+    },
+    {
+      path: "/dev/sdb",
+      name: "sdb",
+      model: "ST2000DM006-2DM164",
+      size: 2000 * GB,
+      kind: "hdd",
+      removable: false,
+      volumes: [
+        vol("/dev/sdb1", 0.13 * GB, "empty"),
+        mounted("/dev/sdb2", 1999 * GB, 1210 * GB, "/mnt/archive", {
+          fstype: "ntfs",
+          label: "Local Disk",
+        }),
+      ],
+    },
+    {
+      path: "/dev/sdc",
+      name: "sdc",
+      model: "Flash Drive",
+      size: 62 * GB,
+      kind: "usb",
+      removable: true,
+      volumes: [
+        mounted("/dev/sdc1", 62 * GB, 11 * GB, "/media/talha/STICK", {
+          fstype: "exfat",
+          label: "STICK",
+        }),
+      ],
+    },
+    {
+      path: "network",
+      name: "Network shares",
+      model: null,
+      size: 9200 * GB,
+      kind: "network",
+      removable: false,
+      volumes: [
+        mounted("/mnt/nas", 7200 * GB, 5100 * GB, "/mnt/nas", {
+          name: "nas.local:/volume1/media",
+          fstype: "nfs4",
+        }),
+        mounted("/mnt/work", 2000 * GB, 1980 * GB, "/mnt/work", {
+          name: "//fileserver/work",
+          fstype: "cifs",
+        }),
+      ],
+    },
+  ];
+  const local = disks.filter((d) => d.kind !== "network");
+  const all: DiskVolume[] = [];
+  const walk = (vs: DiskVolume[]) => vs.forEach((v) => (all.push(v), walk(v.children)));
+  local.forEach((d) => walk(d.volumes));
+  for (const v of all) {
+    const at = mountedHere.get(v.path);
+    if (at)
+      Object.assign(v, {
+        mount: at,
+        mountable: false,
+        used: v.size * 0.4,
+        available: v.size * 0.6,
+      });
+  }
+  const fs = all.filter((v) => v.role === "filesystem");
   return {
     overview: {
-      size: counted.reduce((n, f) => n + (f.size ?? 0), 0),
-      used: counted.reduce((n, f) => n + (f.used ?? 0), 0),
-      available: counted.reduce((n, f) => n + (f.available ?? 0), 0),
-      volumes: counted.length,
+      capacity: local.reduce((n, d) => n + d.size, 0),
+      used: fs.reduce((n, v) => n + (v.used ?? 0), 0),
+      available: fs.reduce((n, v) => n + (v.available ?? 0), 0),
+      disks: local.length,
+      mounted: fs.filter((v) => v.mount).length,
+      unmounted: fs.filter((v) => !v.mount).length,
     },
-    filesystems,
+    disks,
   };
 };
+
+/** Where a mounted device's files are, for measuring. */
+const mountPoints = (): [string, number][] =>
+  diskDevices().disks.flatMap((d) =>
+    d.volumes.flatMap(function flat(v): [string, number][] {
+      return [
+        ...(v.mount ? ([[v.mount, v.used ?? 0]] as [string, number][]) : []),
+        ...v.children.flatMap(flat),
+      ];
+    }),
+  );
+
+const treeNames: [string, "dir" | "file"][] = [
+  ["Documents", "dir"],
+  ["Downloads", "dir"],
+  [".cache", "dir"],
+  ["projects", "dir"],
+  ["Videos", "dir"],
+  ["node_modules", "dir"],
+  ["Pictures", "dir"],
+  ["backup.tar.gz", "file"],
+  ["notes.txt", "file"],
+];
+const weights = [0.38, 0.22, 0.14, 0.09, 0.06, 0.04, 0.03, 0.02, 0.01];
+const measured = new Map<string, number>();
+
+/** A believable folder tree: sizes shrink down the levels and each folder's children add up to it. */
+const directoryUsage = (path: string): DirectoryUsage => {
+  const mount = mountPoints().find((m) => m[0] === path);
+  const total = measured.get(path) ?? (mount ? mount[1] : 4e9);
+  const seed = [...path].reduce((n, c) => n + c.charCodeAt(0), 0);
+  const depth = path.split("/").filter(Boolean).length;
+  const count = depth >= 5 ? 0 : 5 + (seed % 4);
+  const names = [...treeNames.slice(seed % 2), ...treeNames].slice(0, count);
+  const entries: UsageEntry[] = names.map(([name, kind], i) => {
+    const size = Math.round(total * 0.92 * weights[i] * (kind === "file" ? 0.5 : 1));
+    const child = `${path === "/" ? "" : path}/${name}`;
+    if (kind === "dir") measured.set(child, size);
+    return {
+      name,
+      path: child,
+      kind,
+      size,
+      files: kind === "dir" ? Math.round(size / 180_000) : 0,
+      unreadable: false,
+      mount: false,
+    };
+  });
+  if (path === "/") {
+    entries.push(
+      {
+        name: "boot",
+        path: "/boot",
+        kind: "dir",
+        size: 0,
+        files: 0,
+        unreadable: false,
+        mount: true,
+      },
+      {
+        name: "root",
+        path: "/root",
+        kind: "dir",
+        size: 4096,
+        files: 0,
+        unreadable: true,
+        mount: false,
+      },
+    );
+  }
+  entries.sort((a, b) => b.size - a.size);
+  return {
+    path,
+    total: entries.reduce((n, e) => n + e.size, 0) + 4096,
+    entries,
+    hidden_count: depth === 1 ? 312 : 0,
+    hidden_size: depth === 1 ? Math.round(total * 0.01) : 0,
+    unreadable: path === "/",
+    incomplete: false,
+    took_ms: 40,
+  };
+};
+
+const osSummary = (): OsSummary => ({
+  name: "Ubuntu 26.04.1 LTS",
+  version: "26.04.1 LTS (Resolute Raccoon)",
+  kernel: "7.0.0-34-generic",
+  hostname: "talha-MS-7E02",
+  architecture: "x86_64",
+  boot_time: Math.floor(Date.now() / 1000) - 3 * 3600 - 14 * 60,
+  details: [
+    row("Operating system", "Name", "Ubuntu 26.04.1 LTS"),
+    row("Operating system", "Version", "26.04.1 LTS (Resolute Raccoon)"),
+    row("Operating system", "Codename", "resolute"),
+    row("Operating system", "Distribution", "ubuntu"),
+    row("Operating system", "Based on", "debian"),
+    row("Operating system", "Website", "https://www.ubuntu.com/"),
+    row("Operating system", "Host name", "talha-MS-7E02"),
+    row("Operating system", "Architecture", "x86_64"),
+    row("Kernel", "Release", "7.0.0-34-generic"),
+    row("Kernel", "Build", "#34-Ubuntu SMP PREEMPT_DYNAMIC Wed Sep  2 14:29:37 UTC 2026"),
+    row(
+      "Kernel",
+      "Command line",
+      "BOOT_IMAGE=/boot/vmlinuz-7.0.0-34-generic root=UUID=c509a2d6 ro quiet splash",
+    ),
+    row("Kernel", "Loaded modules", "139"),
+    row("Kernel", "Tainted", "Yes (flags 4097)"),
+    row("Boot", "Firmware", "UEFI"),
+    row("Boot", "Secure Boot", "Enabled"),
+    row("Boot", "Started", "2026-10-04 05:36:06"),
+    row(
+      "Boot",
+      "Startup took",
+      "7.8s (firmware) + 2.7s (loader) + 2.5s (kernel) + 3.6s (initrd) + 9s (userspace) = 25.7s",
+    ),
+    row("Boot", "Init system", "systemd"),
+    row("Boot", "Default target", "graphical.target"),
+    row("Session", "Current user", "talha"),
+    row("Session", "Desktop", "ubuntu:GNOME"),
+    row("Session", "Session type", "wayland"),
+    row("Session", "Shell", "/bin/bash"),
+    row("Language and time", "Language", "en_US.UTF-8"),
+    row("Language and time", "Time zone", "Asia/Karachi"),
+    row("Language and time", "Clock synchronised", "Yes"),
+    row("Security", "AppArmor", "Enabled"),
+    row("Security", "Kernel lockdown", "integrity"),
+    row("Security", "Address randomisation", "Full (2)"),
+    row("Virtualization", "Runs on", "Physical machine"),
+    row("Software", "Package manager", "apt (dpkg)"),
+    row("Software", "Installed packages", "2185"),
+    row("Software", "Snap packages", "16"),
+    row("Software", "C library", "ldd (Ubuntu GLIBC 2.43-2ubuntu2.4) 2.43"),
+    row("Software", "systemd", "systemd 259 (259.5-0ubuntu3.4)"),
+  ],
+});
+
+const moduleDefs: [string, number, string[]][] = [
+  ["nvidia_modeset", 1572864, ["nvidia_drm"]],
+  ["nvidia", 62914560, ["nvidia_modeset"]],
+  ["btrfs", 2097152, []],
+  ["snd_hda_intel", 61440, []],
+  ["snd_hda_codec", 217088, ["snd_hda_intel", "snd_hda_codec_realtek"]],
+  ["i915", 4194304, []],
+  ["bluetooth", 1048576, ["btusb", "bnep"]],
+  ["usbhid", 65536, []],
+  ["ext4", 1146880, []],
+  ["nf_tables", 372736, []],
+];
+const kernelModules = (): KernelModule[] =>
+  moduleDefs
+    .map(([name, size, used_by]) => ({ name, size, used_by }))
+    .sort((a, b) => b.size - a.size);
+const kernelModuleInfo = (name: string): ModuleInfo => {
+  const m = kernelModules().find((x) => x.name === name);
+  if (!m) return { name, found: false, details: [] };
+  return {
+    name,
+    found: true,
+    details: [
+      row("Module", "Name", name),
+      row("Module", "Description", `The ${name} driver`),
+      row("Module", "License", "GPL"),
+      row("Module", "File", `/lib/modules/7.0.0-34-generic/kernel/${name}.ko.zst`),
+      row("Loaded", "Memory", `${(m.size / 1024).toFixed(0)} KiB`),
+      row("Loaded", "Used by", m.used_by.join(", ") || "Nothing else"),
+      row("Settings", "debug", "0 · Print extra messages (int)"),
+    ],
+  };
+};
+
+const pkgDefs: [string, string, string][] = [
+  ["bash", "5.2.21-2ubuntu4", "amd64"],
+  ["coreutils", "9.4-3ubuntu6", "amd64"],
+  ["firefox", "1:1snap1-0ubuntu5", "amd64"],
+  ["gnome-shell", "46.0-0ubuntu6", "amd64"],
+  ["libc6", "2.39-0ubuntu8", "amd64"],
+  ["libc6", "2.39-0ubuntu8", "i386"],
+  ["linux-image-7.0.0-34-generic", "7.0.0-34.34", "amd64"],
+  ["openssh-server", "1:9.6p1-3ubuntu13", "amd64"],
+  ["python3", "3.12.3-0ubuntu2", "amd64"],
+  ["systemd", "259.5-0ubuntu3.4", "amd64"],
+  ["vim", "2:9.1.0016-1ubuntu7", "amd64"],
+];
+const osPackages = (): Packages => ({
+  manager: "apt (dpkg)",
+  packages: pkgDefs.map(([name, version, arch]): PackageRow => ({ name, version, arch })),
+});
+
+const osEnvironment = (): EnvVar[] =>
+  [
+    ["DISPLAY", ":0", false],
+    ["HOME", "/home/talha", false],
+    ["LANG", "en_US.UTF-8", false],
+    ["PATH", "/usr/local/bin:/usr/bin:/bin:/home/talha/.cargo/bin", false],
+    ["SHELL", "/bin/bash", false],
+    ["SSH_AUTH_SOCK", "", true],
+    ["USER", "talha", false],
+    ["XDG_CURRENT_DESKTOP", "ubuntu:GNOME", false],
+    ["XDG_SESSION_TYPE", "wayland", false],
+    ["GITHUB_TOKEN", "", true],
+  ]
+    .map(([key, value, hidden]) => ({
+      key: key as string,
+      value: value as string,
+      hidden: hidden as boolean,
+    }))
+    .sort((a, b) => a.key.localeCompare(b.key));
 
 const serviceDefs: [string, string, string, string, string, number | null][] = [
   ["NetworkManager", "Network Manager", "active", "running", "enabled", 9.7e6],
@@ -752,7 +1016,13 @@ export const fixtures = {
   memoryModules,
   processList,
   processDetail,
-  filesystemList,
+  osSummary,
+  kernelModules,
+  kernelModuleInfo,
+  osPackages,
+  osEnvironment,
+  diskDevices,
+  directoryUsage,
   serviceList,
   serviceDetail,
   accountList,
@@ -789,11 +1059,33 @@ export function installMockBackend(): void {
         return accountList();
       case "namespace_list":
         return namespaceList();
-      case "filesystem_list":
-        return filesystemList();
+      case "os_summary":
+        return osSummary();
+      case "kernel_modules":
+        return kernelModules();
+      case "kernel_module_info":
+        return kernelModuleInfo(String(args.name));
+      case "os_packages":
+        return osPackages();
+      case "os_environment":
+        return osEnvironment();
+      case "disk_devices":
+        return diskDevices();
+      case "directory_usage":
+        return new Promise((resolve) =>
+          setTimeout(() => resolve(directoryUsage(String(args.path))), 250),
+        );
+      case "disk_mount":
+        return new Promise((resolve) =>
+          setTimeout(() => {
+            const at = `/media/talha/${String(args.device).split("/").pop()}`;
+            mountedHere.set(String(args.device), at);
+            resolve(at);
+          }, 500),
+        );
+      case "path_open":
       case "process_signal":
       case "service_action":
-      case "filesystem_action":
         return null;
       case "service_list":
         return serviceList();

@@ -1,10 +1,11 @@
 mod accounts;
 mod common;
 mod connection;
+mod disk_usage;
 mod error;
-mod filesystems;
 mod hardware;
 mod monitor;
+mod os;
 mod processes;
 mod report;
 mod services;
@@ -27,6 +28,7 @@ pub fn run() {
     tauri::Builder::default()
         .manage(processes::ProcessService::default())
         .manage(monitor::MonitorService::default())
+        .manage(disk_usage::UsageService::default())
         .invoke_handler(tauri::generate_handler![
             hardware::commands::hardware_info,
             report::commands::device_report,
@@ -37,12 +39,19 @@ pub fn run() {
             processes::commands::process_signal,
             processes::commands::namespace_list,
             accounts::commands::account_list,
-            filesystems::commands::filesystem_list,
-            filesystems::commands::filesystem_action,
+            disk_usage::commands::disk_devices,
+            disk_usage::commands::directory_usage,
+            disk_usage::commands::path_open,
+            disk_usage::commands::disk_mount,
             services::commands::service_list,
             services::commands::service_detail,
             services::commands::service_action,
             monitor::commands::monitor_sample,
+            os::commands::os_summary,
+            os::commands::kernel_modules,
+            os::commands::kernel_module_info,
+            os::commands::os_packages,
+            os::commands::os_environment,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

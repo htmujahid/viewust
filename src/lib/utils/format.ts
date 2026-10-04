@@ -21,3 +21,10 @@ export function formatRate(bytesPerSecond: number): string {
   const v = bytesPerSecond / 1000 ** i;
   return `${v >= 100 || i === 0 ? v.toFixed(0) : v.toFixed(1)} ${units[i]}`;
 }
+
+/** A short count: 840, 12.3k, 1.9M. */
+export function formatCount(n: number): string {
+  if (n < 1000) return String(n);
+  if (n < 1e6) return `${(n / 1e3).toFixed(n < 1e4 ? 1 : 0)}k`;
+  return `${(n / 1e6).toFixed(1)}M`;
+}

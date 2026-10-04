@@ -1,11 +1,7 @@
 pub(crate) struct Mount {
-    pub(crate) dev: String,
-    pub(crate) root: String,
     pub(crate) target: String,
-    pub(crate) options: Vec<String>,
     pub(crate) fstype: String,
     pub(crate) source: String,
-    pub(crate) super_options: Vec<String>,
 }
 
 /// The kernel writes spaces, tabs and backslashes in paths as `\040`, `\011`, `\134`.
@@ -32,26 +28,31 @@ pub(crate) fn unescape(text: &str) -> String {
     String::from_utf8_lossy(&out).into_owned()
 }
 
-fn list(text: &str) -> Vec<String> {
-    text.split(',').map(str::to_owned).collect()
-}
-
 pub(crate) fn parse_mountinfo(text: &str) -> Vec<Mount> {
     text.lines()
         .filter_map(|line| {
             let words: Vec<&str> = line.split_whitespace().collect();
             let dash = words.iter().skip(6).position(|w| *w == "-")? + 6;
             Some(Mount {
-                dev: (*words.get(2)?).to_owned(),
-                root: unescape(words.get(3)?),
                 target: unescape(words.get(4)?),
-                options: list(words.get(5)?),
                 fstype: (*words.get(dash + 1)?).to_owned(),
                 source: unescape(words.get(dash + 2)?),
-                super_options: words.get(dash + 3).map(|o| list(o)).unwrap_or_default(),
             })
         })
         .collect()
+}
+
+/// When mounts are stacked on one path only the last is what anyone sees there; the rest are
+/// covered. Keeping one per path also keeps every row's mount point unique.
+pub(crate) fn visible(mounts: Vec<Mount>) -> Vec<Mount> {
+    let mut seen = std::collections::HashSet::new();
+    let mut out: Vec<Mount> = mounts
+        .into_iter()
+        .rev()
+        .filter(|m| seen.insert(m.target.clone()))
+        .collect();
+    out.reverse();
+    out
 }
 
 #[cfg(test)]
@@ -80,7 +81,6 @@ mod tests {
         assert_eq!((m[0].target.as_str(), m[0].fstype.as_str()), ("/", "ext4"));
         assert_eq!(m[0].source, "/dev/nvme0n1p2");
         assert_eq!(m[1].target, "/media/me/My Stick");
-        assert_eq!(m[1].dev, "8:17");
     }
 
     #[test]
@@ -88,13 +88,24 @@ mod tests {
         let m = parse_mountinfo(MOUNTINFO);
         assert_eq!(m[2].fstype, "nfs4");
         assert_eq!(m[2].source, "srv:/export");
-        assert_eq!(m[2].root, "/sub");
-        assert!(m[2].options.contains(&"ro".to_owned()));
-        assert_eq!(m[3].super_options, ["rw", "size=1638400k"]);
+        assert_eq!(m[3].fstype, "tmpfs");
     }
 
     #[test]
     fn broken_lines_are_ignored() {
         assert!(parse_mountinfo("garbage\n\n1 2 3").is_empty());
+    }
+
+    #[test]
+    fn a_stacked_mount_shows_only_the_top_one() {
+        let text = "\
+20 1 0:21 / /proc/sys/fs/binfmt_misc rw - autofs systemd-1 rw
+21 20 0:50 / /proc/sys/fs/binfmt_misc rw - binfmt_misc binfmt_misc rw
+22 1 8:1 / /data rw - ext4 /dev/sda1 rw
+";
+        let m = visible(parse_mountinfo(text));
+        let targets: Vec<&str> = m.iter().map(|x| x.target.as_str()).collect();
+        assert_eq!(targets, ["/proc/sys/fs/binfmt_misc", "/data"]);
+        assert_eq!(m[0].fstype, "binfmt_misc");
     }
 }

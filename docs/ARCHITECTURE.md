@@ -19,17 +19,18 @@ feature/
   …             the logic, split by concern
 ```
 
-| Module        | Responsibility                                                                                      |
-| ------------- | --------------------------------------------------------------------------------------------------- |
-| `hardware`    | external devices: USB (`usb/`), audio jacks, monitors (`edid.rs`)                                   |
-| `connection`  | the route to the internet: wired/Wi-Fi, gateway, DNS, signal                                        |
-| `system`      | internal parts: board, CPU, memory, drives, GPU, network, sound, power                              |
-| `report`      | the deep technical report for one device (descriptors, HID, drivers…)                               |
-| `filesystems` | mounted filesystems, grouped by storage kind: mounts, `df` space, `lsblk` device stack              |
-| `processes`   | the process list and one process in depth                                                           |
-| `monitor`     | one-second live samples                                                                             |
-| `common`      | shared plumbing with no domain knowledge: details rows, formatting, sysfs, ID databases, `blocking` |
-| `error`       | the one `AppError` every command returns; serialises to a plain message                             |
+| Module       | Responsibility                                                                                      |
+| ------------ | --------------------------------------------------------------------------------------------------- |
+| `hardware`   | external devices: USB (`usb/`), audio jacks, monitors (`edid.rs`)                                   |
+| `connection` | the route to the internet: wired/Wi-Fi, gateway, DNS, signal                                        |
+| `system`     | internal parts: board, CPU, memory, drives, GPU, network, sound, power                              |
+| `report`     | the deep technical report for one device (descriptors, HID, drivers…)                               |
+| `disk_usage` | attached drives and partitions (`lsblk`, `df`), mounting (`udisksctl`), folder sizes for the tree   |
+| `os`         | the operating system: release, kernel, boot, session, security; modules, packages, environment      |
+| `processes`  | the process list and one process in depth                                                           |
+| `monitor`    | one-second live samples                                                                             |
+| `common`     | shared plumbing with no domain knowledge: details rows, formatting, sysfs, ID databases, `blocking` |
+| `error`      | the one `AppError` every command returns; serialises to a plain message                             |
 
 **Conventions**
 
@@ -40,7 +41,7 @@ feature/
   `.manage(...)` in `lib.rs` and injected with `State<'_, T>`. They hold what must survive between
   calls (CPU usage and rates are differences between two readings).
 - **Reading never needs admin rights.** Changing things is explicit and narrow: the commands that do
-  (`process_signal`, `service_action`, `filesystem_action`) accept only a fixed set of actions,
+  (`process_signal`, `service_action`, `disk_mount`) accept only a fixed set of actions,
   validate their target, refuse system-critical ones, and use `common::elevate` (`pkexec`) when root is
   needed. RAM modules (`system::memory::read_modules`) use the same helper.
 - **Be honest about gaps.** If the OS doesn't report something (the power supply, a mouse's sensor),
@@ -48,6 +49,10 @@ feature/
 - **Linux only, on purpose.** There are no `cfg` gates or per-OS fallbacks: modules read `/proc`,
   `/sys`, `/etc` and tools like `lsblk`, `df`, `systemctl` and `udevadm` directly, so each view can
   go as deep as the platform allows. Other operating systems will get their own codebase.
+- **Long reads are cached and bounded.** The folder-size scan (`disk_usage::directory`) runs on a
+  work queue across threads, stays on one device, never follows links, counts hard links once, and
+  stops at a deadline (reporting `incomplete`). `UsageService` remembers results so reopening a
+  folder is instant; a rescan passes `refresh`.
 - **Parsers are pure functions with tests** (`parse_dmidecode`, `decode_hid`, `parse_edid`, …). Keep
   that split: reading a file is one function, interpreting its text is another.
 - Lints: `unsafe_code = "forbid"`, clippy clean (`-D warnings` in `pnpm rust:verify`).

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatBytes, formatDuration, formatRate } from "./format";
+import { formatBytes, formatCount, formatDuration, formatRate } from "./format";
 
 describe("formatBytes", () => {
   it("uses binary units and one decimal", () => {
@@ -29,5 +29,15 @@ describe("formatDuration", () => {
     expect(formatDuration(59)).toBe("0m 59s");
     expect(formatDuration(3700)).toBe("1h 1m");
     expect(formatDuration(90_000)).toBe("1d 1h");
+  });
+});
+
+describe("formatCount", () => {
+  it("shortens big numbers", () => {
+    expect(formatCount(0)).toBe("0");
+    expect(formatCount(840)).toBe("840");
+    expect(formatCount(1234)).toBe("1.2k");
+    expect(formatCount(56_789)).toBe("57k");
+    expect(formatCount(1_934_532)).toBe("1.9M");
   });
 });

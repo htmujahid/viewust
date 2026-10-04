@@ -48,7 +48,7 @@ pub(crate) fn parse_unit_files(text: &str) -> HashMap<String, String> {
         .collect()
 }
 
-pub(crate) fn parse_properties(text: &str) -> HashMap<String, String> {
+pub fn parse_properties(text: &str) -> HashMap<String, String> {
     text.lines()
         .filter_map(|l| l.split_once('='))
         .map(|(k, v)| (k.to_owned(), v.to_owned()))
