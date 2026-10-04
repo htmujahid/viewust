@@ -1,14 +1,19 @@
 import { invoke } from "@tauri-apps/api/core";
 
 import type {
+  Cgroups,
   Detail,
   EnvVar,
   DirectoryUsage,
   DiskDevices,
+  Filesystems,
   HardwareInfo,
   KernelModule,
   MemoryModules,
   ModuleInfo,
+  OsMemory,
+  OsNetwork,
+  OsSecurity,
   OsSummary,
   Packages,
   ProcessDetail,
@@ -58,6 +63,7 @@ export const api = {
   pathOpen: (path: string) => call<void>("path_open", { path }),
   /** Mounts a filesystem and returns where it is now. */
   diskMount: (device: string) => call<string>("disk_mount", { device }),
+  filesystemList: () => call<Filesystems>("filesystem_list"),
 
   serviceList: () => call<ServiceSnapshot>("service_list"),
   serviceDetail: (unit: string) => call<ServiceDetail>("service_detail", { unit }),
@@ -69,6 +75,10 @@ export const api = {
   kernelModuleInfo: (name: string) => call<ModuleInfo>("kernel_module_info", { name }),
   osPackages: () => call<Packages>("os_packages"),
   osEnvironment: () => call<EnvVar[]>("os_environment"),
+  osMemory: () => call<OsMemory>("os_memory"),
+  osSecurity: () => call<OsSecurity>("os_security"),
+  osCgroups: () => call<Cgroups>("os_cgroups"),
+  osNetwork: () => call<OsNetwork>("os_network"),
 
   monitorSample: () => call<Sample>("monitor_sample"),
 } as const;

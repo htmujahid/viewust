@@ -11,7 +11,7 @@
   import SearchBox from "$lib/components/ui/SearchBox.svelte";
   import SidePanel from "$lib/components/ui/SidePanel.svelte";
   import StatTiles from "$lib/components/ui/StatTiles.svelte";
-  import ProcessesShell from "$lib/features/processes/ProcessesShell.svelte";
+  import SectionShell from "$lib/components/ui/SectionShell.svelte";
   import { menu } from "$lib/stores/menu.svelte";
   import { copyText } from "$lib/utils/actions";
   import { NS_KINDS, nsLabel } from "$lib/features/namespaces/logic";
@@ -44,7 +44,7 @@
   function onkeydown(e: KeyboardEvent) {
     if (e.key !== "Escape") return;
     if (namespaces.selected !== null) namespaces.selected = null;
-    else goto("/");
+    else goto("/os");
   }
 
   onMount(namespaces.start);
@@ -53,7 +53,7 @@
 
 <svelte:window {onkeydown} />
 
-<ProcessesShell>
+<SectionShell title="Namespaces">
   {#snippet actions()}
     <SearchBox
       bind:value={namespaces.search}
@@ -172,7 +172,7 @@
       </SidePanel>
     {/if}
   {/snippet}
-</ProcessesShell>
+</SectionShell>
 
 <style>
   .toolbar {

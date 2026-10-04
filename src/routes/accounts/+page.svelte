@@ -8,11 +8,12 @@
   import DetailList from "$lib/components/ui/DetailList.svelte";
   import FilterChips from "$lib/components/ui/FilterChips.svelte";
   import SearchBox from "$lib/components/ui/SearchBox.svelte";
+  import SectionShell from "$lib/components/ui/SectionShell.svelte";
   import SidePanel from "$lib/components/ui/SidePanel.svelte";
   import StatTiles from "$lib/components/ui/StatTiles.svelte";
   import { userMenu } from "$lib/features/accounts/menu";
   import { menu } from "$lib/stores/menu.svelte";
-  import AccountsShell from "$lib/features/accounts/AccountsShell.svelte";
+
   import { userBadges, type UserFilter } from "$lib/features/accounts/logic";
   import { accounts } from "$lib/features/accounts/store.svelte";
   import type { UserRow } from "$lib/api/types";
@@ -58,7 +59,7 @@
   function onkeydown(e: KeyboardEvent) {
     if (e.key !== "Escape") return;
     if (accounts.selectedUser !== null) accounts.selectedUser = null;
-    else goto("/");
+    else goto("/os");
   }
 
   onMount(accounts.start);
@@ -67,7 +68,7 @@
 
 <svelte:window {onkeydown} />
 
-<AccountsShell>
+<SectionShell title="Users">
   {#snippet actions()}
     <SearchBox
       bind:value={accounts.userSearch}
@@ -173,7 +174,7 @@
       </SidePanel>
     {/if}
   {/snippet}
-</AccountsShell>
+</SectionShell>
 
 <style>
   .toolbar {

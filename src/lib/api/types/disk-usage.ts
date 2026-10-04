@@ -76,3 +76,20 @@ export interface DirectoryUsage {
   incomplete: boolean;
   took_ms: number;
 }
+
+export interface FsRow {
+  mount: string;
+  source: string;
+  fstype: string;
+  size: number | null;
+  used: number | null;
+  available: number | null;
+  /** No space of its own: a kernel view or memory-backed mount */
+  pseudo: boolean;
+}
+
+export interface Filesystems {
+  mounted: number;
+  real: number;
+  rows: FsRow[];
+}

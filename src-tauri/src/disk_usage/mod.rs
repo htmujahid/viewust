@@ -1,6 +1,7 @@
 pub mod commands;
 mod devices;
 mod directory;
+mod filesystems;
 mod model;
 mod mount;
 mod mounts;

@@ -5,7 +5,7 @@
 
   import LiveToggle from "$lib/components/ui/LiveToggle.svelte";
   import SearchBox from "$lib/components/ui/SearchBox.svelte";
-  import ProcessesShell from "$lib/features/processes/ProcessesShell.svelte";
+  import SectionShell from "$lib/components/ui/SectionShell.svelte";
   import ProcessPanel from "$lib/features/processes/ProcessPanel.svelte";
   import ProcessSummary from "$lib/features/processes/ProcessSummary.svelte";
   import { processMenu } from "$lib/features/processes/menu";
@@ -22,7 +22,7 @@
   function onkeydown(e: KeyboardEvent) {
     if (e.key !== "Escape") return;
     if (processes.selectedPid !== null) processes.select(null);
-    else goto("/");
+    else goto("/os");
   }
 
   onMount(processes.start);
@@ -31,7 +31,7 @@
 
 <svelte:window {onkeydown} />
 
-<ProcessesShell>
+<SectionShell title="Processes">
   {#snippet actions()}
     <SearchBox
       bind:value={processes.search}
@@ -83,7 +83,7 @@
       />
     {/if}
   {/snippet}
-</ProcessesShell>
+</SectionShell>
 
 <style>
   .toolbar {

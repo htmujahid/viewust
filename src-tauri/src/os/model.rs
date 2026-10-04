@@ -15,6 +15,75 @@ pub struct OsSummary {
 }
 
 #[derive(Serialize, Debug, PartialEq)]
+pub struct CgroupRow {
+    pub(crate) name: String,
+    /// Processes inside it and its children (`pids.current`)
+    pub(crate) pids: Option<u64>,
+    /// Memory charged to it (`memory.current`)
+    pub(crate) memory: Option<u64>,
+    /// Groups nested beneath it (`cgroup.stat`)
+    pub(crate) groups: Option<u64>,
+}
+
+#[derive(Serialize)]
+pub struct Cgroups {
+    pub(crate) version: &'static str,
+    pub(crate) controllers: Vec<String>,
+    pub(crate) groups: usize,
+    /// The count hit its ceiling, so the real number is higher
+    pub(crate) capped: bool,
+    /// The groups directly under the root, biggest first
+    pub(crate) top: Vec<CgroupRow>,
+}
+
+#[derive(Serialize)]
+pub struct NetInterface {
+    pub(crate) name: String,
+    /// "ethernet", "wifi", "bridge", "virtual" or "loopback"
+    pub(crate) kind: &'static str,
+    pub(crate) state: String,
+    pub(crate) mac: Option<String>,
+    pub(crate) mtu: Option<u64>,
+    pub(crate) speed: Option<String>,
+    pub(crate) ipv4: Vec<String>,
+    pub(crate) ipv6: usize,
+    pub(crate) rx: u64,
+    pub(crate) tx: u64,
+}
+
+#[derive(Serialize)]
+pub struct OsNetwork {
+    /// Real interfaces that are up, and how many exist (the loopback doesn't count)
+    pub(crate) up: usize,
+    pub(crate) total: usize,
+    pub(crate) default_route: Option<String>,
+    pub(crate) dns: Vec<String>,
+    pub(crate) listening_tcp: Vec<u16>,
+    pub(crate) established: usize,
+    pub(crate) interfaces: Vec<NetInterface>,
+    pub(crate) details: Vec<Detail>,
+}
+
+#[derive(Serialize)]
+pub struct OsMemory {
+    pub(crate) total: u64,
+    pub(crate) used: u64,
+    pub(crate) available: u64,
+    pub(crate) swap_total: u64,
+    pub(crate) swap_used: u64,
+    pub(crate) details: Vec<Detail>,
+}
+
+#[derive(Serialize)]
+pub struct OsSecurity {
+    pub(crate) apparmor: Option<String>,
+    pub(crate) selinux: Option<String>,
+    pub(crate) lockdown: Option<String>,
+    pub(crate) secure_boot: Option<String>,
+    pub(crate) details: Vec<Detail>,
+}
+
+#[derive(Serialize, Debug, PartialEq)]
 pub struct KernelModule {
     pub(crate) name: String,
     pub(crate) size: u64,

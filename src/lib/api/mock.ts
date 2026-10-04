@@ -7,12 +7,17 @@ import type {
   EnvVar,
   KernelModule,
   ModuleInfo,
+  Cgroups,
+  OsMemory,
+  OsNetwork,
+  OsSecurity,
   OsSummary,
   PackageRow,
   Packages,
   DirectoryUsage,
   Disk,
   DiskDevices,
+  Filesystems,
   UsageEntry,
   DiskVolume,
   HardwareInfo,
@@ -672,6 +677,35 @@ const osSummary = (): OsSummary => ({
     ),
     row("Boot", "Init system", "systemd"),
     row("Boot", "Default target", "graphical.target"),
+    row("Firmware", "Vendor", "American Megatrends International, LLC."),
+    row("Firmware", "Version", "A.A0 (revision 5.27)"),
+    row("Firmware", "Date", "09/27/2024"),
+    row("Firmware", "Interface", "UEFI, 64-bit"),
+    row(
+      "Boot chain",
+      "1 · Firmware",
+      "UEFI — wakes the hardware and finds the bootloader · took 7.8s",
+    ),
+    row(
+      "Boot chain",
+      "2 · Bootloader",
+      "GRUB — loads the kernel and the initramfs into memory · took 2.7s",
+    ),
+    row(
+      "Boot chain",
+      "3 · Kernel",
+      "vmlinuz-7.0.0-34-generic (16.5 MiB) — takes over the machine · took 2.5s",
+    ),
+    row(
+      "Boot chain",
+      "4 · initramfs",
+      "initrd.img-7.0.0-34-generic (37.4 MiB) — a temporary root filesystem whose drivers mount the real root disk · took 3.6s",
+    ),
+    row(
+      "Boot chain",
+      "5 · Init",
+      "systemd — the first program; it starts everything else · took 8.5s",
+    ),
     row("Session", "Current user", "talha"),
     row("Session", "Desktop", "ubuntu:GNOME"),
     row("Session", "Session type", "wayland"),
@@ -724,6 +758,148 @@ const kernelModuleInfo = (name: string): ModuleInfo => {
     ],
   };
 };
+
+const GiB = 2 ** 30;
+
+const osMemoryMock = (): OsMemory => ({
+  total: 32 * GiB,
+  used: 9.6 * GiB,
+  available: 22.4 * GiB,
+  swap_total: 15 * GiB,
+  swap_used: 0,
+  details: [
+    row("Memory", "Total", "31.3 GiB"),
+    row("Memory", "In use", "9.6 GiB"),
+    row("Memory", "Available", "22.4 GiB"),
+    row("Memory", "Disk cache", "19.3 GiB"),
+    row("Memory", "Shared", "1.1 GiB"),
+    row("Swap", "/dev/sdc1", "14.9 GiB partition · 0 B used · priority -2"),
+    row("Swap", "Swappiness", "60 of 200: how eagerly RAM is swapped out"),
+    row("Kernel's own use", "Slab", "812.4 MiB"),
+    row("Kernel's own use", "Page tables", "61.2 MiB"),
+    row("Kernel's own use", "Waiting to be written", "1.3 MiB"),
+    row("Huge pages", "Transparent huge pages", "madvise"),
+    row("Settings", "Overcommit", "Heuristic (0): large askings are refused"),
+    row("Settings", "Memory map limit", "1048576"),
+  ],
+});
+
+const osCgroupsMock = (): Cgroups => ({
+  version: "v2 (unified)",
+  controllers: ["cpuset", "cpu", "io", "memory", "hugetlb", "pids", "rdma", "misc"],
+  groups: 142,
+  capped: false,
+  top: [
+    { name: "system.slice", pids: 94, memory: 2.1 * GiB, groups: 71 },
+    { name: "user.slice", pids: 61, memory: 6.4 * GiB, groups: 58 },
+    { name: "machine.slice", pids: 8, memory: 0.6 * GiB, groups: 9 },
+    { name: "init.scope", pids: 1, memory: 14 * 2 ** 20, groups: 0 },
+  ],
+});
+
+const filesystemList = (): Filesystems => {
+  const fs = (
+    mount: string,
+    source: string,
+    fstype: string,
+    size: number | null,
+    used: number | null,
+  ): Filesystems["rows"][number] => ({
+    mount,
+    source,
+    fstype,
+    size,
+    used,
+    available: size === null || used === null ? null : size - used,
+    pseudo: size === null,
+  });
+  const rows = [
+    fs("/mnt/archive", "/dev/sdb2", "ntfs", 2000 * GB, 1210 * GB),
+    fs("/", "/dev/mapper/cryptroot", "btrfs", 970 * GB, 217 * GB),
+    fs("/media/talha/STICK", "/dev/sdc1", "exfat", 62 * GB, 11 * GB),
+    fs("/boot/efi", "/dev/nvme0n1p1", "vfat", 1.1 * GB, 0.006 * GB),
+    fs("/dev/shm", "tmpfs", "tmpfs", 16 * GB, 0.1 * GB),
+    fs("/run", "tmpfs", "tmpfs", 6.5 * GB, 0.003 * GB),
+    fs("/proc", "proc", "proc", null, null),
+    fs("/sys", "sysfs", "sysfs", null, null),
+    fs("/sys/fs/cgroup", "cgroup2", "cgroup2", null, null),
+  ];
+  return { mounted: rows.length, real: rows.filter((r) => !r.pseudo).length, rows };
+};
+
+const osNetworkMock = (): OsNetwork => ({
+  up: 1,
+  total: 2,
+  default_route: "via 192.168.1.1 on enp3s0",
+  dns: ["192.168.1.1", "1.1.1.1"],
+  listening_tcp: [22, 631, 1420, 5355],
+  established: 14,
+  interfaces: [
+    {
+      name: "enp3s0",
+      kind: "ethernet",
+      state: "UP",
+      mac: "34:5a:60:57:b4:90",
+      mtu: 1500,
+      speed: "1000 Mb/s",
+      ipv4: ["192.168.1.23/24"],
+      ipv6: 2,
+      rx: 18.4e9,
+      tx: 1.9e9,
+    },
+    {
+      name: "wlp4s0",
+      kind: "wifi",
+      state: "DOWN",
+      mac: "a8:7e:ea:11:22:33",
+      mtu: 1500,
+      speed: null,
+      ipv4: [],
+      ipv6: 0,
+      rx: 0,
+      tx: 0,
+    },
+    {
+      name: "lo",
+      kind: "loopback",
+      state: "UNKNOWN",
+      mac: null,
+      mtu: 65536,
+      speed: null,
+      ipv4: ["127.0.0.1/8"],
+      ipv6: 1,
+      rx: 42e6,
+      tx: 42e6,
+    },
+  ],
+  details: [
+    row("Identity", "Host name", "talha-MS-7E02"),
+    row("Reaching the internet", "Default route", "via 192.168.1.1 on enp3s0"),
+    row("Reaching the internet", "DNS", "192.168.1.1, 1.1.1.1 · through systemd-resolved"),
+    row("Open ports", "TCP, listening", "22, 631, 1420, 5355"),
+    row("Open ports", "Established connections", "14"),
+    row("Open ports", "UDP sockets", "9"),
+  ],
+});
+
+const osSecurityMock = (): OsSecurity => ({
+  apparmor: "Enabled",
+  selinux: null,
+  lockdown: "integrity",
+  secure_boot: "Enabled",
+  details: [
+    row("Access control", "AppArmor", "Enabled"),
+    row("Access control", "Program tracing", "Only parents and chosen debuggers (1)"),
+    row("Kernel", "Lockdown", "integrity"),
+    row("Kernel", "Address randomisation", "Full (2)"),
+    row("Kernel", "Kernel addresses", "Hidden from ordinary users (1)"),
+    row("Kernel", "Kernel log", "Administrators only"),
+    row("Kernel", "Unprivileged BPF", "Blocked until restart"),
+    row("Kernel", "User namespaces", "Ordinary users may create them"),
+    row("Boot", "Secure Boot", "Enabled"),
+    row("Network", "Firewall", "ufw is running"),
+  ],
+});
 
 const pkgDefs: [string, string, string][] = [
   ["bash", "5.2.21-2ubuntu4", "amd64"],
@@ -1021,6 +1197,11 @@ export const fixtures = {
   kernelModuleInfo,
   osPackages,
   osEnvironment,
+  osMemoryMock,
+  osSecurityMock,
+  osCgroupsMock,
+  osNetworkMock,
+  filesystemList,
   diskDevices,
   directoryUsage,
   serviceList,
@@ -1069,6 +1250,16 @@ export function installMockBackend(): void {
         return osPackages();
       case "os_environment":
         return osEnvironment();
+      case "os_memory":
+        return osMemoryMock();
+      case "os_security":
+        return osSecurityMock();
+      case "os_cgroups":
+        return osCgroupsMock();
+      case "os_network":
+        return osNetworkMock();
+      case "filesystem_list":
+        return filesystemList();
       case "disk_devices":
         return diskDevices();
       case "directory_usage":

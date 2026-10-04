@@ -1,7 +1,8 @@
 use tauri::State;
 
+use super::filesystems::Filesystems;
 use super::model::{Devices, DirectoryUsage};
-use super::{devices, directory, mount, open, UsageService};
+use super::{devices, directory, filesystems, mount, open, UsageService};
 use crate::common::blocking;
 use crate::error::Result;
 
@@ -28,4 +29,9 @@ pub async fn path_open(path: String) -> Result<()> {
 #[tauri::command]
 pub async fn disk_mount(device: String) -> Result<String> {
     blocking::run(move || mount::mount(&device)).await?
+}
+
+#[tauri::command]
+pub async fn filesystem_list() -> Result<Filesystems> {
+    blocking::run(filesystems::snapshot).await?
 }

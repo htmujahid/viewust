@@ -3,10 +3,9 @@
 
   import { goto } from "$app/navigation";
 
-  import Icon from "$lib/components/ui/Icon.svelte";
   import LiveToggle from "$lib/components/ui/LiveToggle.svelte";
-  import Page from "$lib/components/ui/Page.svelte";
-  import PageHeader from "$lib/components/ui/PageHeader.svelte";
+  import SearchBox from "$lib/components/ui/SearchBox.svelte";
+  import SectionShell from "$lib/components/ui/SectionShell.svelte";
   import { serviceMenu } from "$lib/features/services/menu";
   import { menu } from "$lib/stores/menu.svelte";
   import ServicePanel from "$lib/features/services/ServicePanel.svelte";
@@ -30,7 +29,7 @@
   function onkeydown(e: KeyboardEvent) {
     if (e.key !== "Escape") return;
     if (services.selectedUnit !== null) services.select(null);
-    else goto("/");
+    else goto("/os");
   }
 
   onMount(services.start);
@@ -39,112 +38,71 @@
 
 <svelte:window {onkeydown} />
 
-<div class="layout">
-  <div class="content">
-    <Page fill>
-      <PageHeader back="/" backLabel="Devices" title="Services">
-        {#snippet actions()}
-          <label class="search">
-            <Icon name="search" size={15} />
-            <input
-              type="search"
-              aria-label="Search services"
-              placeholder="Search name, description or PID"
-              bind:value={services.search}
-            />
-          </label>
-          <LiveToggle bind:live={services.live} />
-        {/snippet}
-      </PageHeader>
+<SectionShell title="Services">
+  {#snippet actions()}
+    <SearchBox
+      bind:value={services.search}
+      placeholder="Search name, description or PID"
+      label="Search services"
+    />
+    <LiveToggle bind:live={services.live} />
+  {/snippet}
 
-      {#if services.error && !snapshot}
-        <p class="error">Couldn't read services: {services.error}</p>
-      {:else if !snapshot}
-        <div class="skeleton" style="height: 96px; margin-bottom: 16px"></div>
-        <div class="skeleton" style="height: 420px"></div>
-      {:else if !snapshot.available}
-        <p class="error">This computer doesn't use systemd, so there is no service list to show.</p>
-      {:else if overview}
-        <ServiceSummary {overview} />
+  {#if services.error && !snapshot}
+    <p class="error">Couldn't read services: {services.error}</p>
+  {:else if !snapshot}
+    <div class="skeleton" style="height: 96px; margin-bottom: 16px"></div>
+    <div class="skeleton" style="height: 420px"></div>
+  {:else if !snapshot.available}
+    <p class="error">This computer doesn't use systemd, so there is no service list to show.</p>
+  {:else if overview}
+    <ServiceSummary {overview} />
 
-        <div class="toolbar">
-          <div class="chips" role="group" aria-label="Filter services">
-            {#each filters as f}
-              <button
-                class="chip"
-                aria-pressed={services.filter === f.key}
-                onclick={() => (services.filter = f.key)}
-              >
-                {f.label}
-                <span class="tabular">{services.count(f.key)}</span>
-              </button>
-            {/each}
-          </div>
-          <p class="muted">
-            {rows.length}
-            {rows.length === 1 ? "service" : "services"}{services.search ? " match" : ""}
-          </p>
-        </div>
+    <div class="toolbar">
+      <div class="chips" role="group" aria-label="Filter services">
+        {#each filters as f}
+          <button
+            class="chip"
+            aria-pressed={services.filter === f.key}
+            onclick={() => (services.filter = f.key)}
+          >
+            {f.label}
+            <span class="tabular">{services.count(f.key)}</span>
+          </button>
+        {/each}
+      </div>
+      <p class="muted">
+        {rows.length}
+        {rows.length === 1 ? "service" : "services"}{services.search ? " match" : ""}
+      </p>
+    </div>
 
-        <ServiceTable
-          {rows}
-          sortKey={services.sortKey}
-          sortDesc={services.sortDesc}
-          selectedUnit={services.selectedUnit}
-          emptyText={services.search
-            ? `No services match “${services.search}”.`
-            : "No services in this group."}
-          onsort={(key) => services.sortBy(key)}
-          onselect={(unit) => services.select(unit)}
-          oncontext={(r, e) => menu.open(e, serviceMenu(r), r.unit)}
-        />
-      {/if}
-    </Page>
-  </div>
-
-  {#if services.selectedUnit !== null}
-    <ServicePanel
-      row={selectedRow}
-      detail={services.detail}
-      onclose={() => services.select(null)}
+    <ServiceTable
+      {rows}
+      sortKey={services.sortKey}
+      sortDesc={services.sortDesc}
+      selectedUnit={services.selectedUnit}
+      emptyText={services.search
+        ? `No services match “${services.search}”.`
+        : "No services in this group."}
+      onsort={(key) => services.sortBy(key)}
+      onselect={(unit) => services.select(unit)}
+      oncontext={(r, e) => menu.open(e, serviceMenu(r), r.unit)}
     />
   {/if}
-</div>
+
+  {#snippet panel()}
+    {#if services.selectedUnit !== null}
+      <ServicePanel
+        row={selectedRow}
+        detail={services.detail}
+        onclose={() => services.select(null)}
+      />
+    {/if}
+  {/snippet}
+</SectionShell>
 
 <style>
-  .layout {
-    position: relative;
-    display: flex;
-    height: 100%;
-  }
-  .content {
-    flex: 1;
-    min-width: 0;
-  }
-  .search {
-    display: flex;
-    align-items: center;
-    gap: var(--s-2);
-    width: 300px;
-    padding: 7px var(--s-3);
-    border: 1px solid var(--border);
-    border-radius: 0;
-    background: var(--surface);
-    color: var(--text-3);
-  }
-  .search:focus-within {
-    border-color: var(--accent);
-    box-shadow: var(--glow);
-  }
-  .search input {
-    flex: 1;
-    min-width: 0;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    font-family: var(--font-mono);
-    font-size: var(--fs-small);
-  }
   .toolbar {
     display: flex;
     flex-wrap: wrap;

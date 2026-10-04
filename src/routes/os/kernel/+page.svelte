@@ -12,7 +12,7 @@
   import SidePanel from "$lib/components/ui/SidePanel.svelte";
   import StatTiles from "$lib/components/ui/StatTiles.svelte";
   import { filterModules } from "$lib/features/os/logic";
-  import OsShell from "$lib/features/os/OsShell.svelte";
+  import SectionShell from "$lib/components/ui/SectionShell.svelte";
   import { os } from "$lib/features/os/store.svelte";
   import { menu } from "$lib/stores/menu.svelte";
   import { copyText } from "$lib/utils/actions";
@@ -20,6 +20,10 @@
   import { formatBytes } from "$lib/utils/format";
   import { sortRows } from "$lib/utils/sort";
 
+  // The kernel facts come from the summary; the table below is its loaded modules (drivers).
+  const kernelFacts = $derived(
+    groupBySection(os.summary.data?.details ?? []).find((s) => s.title === "Kernel")?.rows ?? [],
+  );
   const all = $derived(os.modules.data ?? []);
   const rows = $derived(
     sortRows(
@@ -42,15 +46,18 @@
   function onkeydown(e: KeyboardEvent) {
     if (e.key !== "Escape") return;
     if (os.selectedModule !== null) os.selectModule(null);
-    else goto("/");
+    else goto("/os");
   }
 
-  onMount(os.modules.ensure);
+  onMount(() => {
+    os.modules.ensure();
+    os.summary.ensure();
+  });
 </script>
 
 <svelte:window {onkeydown} />
 
-<OsShell>
+<SectionShell title="Kernel & drivers">
   {#snippet actions()}
     <SearchBox
       bind:value={os.moduleSearch}
@@ -66,9 +73,16 @@
     <div class="skeleton" style="height: 96px; margin-bottom: 16px"></div>
     <div class="skeleton" style="height: 420px"></div>
   {:else}
+    {#if kernelFacts.length}
+      <section class="card facts">
+        <h2>Kernel</h2>
+        <DetailList rows={kernelFacts} stackAt={64} />
+      </section>
+    {/if}
+
     <StatTiles
       items={[
-        { label: "Loaded", value: String(all.length), sub: "kernel modules" },
+        { label: "Loaded", value: String(all.length), sub: "modules (drivers)" },
         { label: "Memory", value: formatBytes(total) },
         {
           label: "Unused",
@@ -137,9 +151,22 @@
       </SidePanel>
     {/if}
   {/snippet}
-</OsShell>
+</SectionShell>
 
 <style>
+  .facts {
+    margin: 0 0 var(--s-5);
+    padding: var(--s-4) var(--s-5);
+  }
+  .facts h2 {
+    margin-bottom: var(--s-3);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
   .muted {
     color: var(--text-2);
   }

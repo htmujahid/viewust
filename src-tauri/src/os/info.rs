@@ -6,7 +6,7 @@ use sysinfo::System;
 use super::model::OsSummary;
 use super::{modules, packages, release};
 use crate::common::cmd::{run, run_any};
-use crate::common::sysfs::read;
+use crate::common::sysfs::{dmi, read};
 use crate::common::Details;
 
 fn first_line(text: Option<String>) -> Option<String> {
@@ -42,11 +42,64 @@ pub(crate) fn tainted(value: &str) -> String {
     }
 }
 
-/// `/sys/kernel/security/lockdown` reads `none [integrity] confidentiality`; the bracket is active.
-pub(crate) fn lockdown(text: &str) -> Option<String> {
+/// Kernel files like `/sys/kernel/security/lockdown` read `none [integrity] …`; the bracket is active.
+pub(crate) fn bracketed(text: &str) -> Option<String> {
     let start = text.find('[')? + 1;
     let end = text.find(']')?;
     (end > start).then(|| text[start..end].to_owned())
+}
+
+/// Breaks "7.8s (firmware) + 2.7s (loader) + … = 25s" into its stages.
+pub(crate) fn startup_stages(text: &str) -> Vec<(String, String)> {
+    text.split(['+', '='])
+        .filter_map(|part| {
+            let (duration, rest) = part.trim().split_once(" (")?;
+            let name = rest.strip_suffix(')')?;
+            Some((name.to_owned(), duration.to_owned()))
+        })
+        .collect()
+}
+
+/// An EFI variable is 4 attribute bytes, then a UTF-16 string.
+pub(crate) fn efi_string(bytes: &[u8]) -> Option<String> {
+    let units: Vec<u16> = bytes
+        .get(4..)?
+        .chunks_exact(2)
+        .map(|c| u16::from_le_bytes([c[0], c[1]]))
+        .take_while(|u| *u != 0)
+        .collect();
+    String::from_utf16(&units)
+        .ok()
+        .filter(|s| !s.trim().is_empty())
+}
+
+/// What hands the kernel to the machine. systemd-boot says its name in an EFI variable;
+/// GRUB leaves its configuration behind.
+fn bootloader(efi: bool) -> String {
+    if let Some(name) =
+        std::fs::read("/sys/firmware/efi/efivars/LoaderInfo-4a67b082-0a4c-41cf-b6c7-440b29bb8c4f")
+            .ok()
+            .and_then(|b| efi_string(&b))
+    {
+        return name;
+    }
+    if ["/boot/grub/grub.cfg", "/boot/grub2/grub.cfg"]
+        .iter()
+        .any(|p| Path::new(p).exists())
+    {
+        return "GRUB".into();
+    }
+    if efi {
+        "an EFI bootloader".into()
+    } else {
+        "the BIOS boot sector".into()
+    }
+}
+
+fn file_size(path: &str) -> Option<String> {
+    std::fs::metadata(path)
+        .ok()
+        .map(|m| crate::common::format::format_bytes(m.len()))
 }
 
 /// `systemd-analyze time` begins "Startup finished in 5s (firmware) + … = 23s".
@@ -174,6 +227,106 @@ pub(crate) fn summary() -> OsSummary {
     );
     d.add_opt("Boot", "Boot ID", read("/proc/sys/kernel/random/boot_id"));
 
+    // The firmware itself: who made it and how old it is. Old firmware explains odd hardware.
+    d.add_opt("Firmware", "Vendor", dmi("bios_vendor"));
+    d.add_opt(
+        "Firmware",
+        "Version",
+        dmi("bios_version").map(|v| match dmi("bios_release") {
+            Some(rel) => format!("{v} (revision {rel})"),
+            None => v,
+        }),
+    );
+    d.add_opt("Firmware", "Date", dmi("bios_date"));
+    d.add(
+        "Firmware",
+        "Interface",
+        if efi {
+            match read("/sys/firmware/efi/fw_platform_size").as_deref() {
+                Some("64") => "UEFI, 64-bit",
+                Some("32") => "UEFI, 32-bit",
+                _ => "UEFI",
+            }
+        } else {
+            "Legacy BIOS"
+        },
+    );
+
+    // The chain that gets from power button to running system, stage by stage.
+    let stages: std::collections::HashMap<String, String> = analyze
+        .as_deref()
+        .and_then(startup_time)
+        .map(|t| startup_stages(&t).into_iter().collect())
+        .unwrap_or_default();
+    let took = |k: &str| {
+        stages
+            .get(k)
+            .map(|d| format!(" · took {d}"))
+            .unwrap_or_default()
+    };
+    d.add(
+        "Boot chain",
+        "1 · Firmware",
+        format!(
+            "{} — wakes the hardware and finds the bootloader{}",
+            if efi { "UEFI" } else { "Legacy BIOS" },
+            took("firmware")
+        ),
+    );
+    d.add(
+        "Boot chain",
+        "2 · Bootloader",
+        format!(
+            "{} — loads the kernel and the initramfs into memory{}",
+            bootloader(efi),
+            took("loader")
+        ),
+    );
+    d.add(
+        "Boot chain",
+        "3 · Kernel",
+        format!(
+            "vmlinuz-{kernel}{} — takes over the machine{}",
+            file_size(&format!("/boot/vmlinuz-{kernel}"))
+                .map(|s| format!(" ({s})"))
+                .unwrap_or_default(),
+            took("kernel")
+        ),
+    );
+    let initrd = [
+        format!("/boot/initrd.img-{kernel}"),
+        format!("/boot/initramfs-{kernel}.img"),
+    ]
+    .into_iter()
+    .find(|p| Path::new(p).exists());
+    d.add(
+        "Boot chain",
+        "4 · initramfs",
+        format!(
+            "{} — a temporary root filesystem whose drivers mount the real root disk{}",
+            initrd
+                .as_deref()
+                .map(|p| {
+                    let name = p.rsplit('/').next().unwrap_or(p);
+                    match file_size(p) {
+                        Some(s) => format!("{name} ({s})"),
+                        None => name.to_owned(),
+                    }
+                })
+                .unwrap_or_else(|| "none found".into()),
+            took("initrd")
+        ),
+    );
+    d.add(
+        "Boot chain",
+        "5 · Init",
+        format!(
+            "{} — the first program; it starts everything else{}",
+            read("/proc/1/comm").unwrap_or_else(|| "unknown".into()),
+            took("userspace")
+        ),
+    );
+
     d.add_opt(
         "Session",
         "Current user",
@@ -249,7 +402,7 @@ pub(crate) fn summary() -> OsSummary {
     d.add_opt(
         "Security",
         "Kernel lockdown",
-        read("/sys/kernel/security/lockdown").and_then(|t| lockdown(&t)),
+        read("/sys/kernel/security/lockdown").and_then(|t| bracketed(&t)),
     );
     d.add_opt(
         "Security",
@@ -328,14 +481,14 @@ mod tests {
     #[test]
     fn the_active_lockdown_mode_is_the_bracketed_one() {
         assert_eq!(
-            lockdown("none [integrity] confidentiality").as_deref(),
+            bracketed("none [integrity] confidentiality").as_deref(),
             Some("integrity")
         );
         assert_eq!(
-            lockdown("[none] integrity confidentiality").as_deref(),
+            bracketed("[none] integrity confidentiality").as_deref(),
             Some("none")
         );
-        assert_eq!(lockdown("garbage"), None);
+        assert_eq!(bracketed("garbage"), None);
     }
 
     #[test]
@@ -346,6 +499,28 @@ mod tests {
             Some("5.1s (firmware) + 3s (loader) + 20s (userspace) = 28s")
         );
         assert_eq!(startup_time("Bootup is not yet finished"), None);
+    }
+
+    #[test]
+    fn the_startup_line_breaks_into_stages() {
+        let t = "7.819s (firmware) + 2.753s (loader) + 2.534s (kernel) + 3.579s (initrd) + 8.545s (userspace) = 25.232s";
+        let stages = startup_stages(t);
+        assert_eq!(stages.len(), 5);
+        assert_eq!(stages[0], ("firmware".into(), "7.819s".into()));
+        assert_eq!(stages[3], ("initrd".into(), "3.579s".into()));
+        assert!(startup_stages("4.2s = 4.2s").is_empty());
+    }
+
+    #[test]
+    fn efi_variables_decode_as_utf16_after_the_attributes() {
+        let mut bytes = vec![7, 0, 0, 0];
+        for unit in "systemd-boot 257".encode_utf16() {
+            bytes.extend(unit.to_le_bytes());
+        }
+        bytes.extend([0, 0]);
+        assert_eq!(efi_string(&bytes).as_deref(), Some("systemd-boot 257"));
+        assert_eq!(efi_string(&[7, 0, 0, 0]), None);
+        assert_eq!(efi_string(&[1, 2]), None);
     }
 
     #[test]

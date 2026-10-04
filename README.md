@@ -6,20 +6,38 @@ doing right now.
 ## What it shows
 
 - **Overview** – the computer at a glance: identity, health, live load, and a summary of every part.
+
+**Hardware** – the physical computer:
+
 - **Devices** – external devices (keyboards, mice, monitors, drives…) and the route to the internet.
 - **System** – the internal parts: motherboard, processor, memory, drives, graphics, power.
 - **Live monitor** – real-time processor, memory, storage, graphics, thermal, power and network charts.
+
+**Operating system** – what it runs:
+
+- **Overview** – one page, grouped the way an OS is structured: **System** (distribution, boot,
+  session), **Kernel** (kernel & drivers, memory), **Processes** (programs, services, namespaces,
+  control groups), **Storage** (disk usage, file systems), **Network**, **Accounts**, **Security**
+  and **Software** — every card with live figures and a button to its page.
+- **Kernel & drivers** – release, build and command line, plus every loaded module and its settings.
+- **Memory management** – RAM, swap devices, caches, the kernel's own use, and memory settings.
+- **Control groups** – cgroup version and controllers, and the top-level slices with their
+  processes and memory.
+- **Security & protection** – AppArmor/SELinux, kernel lockdown and hardening, Secure Boot, firewall.
+- **Packages and environment** – every installed package, and the session's environment variables
+  (secrets are never loaded).
 - **Processes** – running programs and their memory use, plus Linux namespaces.
+- **Services** – systemd services, their state and recent logs.
 - **Disk usage** – every connected drive (internal, USB, optical, network shares) as a tree: drive →
   partitions (through encrypted or LVM layers) → folders, to see what is taking the space. Drives
   that aren't mounted are listed too, with a Mount button so you can browse them.
-- **Services** – systemd services, their state and recent logs.
+- **File systems** – everything mounted, from drives to the kernel's own views, with space and use.
+- **Networking** – interfaces with addresses, MAC, link speed and traffic; the default route, DNS,
+  listening TCP ports and established connections.
 - **Accounts** – users and groups.
-- **Operating system** – the distribution and version, kernel, boot and firmware (UEFI, Secure Boot,
-  startup time), desktop session, language and time, security (AppArmor/SELinux, lockdown),
-  virtualization and software, plus tabs for loaded kernel modules (with their settings), every
-  installed package, and the session's environment variables (secrets are never loaded). Links to
-  all the related pages are on its overview.
+
+The sidebar carries the three hardware pages and the Operating system; processes, services, disk
+usage and accounts are reached through the OS overview.
 
 Click anything for a summary; double-click a device or part for its full technical page.
 

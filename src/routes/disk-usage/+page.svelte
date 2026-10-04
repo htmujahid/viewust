@@ -4,8 +4,7 @@
   import { goto } from "$app/navigation";
 
   import RescanButton from "$lib/components/ui/RescanButton.svelte";
-  import Page from "$lib/components/ui/Page.svelte";
-  import PageHeader from "$lib/components/ui/PageHeader.svelte";
+  import SectionShell from "$lib/components/ui/SectionShell.svelte";
   import StatTiles from "$lib/components/ui/StatTiles.svelte";
   import DiskTree from "$lib/features/disk-usage/DiskTree.svelte";
   import { menuTitle, treeMenu } from "$lib/features/disk-usage/menu";
@@ -26,7 +25,7 @@
   );
 
   function onkeydown(e: KeyboardEvent) {
-    if (e.key === "Escape") goto("/");
+    if (e.key === "Escape") goto("/os");
   }
 
   // The device list is read once; opening a folder is what does the measuring.
@@ -37,23 +36,21 @@
 
 <svelte:window {onkeydown} />
 
-<Page>
-  <PageHeader back="/" backLabel="Overview" title="Disk usage">
-    {#snippet actions()}
-      <label class="check">
-        <input type="checkbox" bind:checked={diskUsage.showFiles} />
-        Show files
-      </label>
-      <button
-        class="btn"
-        onclick={() => diskUsage.collapseAll()}
-        disabled={diskUsage.expanded.size === 0}
-      >
-        Collapse all
-      </button>
-      <RescanButton loading={busy} onclick={() => diskUsage.rescanAll()} label />
-    {/snippet}
-  </PageHeader>
+<SectionShell scroll title="Disk usage">
+  {#snippet actions()}
+    <label class="check">
+      <input type="checkbox" bind:checked={diskUsage.showFiles} />
+      Show files
+    </label>
+    <button
+      class="btn"
+      onclick={() => diskUsage.collapseAll()}
+      disabled={diskUsage.expanded.size === 0}
+    >
+      Collapse all
+    </button>
+    <RescanButton loading={busy} onclick={() => diskUsage.rescanAll()} label />
+  {/snippet}
 
   {#if diskUsage.error && !snapshot}
     <p class="error">Couldn't read the storage devices: {diskUsage.error}</p>
@@ -99,7 +96,7 @@
       />
     {/if}
   {/if}
-</Page>
+</SectionShell>
 
 <style>
   .check {

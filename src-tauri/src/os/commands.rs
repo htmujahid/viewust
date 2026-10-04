@@ -1,5 +1,7 @@
-use super::model::{EnvVar, KernelModule, ModuleInfo, OsSummary, Packages};
-use super::{environment, info, modules, packages};
+use super::model::{
+    Cgroups, EnvVar, KernelModule, ModuleInfo, OsMemory, OsNetwork, OsSecurity, OsSummary, Packages,
+};
+use super::{cgroups, environment, info, memory, modules, network, packages, security};
 use crate::common::blocking;
 use crate::error::Result;
 
@@ -26,4 +28,24 @@ pub async fn os_packages() -> Result<Packages> {
 #[tauri::command]
 pub async fn os_environment() -> Result<Vec<EnvVar>> {
     blocking::run(environment::list).await
+}
+
+#[tauri::command]
+pub async fn os_memory() -> Result<OsMemory> {
+    blocking::run(memory::snapshot).await
+}
+
+#[tauri::command]
+pub async fn os_security() -> Result<OsSecurity> {
+    blocking::run(security::snapshot).await
+}
+
+#[tauri::command]
+pub async fn os_cgroups() -> Result<Cgroups> {
+    blocking::run(cgroups::snapshot).await
+}
+
+#[tauri::command]
+pub async fn os_network() -> Result<OsNetwork> {
+    blocking::run(network::snapshot).await
 }

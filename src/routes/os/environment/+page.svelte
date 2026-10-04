@@ -9,7 +9,7 @@
   import SearchBox from "$lib/components/ui/SearchBox.svelte";
   import StatTiles from "$lib/components/ui/StatTiles.svelte";
   import { filterEnv } from "$lib/features/os/logic";
-  import OsShell from "$lib/features/os/OsShell.svelte";
+  import SectionShell from "$lib/components/ui/SectionShell.svelte";
   import { os } from "$lib/features/os/store.svelte";
   import { menu } from "$lib/stores/menu.svelte";
   import { copyText } from "$lib/utils/actions";
@@ -23,7 +23,7 @@
   ];
 
   function onkeydown(e: KeyboardEvent) {
-    if (e.key === "Escape") goto("/");
+    if (e.key === "Escape") goto("/os");
   }
 
   onMount(os.environment.ensure);
@@ -31,7 +31,7 @@
 
 <svelte:window {onkeydown} />
 
-<OsShell>
+<SectionShell title="Environment">
   {#snippet actions()}
     <SearchBox
       bind:value={os.envSearch}
@@ -98,7 +98,7 @@
       {/snippet}
     </DataTable>
   {/if}
-</OsShell>
+</SectionShell>
 
 <style>
   .muted {

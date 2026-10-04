@@ -43,6 +43,7 @@ pub fn run() {
             disk_usage::commands::directory_usage,
             disk_usage::commands::path_open,
             disk_usage::commands::disk_mount,
+            disk_usage::commands::filesystem_list,
             services::commands::service_list,
             services::commands::service_detail,
             services::commands::service_action,
@@ -52,6 +53,10 @@ pub fn run() {
             os::commands::kernel_module_info,
             os::commands::os_packages,
             os::commands::os_environment,
+            os::commands::os_memory,
+            os::commands::os_security,
+            os::commands::os_cgroups,
+            os::commands::os_network,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

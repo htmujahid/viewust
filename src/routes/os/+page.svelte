@@ -4,91 +4,280 @@
   import { goto } from "$app/navigation";
 
   import Badge from "$lib/components/ui/Badge.svelte";
-  import DetailList from "$lib/components/ui/DetailList.svelte";
-  import Icon, { type IconName } from "$lib/components/ui/Icon.svelte";
-  import Masonry from "$lib/components/ui/Masonry.svelte";
-  import RescanButton from "$lib/components/ui/RescanButton.svelte";
+  import Page from "$lib/components/ui/Page.svelte";
   import { bootedAgo } from "$lib/features/os/logic";
-  import OsShell from "$lib/features/os/OsShell.svelte";
+  import { osOverview } from "$lib/features/os/overview.svelte";
   import { os } from "$lib/features/os/store.svelte";
-  import { groupBySection } from "$lib/utils/details";
+  import SubsystemCard from "$lib/features/os/SubsystemCard.svelte";
+  import {
+    groupFacts,
+    cgroupFacts,
+    bootloaderFact,
+    envFacts,
+    filesystemFacts,
+    kernelFacts,
+    memoryFacts,
+    mountFacts,
+    networkFacts,
+    namespaceFacts,
+    packageFacts,
+    processFacts,
+    securityFacts,
+    serviceFacts,
+    summaryFacts,
+    userFacts,
+  } from "$lib/features/os/subsystems";
   import { formatDuration } from "$lib/utils/format";
-  import { sectionCost } from "$lib/utils/masonry";
 
   const summary = $derived(os.summary.data);
-  const items = $derived(
-    groupBySection(summary?.details ?? []).map((section) => ({
-      key: section.title,
-      cost: sectionCost(section.rows),
-      section,
-    })),
-  );
 
   // Uptime moves on its own; the rest of the page only changes when asked.
   let now = $state(Date.now() / 1000);
   const tick = setInterval(() => (now = Date.now() / 1000), 30_000);
   onDestroy(() => clearInterval(tick));
 
-  const related: { href: string; icon: IconName; title: string; text: string }[] = [
+  const ov = osOverview;
+  // The areas an operating system is made of, each card with its live figures.
+  const groups = $derived([
     {
-      href: "/processes",
-      icon: "activity",
-      title: "Processes",
-      text: "Programs running now and the memory they use",
+      label: "System",
+      text: "What this computer is, how it starts, and who is signed in.",
+      cards: [
+        {
+          href: "/os/about",
+          icon: "box",
+          title: "Distribution",
+          text: "What this system is and where it comes from",
+          facts: summaryFacts(summary, [
+            ["Operating system", "Distribution"],
+            ["Operating system", "Based on"],
+            ["Operating system", "Architecture"],
+            ["Virtualization", "Runs on"],
+          ]),
+          loading: os.summary.loading,
+          error: os.summary.error,
+        },
+        {
+          href: "/os/session",
+          icon: "display",
+          title: "Session",
+          text: "Who is signed in, their desktop, language and time",
+          facts: summaryFacts(summary, [
+            ["Session", "Current user"],
+            ["Session", "Desktop"],
+            ["Session", "Session type"],
+            ["Language and time", "Time zone"],
+          ]),
+          loading: os.summary.loading,
+          error: os.summary.error,
+        },
+        {
+          href: "/os/boot",
+          icon: "clock",
+          title: "Boot",
+          text: "Firmware, bootloader, initramfs: how the computer starts",
+          facts: [
+            ...summaryFacts(summary, [
+              ["Firmware", "Interface"],
+              ["Firmware", "Version"],
+              ["Boot", "Secure Boot"],
+              ["Boot", "Started"],
+            ]),
+            ...bootloaderFact(summary),
+          ],
+          loading: os.summary.loading,
+          error: os.summary.error,
+        },
+      ],
     },
     {
-      href: "/processes/namespaces",
-      icon: "system",
-      title: "Namespaces",
-      text: "How programs are kept apart from each other",
+      label: "Kernel",
+      text: "The core of the OS: its drivers, and how it hands memory out.",
+      cards: [
+        {
+          href: "/os/kernel",
+          icon: "cpu",
+          title: "Kernel & drivers",
+          text: "The core of the OS and the driver modules it has loaded",
+          facts: kernelFacts(summary, os.modules.data),
+          loading: os.summary.loading || os.modules.loading,
+          error: os.summary.error,
+        },
+        {
+          href: "/os/memory",
+          icon: "memory",
+          title: "Memory management",
+          text: "RAM, swap, caches and how the kernel hands memory out",
+          facts: memoryFacts(os.memory.data),
+          loading: os.memory.loading,
+          error: os.memory.error,
+        },
+      ],
     },
     {
-      href: "/services",
-      icon: "server",
-      title: "Services",
-      text: "Background services, their state and logs",
+      label: "Processes",
+      text: "Everything running: how it is supervised, kept apart, and shares the machine.",
+      cards: [
+        {
+          href: "/processes",
+          icon: "activity",
+          title: "Programs",
+          text: "Every running program, scheduled onto the processor",
+          facts: processFacts(ov.processes.data),
+          loading: ov.processes.loading,
+          error: ov.processes.error,
+        },
+        {
+          href: "/services",
+          icon: "server",
+          title: "Services",
+          text: "Programs the OS starts and supervises in the background",
+          facts: serviceFacts(ov.services.data),
+          loading: ov.services.loading,
+          error: ov.services.error,
+        },
+        {
+          href: "/processes/namespaces",
+          icon: "system",
+          title: "Namespaces",
+          text: "The walls that keep programs apart from each other",
+          facts: namespaceFacts(ov.namespaces.data),
+          loading: ov.namespaces.loading,
+          error: ov.namespaces.error,
+        },
+        {
+          href: "/os/cgroups",
+          icon: "overview",
+          title: "Control groups",
+          text: "How processor time, memory and I/O are shared out",
+          facts: cgroupFacts(ov.cgroups.data),
+          loading: ov.cgroups.loading,
+          error: ov.cgroups.error,
+        },
+      ],
     },
-    { href: "/accounts", icon: "users", title: "Users", text: "Accounts on this computer" },
     {
-      href: "/accounts/groups",
-      icon: "users",
-      title: "Groups",
-      text: "Groups and who belongs to them",
+      label: "Storage",
+      text: "The drives, the filesystems mounted on them, and what is taking the space.",
+      cards: [
+        {
+          href: "/disk-usage",
+          icon: "storage",
+          title: "Disk usage",
+          text: "Drives, partitions and what is taking the space, folder by folder",
+          facts: filesystemFacts(ov.disks.data),
+          loading: ov.disks.loading,
+          error: ov.disks.error,
+        },
+        {
+          href: "/os/filesystems",
+          icon: "storage",
+          title: "File systems",
+          text: "Everything mounted, from drives to the kernel's own views",
+          facts: mountFacts(ov.filesystems.data),
+          loading: ov.filesystems.loading,
+          error: ov.filesystems.error,
+        },
+      ],
     },
     {
-      href: "/disk-usage",
-      icon: "storage",
-      title: "Disk usage",
-      text: "What is taking the space on every drive",
+      label: "Network",
+      text: "How the computer talks to the world.",
+      cards: [
+        {
+          href: "/os/network",
+          icon: "network",
+          title: "Networking",
+          text: "Interfaces, addresses, routes, DNS and open ports",
+          facts: networkFacts(ov.network.data),
+          loading: ov.network.loading,
+          error: ov.network.error,
+        },
+      ],
     },
     {
-      href: "/monitor",
-      icon: "chart",
-      title: "Live monitor",
-      text: "Processor, memory, disk and network in real time",
+      label: "Accounts",
+      text: "Who may use the computer, and with what rights.",
+      cards: [
+        {
+          href: "/accounts",
+          icon: "users",
+          title: "Users",
+          text: "Who may sign in, and who may administer the computer",
+          facts: userFacts(ov.accounts.data),
+          loading: ov.accounts.loading,
+          error: ov.accounts.error,
+        },
+        {
+          href: "/accounts/groups",
+          icon: "users",
+          title: "Groups",
+          text: "How users are gathered and given shared rights",
+          facts: groupFacts(ov.accounts.data),
+          loading: ov.accounts.loading,
+          error: ov.accounts.error,
+        },
+      ],
     },
     {
-      href: "/system",
-      icon: "cpu",
-      title: "Hardware inside",
-      text: "The parts this system runs on",
+      label: "Security",
+      text: "The protections wrapped around all of it.",
+      cards: [
+        {
+          href: "/os/security",
+          icon: "shield",
+          title: "Security & protection",
+          text: "Access control, kernel hardening, Secure Boot and the firewall",
+          facts: securityFacts(os.security.data),
+          loading: os.security.loading,
+          error: os.security.error,
+        },
+      ],
     },
-  ];
+    {
+      label: "Software",
+      text: "What is installed, and the variables this session runs with.",
+      cards: [
+        {
+          href: "/os/packages",
+          icon: "box",
+          title: "Packages",
+          text: "Every installed package and the manager behind it",
+          facts: packageFacts(os.packages.data),
+          loading: os.packages.loading,
+          error: os.packages.error,
+        },
+        {
+          href: "/os/environment",
+          icon: "terminal",
+          title: "Environment",
+          text: "The variables this session runs with",
+          facts: envFacts(os.environment.data),
+          loading: os.environment.loading,
+          error: os.environment.error,
+        },
+      ],
+    },
+  ] as const);
 
   function onkeydown(e: KeyboardEvent) {
     if (e.key === "Escape") goto("/");
   }
 
-  onMount(os.summary.ensure);
+  onMount(() => {
+    os.summary.ensure();
+    os.modules.ensure();
+    os.memory.ensure();
+    os.security.ensure();
+    os.packages.ensure();
+    os.environment.ensure();
+    osOverview.ensure();
+  });
 </script>
 
 <svelte:window {onkeydown} />
 
-<OsShell scroll>
-  {#snippet actions()}
-    <RescanButton loading={os.summary.loading} onclick={os.summary.load} label />
-  {/snippet}
-
+<Page>
   {#if os.summary.error && !summary}
     <p class="error">Couldn't read the operating system: {os.summary.error}</p>
   {:else if !summary}
@@ -107,29 +296,25 @@
       </div>
     </section>
 
-    <Masonry {items}>
-      {#snippet children(item)}
-        <section class="card block">
-          <h2>{item.section.title}</h2>
-          <DetailList rows={item.section.rows} stackAt={64} />
-        </section>
-      {/snippet}
-    </Masonry>
-
-    <h2 class="heading">Related</h2>
-    <div class="related">
-      {#each related as r (r.href)}
-        <a class="card link" href={r.href}>
-          <Icon name={r.icon} size={20} />
-          <span>
-            <b>{r.title}</b>
-            <small>{r.text}</small>
-          </span>
-        </a>
-      {/each}
-    </div>
+    {#each groups as g (g.label)}
+      <h2 class="heading">{g.label}</h2>
+      <p class="layer">{g.text}</p>
+      <div class="subsystems">
+        {#each g.cards as c (c.title)}
+          <SubsystemCard
+            href={c.href}
+            icon={c.icon}
+            title={c.title}
+            text={c.text}
+            facts={c.facts}
+            loading={c.loading}
+            error={c.error}
+          />
+        {/each}
+      </div>
+    {/each}
   {/if}
-</OsShell>
+</Page>
 
 <style>
   .hero {
@@ -160,22 +345,9 @@
     gap: var(--s-2);
     margin-top: var(--s-3);
   }
-  .block {
-    margin: 0;
-    padding: var(--s-4) var(--s-5);
-  }
-  .block h2 {
-    margin-bottom: var(--s-3);
-    color: var(--accent);
-    font-family: var(--font-mono);
-    font-size: var(--fs-label);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
   .heading {
-    margin-top: var(--s-4);
-    margin-bottom: var(--s-3);
+    margin-top: 0;
+    margin-bottom: var(--s-1);
     color: var(--text-2);
     font-family: var(--font-mono);
     font-size: var(--fs-label);
@@ -183,39 +355,21 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
-  .related {
+  .layer {
+    margin-bottom: var(--s-3);
+    color: var(--text-3);
+    font-size: var(--fs-small);
+  }
+  .subsystems {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: var(--s-3);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-4);
     margin-bottom: var(--s-5);
   }
-  .link {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--s-3);
-    margin: 0;
-    padding: var(--s-3) var(--s-4);
-    color: var(--text);
-    text-decoration: none;
-  }
-  .link:hover {
-    border-color: var(--accent);
-    box-shadow: var(--glow);
-  }
-  .link :global(svg) {
-    flex: none;
-    margin-top: 2px;
-    color: var(--accent);
-  }
-  .link span {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-  }
-  .link small {
-    color: var(--text-2);
-    font-size: var(--fs-small);
+  @media (max-width: 760px) {
+    .subsystems {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
   .error {
     padding: var(--s-6) 0;

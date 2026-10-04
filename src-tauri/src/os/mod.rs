@@ -1,7 +1,11 @@
+mod cgroups;
 pub mod commands;
 mod environment;
 mod info;
+mod memory;
 mod model;
 mod modules;
+mod network;
 mod packages;
 mod release;
+mod security;

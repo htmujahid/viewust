@@ -1,36 +1,23 @@
 import { api, errorMessage } from "$lib/api/client";
-import type { EnvVar, KernelModule, ModuleInfo, OsSummary, Packages } from "$lib/api/types";
 
-/** One list that is read the first time its tab is opened, and again on request. */
-class Loaded<T> {
-  data = $state.raw<T | null>(null);
-  error = $state<string | null>(null);
-  loading = $state(false);
-
-  constructor(private readonly read: () => Promise<T>) {}
-
-  load = async () => {
-    this.loading = true;
-    try {
-      this.data = await this.read();
-      this.error = null;
-    } catch (e) {
-      this.error = errorMessage(e);
-    } finally {
-      this.loading = false;
-    }
-  };
-
-  ensure = () => {
-    if (this.data === null && !this.loading) void this.load();
-  };
-}
+import { Loaded } from "./loaded.svelte";
+import type {
+  EnvVar,
+  KernelModule,
+  ModuleInfo,
+  OsMemory,
+  OsSecurity,
+  OsSummary,
+  Packages,
+} from "$lib/api/types";
 
 class OsStore {
   readonly summary = new Loaded<OsSummary>(() => api.osSummary());
   readonly modules = new Loaded<KernelModule[]>(() => api.kernelModules());
   readonly packages = new Loaded<Packages>(() => api.osPackages());
   readonly environment = new Loaded<EnvVar[]>(() => api.osEnvironment());
+  readonly memory = new Loaded<OsMemory>(() => api.osMemory());
+  readonly security = new Loaded<OsSecurity>(() => api.osSecurity());
 
   moduleSearch = $state("");
   moduleSort = $state("size");

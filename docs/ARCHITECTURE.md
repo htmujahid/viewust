@@ -26,7 +26,7 @@ feature/
 | `system`     | internal parts: board, CPU, memory, drives, GPU, network, sound, power                              |
 | `report`     | the deep technical report for one device (descriptors, HID, drivers…)                               |
 | `disk_usage` | attached drives and partitions (`lsblk`, `df`), mounting (`udisksctl`), folder sizes for the tree   |
-| `os`         | the operating system: release, kernel, boot, session, security; modules, packages, environment      |
+| `os`         | the OS by area: summary, cgroups, modules, memory, network, security, packages, environment…        |
 | `processes`  | the process list and one process in depth                                                           |
 | `monitor`    | one-second live samples                                                                             |
 | `common`     | shared plumbing with no domain knowledge: details rows, formatting, sysfs, ID databases, `blocking` |
@@ -83,6 +83,10 @@ styles/            tokens.css (colour/spacing/type), base.css, utilities.css
   `Poller`, which never overlaps runs.
 - **Logic that can be pure is pure and tested** (`graph.ts`, `series.ts`, `details.ts`, `scale.ts`).
   Components render; they don't compute layouts.
+- **The sidebar is the three hardware pages plus the operating system.** `lib/nav.ts` maps paths to
+  sidebar entries. The OS page is a dashboard: one card per subsystem with live figures
+  (`features/os/subsystems.ts` builds them as pure, tested functions), each linking to its full
+  page; those pages carry a back link instead of tabs.
 - **Navigation is links.** Use `<a href>` (or `BackLink`/`NavLinks`); reserve `goto` for redirects and
   keyboard shortcuts.
 - **Style with tokens.** Colours, spacing (`--s-*`), type (`--fs-*`) and radii live in
@@ -116,8 +120,9 @@ The menu, confirmation dialog and toasts are mounted once in `routes/+layout.sve
 
 ### Add a page
 
-Create `routes/<name>/+page.svelte`. Wrap it in `<Page>` with a `<PageHeader back=… >`, put the logic
-in a store under `lib/features/<name>/`, and link to it from `NavLinks`.
+Create `routes/<name>/+page.svelte`. Wrap it in `<SectionShell title=…>` (back link + title; pages
+have no tab bars — every page is reached from the OS dashboard or the sidebar), put the logic in a
+store under `lib/features/<name>/`, and add its card to the OS dashboard or `lib/nav.ts`.
 
 ### Add a new kind of device
 
