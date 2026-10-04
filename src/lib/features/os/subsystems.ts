@@ -1,12 +1,15 @@
 import type {
   Accounts,
   Cgroups,
+  Connections,
   DiskDevices,
   EnvVar,
   Filesystems,
   KernelModule,
   Namespaces,
   OsMemory,
+  OsLogins,
+  OsLogs,
   OsNetwork,
   OsSecurity,
   OsSummary,
@@ -146,6 +149,40 @@ export function networkFacts(n: OsNetwork | null): Fact[] {
     fact("DNS servers", String(n.dns.length), n.dns.length === 0 ? "warn" : undefined),
     fact("Listening TCP ports", String(n.listening_tcp.length)),
     fact("Connections", String(n.established)),
+  ];
+}
+
+export function connectionFacts(c: Connections | null): Fact[] {
+  if (!c) return [];
+  return [
+    fact("Established", String(c.established)),
+    fact("Listening", String(c.listening)),
+    fact("Closing down", String(c.time_wait)),
+  ];
+}
+
+export function logFacts(l: OsLogs | null): Fact[] {
+  if (!l) return [];
+  if (!l.available) return [fact("Journal", "Not available", "warn")];
+  return [
+    ...(l.size ? [fact("Journal size", l.size)] : []),
+    ...(l.boots !== null ? [fact("Boots kept", String(l.boots))] : []),
+    fact(
+      "Errors this boot",
+      l.truncated ? `over ${l.errors.length}` : String(l.errors.length),
+      l.errors.length > 0 ? "warn" : "ok",
+    ),
+  ];
+}
+
+export function loginFacts(l: OsLogins | null): Fact[] {
+  if (!l) return [];
+  if (!l.available) return [fact("Sessions", "Not available", "warn")];
+  const remote = l.sessions.filter((s) => s.remote).length;
+  return [
+    fact("Signed-in sessions", String(l.sessions.length)),
+    fact("Users", String(new Set(l.sessions.map((s) => s.user)).size)),
+    fact("From elsewhere", String(remote), remote > 0 ? "warn" : undefined),
   ];
 }
 

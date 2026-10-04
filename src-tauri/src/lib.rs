@@ -57,6 +57,9 @@ pub fn run() {
             os::commands::os_security,
             os::commands::os_cgroups,
             os::commands::os_network,
+            os::commands::os_connections,
+            os::commands::os_logs,
+            os::commands::os_logins,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

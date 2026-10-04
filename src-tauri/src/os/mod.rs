@@ -2,6 +2,8 @@ mod cgroups;
 pub mod commands;
 mod environment;
 mod info;
+mod logins;
+mod logs;
 mod memory;
 mod model;
 mod modules;

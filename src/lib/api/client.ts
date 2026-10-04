@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 
 import type {
   Cgroups,
+  Connections,
   Detail,
   EnvVar,
   DirectoryUsage,
@@ -11,6 +12,8 @@ import type {
   KernelModule,
   MemoryModules,
   ModuleInfo,
+  OsLogins,
+  OsLogs,
   OsMemory,
   OsNetwork,
   OsSecurity,
@@ -79,6 +82,9 @@ export const api = {
   osSecurity: () => call<OsSecurity>("os_security"),
   osCgroups: () => call<Cgroups>("os_cgroups"),
   osNetwork: () => call<OsNetwork>("os_network"),
+  osConnections: () => call<Connections>("os_connections"),
+  osLogs: () => call<OsLogs>("os_logs"),
+  osLogins: () => call<OsLogins>("os_logins"),
 
   monitorSample: () => call<Sample>("monitor_sample"),
 } as const;

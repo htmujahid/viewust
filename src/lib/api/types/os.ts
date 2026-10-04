@@ -105,3 +105,45 @@ export interface OsNetwork {
   interfaces: NetInterface[];
   details: Detail[];
 }
+
+export interface ConnRow {
+  proto: string;
+  local: string;
+  remote: string;
+  state: string;
+}
+
+export interface Connections {
+  established: number;
+  listening: number;
+  time_wait: number;
+  rows: ConnRow[];
+}
+
+export interface OsLogs {
+  available: boolean;
+  size: string | null;
+  boots: number | null;
+  /** The error-level lines of this boot, oldest first */
+  errors: string[];
+  truncated: boolean;
+  note: string | null;
+}
+
+export interface LoginSession {
+  id: string;
+  user: string;
+  /** "wayland", "x11" or "tty" */
+  kind: string;
+  class: string;
+  /** The TTY, seat or remote host it comes from */
+  place: string;
+  remote: boolean;
+  since: string | null;
+  state: string;
+}
+
+export interface OsLogins {
+  available: boolean;
+  sessions: LoginSession[];
+}

@@ -79,6 +79,106 @@ pub(crate) fn parse_sockets(text: &str) -> (BTreeSet<u16>, usize) {
     (listening, established)
 }
 
+/// "5DB8D9AC:01BB": a little-endian IPv4 address and a big-endian port, both hex.
+pub(crate) fn decode_v4(hex: &str) -> Option<String> {
+    let (addr, port) = hex.split_once(':')?;
+    let n = u32::from_str_radix(addr, 16).ok()?;
+    let port = u16::from_str_radix(port, 16).ok()?;
+    Some(format!(
+        "{}:{port}",
+        std::net::Ipv4Addr::from(n.swap_bytes())
+    ))
+}
+
+/// IPv6 in /proc is four little-endian 32-bit words, written as 32 hex characters.
+pub(crate) fn decode_v6(hex: &str) -> Option<String> {
+    let (addr, port) = hex.split_once(':')?;
+    if addr.len() != 32 {
+        return None;
+    }
+    let mut bytes = [0u8; 16];
+    for (i, chunk) in addr.as_bytes().chunks(8).enumerate() {
+        let word = u32::from_str_radix(std::str::from_utf8(chunk).ok()?, 16).ok()?;
+        bytes[i * 4..i * 4 + 4].copy_from_slice(&word.to_le_bytes());
+    }
+    let port = u16::from_str_radix(port, 16).ok()?;
+    let ip = std::net::Ipv6Addr::from(bytes);
+    // A v4 connection on a v6 socket reads better as plain v4.
+    Some(match ip.to_ipv4_mapped() {
+        Some(v4) => format!("{v4}:{port}"),
+        None => format!("[{ip}]:{port}"),
+    })
+}
+
+pub(crate) fn state_name(code: &str) -> &'static str {
+    match code {
+        "01" => "established",
+        "02" => "syn-sent",
+        "03" => "syn-recv",
+        "04" | "05" => "fin-wait",
+        "06" => "time-wait",
+        "07" => "close",
+        "08" => "close-wait",
+        "09" => "last-ack",
+        "0A" => "listening",
+        "0B" => "closing",
+        _ => "other",
+    }
+}
+
+pub(crate) fn parse_connections(
+    text: &str,
+    proto: &'static str,
+    v6: bool,
+) -> Vec<super::model::ConnRow> {
+    let decode = if v6 { decode_v6 } else { decode_v4 };
+    text.lines()
+        .skip(1)
+        .filter_map(|line| {
+            let mut f = line.split_whitespace();
+            let (_, local, remote, state) = (f.next()?, f.next()?, f.next()?, f.next()?);
+            Some(super::model::ConnRow {
+                proto,
+                local: decode(local)?,
+                remote: decode(remote)?,
+                state: state_name(state),
+            })
+        })
+        .collect()
+}
+
+pub(crate) fn connections() -> super::model::Connections {
+    let read = |path: &str, proto: &'static str, v6: bool| {
+        std::fs::read_to_string(path)
+            .map(|t| parse_connections(&t, proto, v6))
+            .unwrap_or_default()
+    };
+    let mut rows = read("/proc/net/tcp", "tcp", false);
+    rows.extend(read("/proc/net/tcp6", "tcp6", true));
+    let count = |s: &str| rows.iter().filter(|r| r.state == s).count();
+    let (established, listening, time_wait) =
+        (count("established"), count("listening"), count("time-wait"));
+    // The interesting ones first: live talk, then listeners, then the leftovers.
+    let rank = |s: &str| match s {
+        "established" => 0,
+        "listening" => 1,
+        "time-wait" => 3,
+        _ => 2,
+    };
+    rows.sort_by(|a, b| {
+        rank(a.state)
+            .cmp(&rank(b.state))
+            .then_with(|| a.local.cmp(&b.local))
+    });
+    rows.truncate(500);
+    super::model::Connections {
+        established,
+        listening,
+        time_wait,
+        rows,
+    }
+}
+
 pub(crate) fn parse_resolv(text: &str) -> Vec<String> {
     text.lines()
         .filter_map(|l| l.trim().strip_prefix("nameserver"))
@@ -272,5 +372,38 @@ mod tests {
         let n = snapshot();
         assert!(!n.interfaces.is_empty());
         assert!(!n.details.is_empty());
+    }
+}
+
+#[cfg(test)]
+mod conn_tests {
+    use super::*;
+
+    #[test]
+    fn hex_addresses_decode_to_readable_endpoints() {
+        assert_eq!(
+            decode_v4("5DB8D9AC:01BB").as_deref(),
+            Some("172.217.184.93:443")
+        );
+        assert_eq!(decode_v4("0100007F:0016").as_deref(), Some("127.0.0.1:22"));
+        assert_eq!(decode_v4("garbage"), None);
+        assert_eq!(
+            decode_v6("00000000000000000000000001000000:1F90").as_deref(),
+            Some("[::1]:8080")
+        );
+        assert_eq!(
+            decode_v6("0000000000000000FFFF00001700A8C0:0050").as_deref(),
+            Some("192.168.0.23:80")
+        );
+    }
+
+    #[test]
+    fn connections_come_back_with_their_state_named() {
+        let tcp = "  sl local rem st\n 0: 0100007F:0016 00000000:0000 0A 0\n 1: 1700A8C0:AE42 5DB8D9AC:01BB 01 0\n";
+        let rows = parse_connections(tcp, "tcp", false);
+        assert_eq!(rows.len(), 2);
+        assert_eq!(rows[0].state, "listening");
+        assert_eq!(rows[1].remote, "172.217.184.93:443");
+        assert_eq!(rows[1].state, "established");
     }
 }

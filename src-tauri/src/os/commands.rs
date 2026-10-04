@@ -1,7 +1,10 @@
 use super::model::{
-    Cgroups, EnvVar, KernelModule, ModuleInfo, OsMemory, OsNetwork, OsSecurity, OsSummary, Packages,
+    Cgroups, Connections, EnvVar, KernelModule, ModuleInfo, OsLogins, OsLogs, OsMemory, OsNetwork,
+    OsSecurity, OsSummary, Packages,
 };
-use super::{cgroups, environment, info, memory, modules, network, packages, security};
+use super::{
+    cgroups, environment, info, logins, logs, memory, modules, network, packages, security,
+};
 use crate::common::blocking;
 use crate::error::Result;
 
@@ -48,4 +51,19 @@ pub async fn os_cgroups() -> Result<Cgroups> {
 #[tauri::command]
 pub async fn os_network() -> Result<OsNetwork> {
     blocking::run(network::snapshot).await
+}
+
+#[tauri::command]
+pub async fn os_connections() -> Result<Connections> {
+    blocking::run(network::connections).await
+}
+
+#[tauri::command]
+pub async fn os_logs() -> Result<OsLogs> {
+    blocking::run(logs::snapshot).await
+}
+
+#[tauri::command]
+pub async fn os_logins() -> Result<OsLogins> {
+    blocking::run(logins::snapshot).await
 }

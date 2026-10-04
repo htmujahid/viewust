@@ -4,7 +4,10 @@ import { fixtures } from "$lib/api/mock";
 
 import {
   bootloaderFact,
+  connectionFacts,
   groupFacts,
+  logFacts,
+  loginFacts,
   cgroupFacts,
   memoryFacts,
   mountFacts,
@@ -87,6 +90,27 @@ describe("subsystem facts", () => {
     expect(by(networkFacts({ ...n, up: 0 }), "Interfaces up")?.tone).toBe("danger");
     expect(by(networkFacts({ ...n, default_route: null }), "Internet")?.tone).toBe("warn");
     expect(networkFacts(null)).toEqual([]);
+  });
+
+  it("tell quiet logs from noisy ones and spot remote logins", () => {
+    expect(by(logFacts(fixtures.osLogsMock()), "Errors this boot")?.tone).toBe("warn");
+    expect(by(logFacts({ ...fixtures.osLogsMock(), errors: [] }), "Errors this boot")?.tone).toBe(
+      "ok",
+    );
+    expect(
+      logFacts({
+        available: false,
+        size: null,
+        boots: null,
+        errors: [],
+        truncated: false,
+        note: null,
+      })[0].tone,
+    ).toBe("warn");
+    const logins = loginFacts(fixtures.osLoginsMock());
+    expect(by(logins, "From elsewhere")).toMatchObject({ value: "1", tone: "warn" });
+    expect(by(logins, "Users")?.value).toBe("2");
+    expect(by(connectionFacts(fixtures.osConnectionsMock()), "Established")?.value).toBe("3");
   });
 
   it("cope with a machine without a package manager", () => {

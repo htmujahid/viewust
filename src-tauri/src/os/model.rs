@@ -64,6 +64,53 @@ pub struct OsNetwork {
     pub(crate) details: Vec<Detail>,
 }
 
+#[derive(Serialize, Debug, PartialEq)]
+pub struct ConnRow {
+    pub(crate) proto: &'static str,
+    pub(crate) local: String,
+    pub(crate) remote: String,
+    pub(crate) state: &'static str,
+}
+
+#[derive(Serialize)]
+pub struct Connections {
+    pub(crate) established: usize,
+    pub(crate) listening: usize,
+    pub(crate) time_wait: usize,
+    pub(crate) rows: Vec<ConnRow>,
+}
+
+#[derive(Serialize)]
+pub struct OsLogs {
+    pub(crate) available: bool,
+    pub(crate) size: Option<String>,
+    pub(crate) boots: Option<usize>,
+    /// The error-level lines of this boot, oldest first
+    pub(crate) errors: Vec<String>,
+    pub(crate) truncated: bool,
+    pub(crate) note: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct LoginSession {
+    pub(crate) id: String,
+    pub(crate) user: String,
+    /// "wayland", "x11" or "tty"
+    pub(crate) kind: String,
+    pub(crate) class: String,
+    /// The TTY, seat or remote host it comes from
+    pub(crate) place: String,
+    pub(crate) remote: bool,
+    pub(crate) since: Option<String>,
+    pub(crate) state: String,
+}
+
+#[derive(Serialize)]
+pub struct OsLogins {
+    pub(crate) available: bool,
+    pub(crate) sessions: Vec<LoginSession>,
+}
+
 #[derive(Serialize)]
 pub struct OsMemory {
     pub(crate) total: u64,

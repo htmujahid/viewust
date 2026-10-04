@@ -8,7 +8,10 @@ import type {
   KernelModule,
   ModuleInfo,
   Cgroups,
+  Connections,
   OsMemory,
+  OsLogins,
+  OsLogs,
   OsNetwork,
   OsSecurity,
   OsSummary,
@@ -882,6 +885,77 @@ const osNetworkMock = (): OsNetwork => ({
   ],
 });
 
+const osConnectionsMock = (): Connections => ({
+  established: 3,
+  listening: 4,
+  time_wait: 2,
+  rows: [
+    {
+      proto: "tcp",
+      local: "192.168.1.23:44712",
+      remote: "172.217.184.93:443",
+      state: "established",
+    },
+    { proto: "tcp6", local: "[::1]:38114", remote: "[::1]:631", state: "established" },
+    { proto: "tcp", local: "192.168.1.23:51820", remote: "140.82.121.3:443", state: "established" },
+    { proto: "tcp", local: "127.0.0.1:22", remote: "0.0.0.0:0", state: "listening" },
+    { proto: "tcp", local: "127.0.0.1:631", remote: "0.0.0.0:0", state: "listening" },
+    { proto: "tcp", local: "127.0.0.1:1420", remote: "0.0.0.0:0", state: "listening" },
+    { proto: "tcp6", local: "[::]:22", remote: "[::]:0", state: "listening" },
+    { proto: "tcp", local: "192.168.1.23:40112", remote: "34.107.243.93:443", state: "time-wait" },
+    { proto: "tcp", local: "192.168.1.23:40254", remote: "34.107.243.93:443", state: "time-wait" },
+  ],
+});
+
+const osLogsMock = (): OsLogs => ({
+  available: true,
+  size: "3.9G",
+  boots: 54,
+  errors: [
+    "Oct 04 05:36:13 talha-MS-7E02 kernel: Bluetooth: hci0: unexpected event for opcode 0x0000",
+    "Oct 04 05:36:24 talha-MS-7E02 gdm-password][4240]: gkr-pam: unable to locate daemon control file",
+    "Oct 04 06:02:11 talha-MS-7E02 pipewire[2301]: mod.rt: could not set priority: Operation not permitted",
+  ],
+  truncated: false,
+  note: null,
+});
+
+const osLoginsMock = (): OsLogins => ({
+  available: true,
+  sessions: [
+    {
+      id: "3",
+      user: "talha",
+      kind: "wayland",
+      class: "user",
+      place: "tty2",
+      remote: false,
+      since: "2026-10-04 05:37:12 PKT",
+      state: "active",
+    },
+    {
+      id: "7",
+      user: "talha",
+      kind: "tty",
+      class: "user",
+      place: "192.168.1.50",
+      remote: true,
+      since: "2026-10-04 06:58:03 PKT",
+      state: "online",
+    },
+    {
+      id: "c1",
+      user: "gdm",
+      kind: "wayland",
+      class: "greeter",
+      place: "seat0",
+      remote: false,
+      since: "2026-10-04 05:36:40 PKT",
+      state: "online",
+    },
+  ],
+});
+
 const osSecurityMock = (): OsSecurity => ({
   apparmor: "Enabled",
   selinux: null,
@@ -1202,6 +1276,9 @@ export const fixtures = {
   osCgroupsMock,
   osNetworkMock,
   filesystemList,
+  osConnectionsMock,
+  osLogsMock,
+  osLoginsMock,
   diskDevices,
   directoryUsage,
   serviceList,
@@ -1260,6 +1337,12 @@ export function installMockBackend(): void {
         return osNetworkMock();
       case "filesystem_list":
         return filesystemList();
+      case "os_connections":
+        return osConnectionsMock();
+      case "os_logs":
+        return osLogsMock();
+      case "os_logins":
+        return osLoginsMock();
       case "disk_devices":
         return diskDevices();
       case "directory_usage":

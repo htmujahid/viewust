@@ -2,9 +2,12 @@ import { api } from "$lib/api/client";
 import type {
   Accounts,
   Cgroups,
+  Connections,
   DiskDevices,
   Filesystems,
   Namespaces,
+  OsLogins,
+  OsLogs,
   OsNetwork,
   ServiceSnapshot,
   Snapshot,
@@ -22,6 +25,9 @@ class OsOverview {
   readonly cgroups = new Loaded<Cgroups>(() => api.osCgroups());
   readonly network = new Loaded<OsNetwork>(() => api.osNetwork());
   readonly filesystems = new Loaded<Filesystems>(() => api.filesystemList());
+  readonly connections = new Loaded<Connections>(() => api.osConnections());
+  readonly logs = new Loaded<OsLogs>(() => api.osLogs());
+  readonly logins = new Loaded<OsLogins>(() => api.osLogins());
 
   readonly all = [
     this.processes,
@@ -32,6 +38,9 @@ class OsOverview {
     this.cgroups,
     this.network,
     this.filesystems,
+    this.connections,
+    this.logs,
+    this.logins,
   ];
 
   ensure = () => this.all.forEach((l) => l.ensure());

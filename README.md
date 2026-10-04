@@ -33,7 +33,10 @@ doing right now.
   that aren't mounted are listed too, with a Mount button so you can browse them.
 - **File systems** – everything mounted, from drives to the kernel's own views, with space and use.
 - **Networking** – interfaces with addresses, MAC, link speed and traffic; the default route, DNS,
-  listening TCP ports and established connections.
+  listening TCP ports and established connections — plus a Connections page showing who this
+  computer is talking to, address by address.
+- **Logs** – the journal's size and boots kept, and every error-level message of this boot.
+- **Logins** – the signed-in sessions: user, kind, where from (remote ones flagged), since when.
 - **Accounts** – users and groups.
 
 The sidebar carries the three hardware pages and the Operating system; processes, services, disk
