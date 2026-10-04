@@ -24,6 +24,7 @@ class Filesystems {
   );
 
   start = () => this.#poller.start();
+  refresh = () => this.#refresh();
   stop = () => this.#poller.stop();
 
   async #refresh() {

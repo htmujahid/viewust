@@ -10,6 +10,8 @@
   import SearchBox from "$lib/components/ui/SearchBox.svelte";
   import SidePanel from "$lib/components/ui/SidePanel.svelte";
   import StatTiles from "$lib/components/ui/StatTiles.svelte";
+  import { groupMenu } from "$lib/features/accounts/menu";
+  import { menu } from "$lib/stores/menu.svelte";
   import AccountsShell from "$lib/features/accounts/AccountsShell.svelte";
   import type { GroupFilter } from "$lib/features/accounts/logic";
   import { accounts } from "$lib/features/accounts/store.svelte";
@@ -110,6 +112,7 @@
         : "No groups in this filter."}
       onsort={(k) => accounts.sortGroups(k)}
       onselect={(k) => (accounts.selectedGroup = k)}
+      oncontext={(g, e) => menu.open(e, groupMenu(g), g.name)}
     >
       {#snippet cell(g, c)}
         {#if c.key === "name"}

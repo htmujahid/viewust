@@ -10,6 +10,8 @@
   import SearchBox from "$lib/components/ui/SearchBox.svelte";
   import SidePanel from "$lib/components/ui/SidePanel.svelte";
   import StatTiles from "$lib/components/ui/StatTiles.svelte";
+  import { userMenu } from "$lib/features/accounts/menu";
+  import { menu } from "$lib/stores/menu.svelte";
   import AccountsShell from "$lib/features/accounts/AccountsShell.svelte";
   import { userBadges, type UserFilter } from "$lib/features/accounts/logic";
   import { accounts } from "$lib/features/accounts/store.svelte";
@@ -106,6 +108,7 @@
         : "No accounts in this group."}
       onsort={(k) => accounts.sortUsers(k)}
       onselect={(k) => (accounts.selectedUser = k)}
+      oncontext={(u, e) => menu.open(e, userMenu(u), u.name)}
     >
       {#snippet cell(u, c)}
         {#if c.key === "name"}

@@ -84,3 +84,6 @@ export interface Namespaces {
   total: number;
   namespaces: NamespaceRow[];
 }
+
+/** What can be sent to a running program: ask it to quit, force it, pause it, resume it. */
+export type Signal = "term" | "kill" | "stop" | "cont";

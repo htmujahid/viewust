@@ -29,3 +29,5 @@ export interface FilesystemSnapshot {
   overview: FilesystemOverview;
   filesystems: FilesystemRow[];
 }
+
+export type FilesystemAction = "open" | "unmount";

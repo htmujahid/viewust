@@ -1,3 +1,4 @@
+mod actions;
 mod block;
 pub mod commands;
 mod kind;

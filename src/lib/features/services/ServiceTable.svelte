@@ -15,6 +15,7 @@
     emptyText,
     onsort,
     onselect,
+    oncontext,
   }: {
     rows: readonly ServiceRow[];
     sortKey: SortKey;
@@ -23,6 +24,7 @@
     emptyText: string;
     onsort: (key: SortKey) => void;
     onselect: (unit: string) => void;
+    oncontext: (row: ServiceRow, event: MouseEvent) => void;
   } = $props();
 
   const columns: { key: SortKey; label: string; right?: boolean; hint?: string }[] = [
@@ -62,7 +64,11 @@
       {#each rows as r (r.unit)}
         {@const status = statusOf(r)}
         {@const boot = bootOf(r.enabled)}
-        <tr class:selected={selectedUnit === r.unit} onclick={() => onselect(r.unit)}>
+        <tr
+          class:selected={selectedUnit === r.unit}
+          onclick={() => onselect(r.unit)}
+          oncontextmenu={(e) => oncontext(r, e)}
+        >
           <td class="name">
             <span class="truncate" title={r.unit}>{r.name}</span>
             {#if r.description}<small class="truncate muted" title={r.description}

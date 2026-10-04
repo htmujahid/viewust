@@ -35,3 +35,5 @@ export interface ServiceDetail {
   logs: string[];
   logs_note: string | null;
 }
+
+export type ServiceAction = "start" | "stop" | "restart" | "reload" | "enable" | "disable";

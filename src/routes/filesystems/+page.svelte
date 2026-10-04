@@ -23,6 +23,8 @@
     usedPercent,
     type Filter,
   } from "$lib/features/filesystems/logic";
+  import { filesystemMenu } from "$lib/features/filesystems/menu";
+  import { menu } from "$lib/stores/menu.svelte";
   import { filesystems, type SortKey } from "$lib/features/filesystems/store.svelte";
   import { formatBytes } from "$lib/utils/format";
   import { groupBySection } from "$lib/utils/details";
@@ -148,6 +150,7 @@
               emptyText=""
               onsort={(k) => filesystems.sortBy(k as SortKey)}
               onselect={(k) => (filesystems.selectedMount = k)}
+              oncontext={(r, e) => menu.open(e, filesystemMenu(r), r.mount)}
             >
               {#snippet cell(r, c)}
                 {@const pct = usedPercent(r)}

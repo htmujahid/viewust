@@ -8,7 +8,9 @@
   import ProcessesShell from "$lib/features/processes/ProcessesShell.svelte";
   import ProcessPanel from "$lib/features/processes/ProcessPanel.svelte";
   import ProcessSummary from "$lib/features/processes/ProcessSummary.svelte";
+  import { processMenu } from "$lib/features/processes/menu";
   import ProcessTable from "$lib/features/processes/ProcessTable.svelte";
+  import { menu } from "$lib/stores/menu.svelte";
   import { processes } from "$lib/features/processes/store.svelte";
 
   const overview = $derived(processes.snapshot?.overview ?? null);
@@ -67,6 +69,7 @@
       emptyText="No processes match “{processes.search}”."
       onsort={(key) => processes.sortBy(key)}
       onselect={(pid) => processes.select(pid)}
+      oncontext={(p, e) => menu.open(e, processMenu(p), `${p.name} · ${p.pid}`)}
     />
   {/if}
 

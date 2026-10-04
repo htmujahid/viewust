@@ -14,6 +14,7 @@
     emptyText,
     onsort,
     onselect,
+    oncontext,
   }: {
     rows: readonly ProcessRow[];
     memoryTotal: number;
@@ -23,6 +24,7 @@
     emptyText: string;
     onsort: (key: SortKey) => void;
     onselect: (pid: number) => void;
+    oncontext: (row: ProcessRow, event: MouseEvent) => void;
   } = $props();
 
   const columns: { key: SortKey; label: string; right?: boolean; hint?: string }[] = [
@@ -67,7 +69,11 @@
     </thead>
     <tbody>
       {#each rows as p (p.pid)}
-        <tr class:selected={selectedPid === p.pid} onclick={() => onselect(p.pid)}>
+        <tr
+          class:selected={selectedPid === p.pid}
+          onclick={() => onselect(p.pid)}
+          oncontextmenu={(e) => oncontext(p, e)}
+        >
           <td class="name"><span class="truncate" title={p.name}>{p.name}</span></td>
           <td class="right tabular muted">{p.pid}</td>
           <td class="muted">{p.user}</td>

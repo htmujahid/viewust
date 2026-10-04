@@ -39,8 +39,10 @@ feature/
 - **State is managed, not global.** `ProcessService` and `MonitorService` are registered with
   `.manage(...)` in `lib.rs` and injected with `State<'_, T>`. They hold what must survive between
   calls (CPU usage and rates are differences between two readings).
-- **Everything is read without admin rights.** The one exception is individual RAM modules, behind an
-  explicit button that asks the desktop for permission (`system::memory::read_modules`).
+- **Reading never needs admin rights.** Changing things is explicit and narrow: the commands that do
+  (`process_signal`, `service_action`, `filesystem_action`) accept only a fixed set of actions,
+  validate their target, refuse system-critical ones, and use `common::elevate` (`pkexec`) when root is
+  needed. RAM modules (`system::memory::read_modules`) use the same helper.
 - **Be honest about gaps.** If the OS doesn't report something (the power supply, a mouse's sensor),
   say so in the result rather than guessing.
 - **Linux only, on purpose.** There are no `cfg` gates or per-OS fallbacks: modules read `/proc`,
@@ -96,6 +98,16 @@ styles/            tokens.css (colour/spacing/type), base.css, utilities.css
 4. Register it in `lib.rs`'s `generate_handler![…]`.
 5. Mirror the type in `src/lib/api/types/<domain>.ts` and add one line to `api` in `client.ts`.
 6. Add a fixture case in `lib/api/mock.ts`.
+
+### Add a right-click menu
+
+1. Build the items in `features/<name>/menu.ts` as `MenuItem[]` (`label`, `onselect`, optional `hint`,
+   `danger`, `disabled`; use `separator` between groups).
+2. Run backend work through `perform(done, run, { ask, after })` from `utils/actions.ts`: it confirms
+   first when `ask` is given, shows a toast with the result or the error, then refreshes.
+3. Open it with `menu.open(event, items, title)`. `DataTable` takes `oncontext={(row, e) => …}`.
+
+The menu, confirmation dialog and toasts are mounted once in `routes/+layout.svelte`.
 
 ### Add a page
 

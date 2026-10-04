@@ -1,9 +1,8 @@
 use super::model::*;
+use crate::common::elevate;
 use crate::common::format::*;
 use crate::common::Details;
-use crate::error::{AppError, Result};
-use std::path::Path;
-use std::process::Command;
+use crate::error::Result;
 
 pub(crate) fn meminfo() -> std::collections::HashMap<String, u64> {
     std::fs::read_to_string("/proc/meminfo")
@@ -56,25 +55,16 @@ pub(crate) fn memory() -> Component {
 }
 
 pub(crate) fn read_modules() -> Result<MemoryModules> {
-    let program = [
-        "/usr/sbin/dmidecode",
-        "/usr/bin/dmidecode",
-        "/sbin/dmidecode",
-    ]
-    .into_iter()
-    .find(|p| Path::new(p).exists())
-    .ok_or(AppError::MissingTool("dmidecode"))?;
-    let out = Command::new("pkexec")
-        .args([program, "-t", "17"])
-        .output()
-        .map_err(|e| AppError::Other(format!("could not ask for permission: {e}")))?;
-    if !out.status.success() {
-        return Err(match out.status.code() {
-            Some(126) | Some(127) => AppError::PermissionDenied,
-            _ => AppError::Other("Permission was declined or the read failed".into()),
-        });
-    }
-    Ok(parse_dmidecode(&String::from_utf8_lossy(&out.stdout)))
+    let out = elevate::run(
+        &[
+            "/usr/sbin/dmidecode",
+            "/usr/bin/dmidecode",
+            "/sbin/dmidecode",
+        ],
+        "dmidecode",
+        &["-t", "17"],
+    )?;
+    Ok(parse_dmidecode(&out))
 }
 
 fn parse_dmidecode(text: &str) -> MemoryModules {

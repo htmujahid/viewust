@@ -7,6 +7,8 @@
   import LiveToggle from "$lib/components/ui/LiveToggle.svelte";
   import Page from "$lib/components/ui/Page.svelte";
   import PageHeader from "$lib/components/ui/PageHeader.svelte";
+  import { serviceMenu } from "$lib/features/services/menu";
+  import { menu } from "$lib/stores/menu.svelte";
   import ServicePanel from "$lib/features/services/ServicePanel.svelte";
   import ServiceSummary from "$lib/features/services/ServiceSummary.svelte";
   import ServiceTable from "$lib/features/services/ServiceTable.svelte";
@@ -94,6 +96,7 @@
             : "No services in this group."}
           onsort={(key) => services.sortBy(key)}
           onselect={(unit) => services.select(unit)}
+          oncontext={(r, e) => menu.open(e, serviceMenu(r), r.unit)}
         />
       {/if}
     </Page>

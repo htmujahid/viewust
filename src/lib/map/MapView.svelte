@@ -11,11 +11,13 @@
   } from "@xyflow/svelte";
   import "@xyflow/svelte/dist/style.css";
 
+  import { menu } from "$lib/stores/menu.svelte";
   import { theme } from "$lib/stores/theme.svelte";
 
   import ComputerNode from "./ComputerNode.svelte";
   import DetailsPanel from "./DetailsPanel.svelte";
   import DeviceNode from "./DeviceNode.svelte";
+  import { nodeMenu } from "./menu";
   import type { NodeInfo } from "./model";
   import Refit from "./Refit.svelte";
 
@@ -81,6 +83,13 @@
             nodesConnectable={false}
             zoomOnDoubleClick={false}
             onnodeclick={({ node }) => (selectedId = node.id)}
+            onnodecontextmenu={({ event, node }) => {
+              menu.open(
+                event as MouseEvent,
+                nodeMenu(node.data.info as NodeInfo, () => (selectedId = node.id)),
+                (node.data.info as NodeInfo).title,
+              );
+            }}
             onpaneclick={() => (selectedId = null)}
             deleteKey={null}
             defaultEdgeOptions={{ type: "smoothstep" }}

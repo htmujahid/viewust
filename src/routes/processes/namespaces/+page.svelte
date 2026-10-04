@@ -12,6 +12,8 @@
   import SidePanel from "$lib/components/ui/SidePanel.svelte";
   import StatTiles from "$lib/components/ui/StatTiles.svelte";
   import ProcessesShell from "$lib/features/processes/ProcessesShell.svelte";
+  import { menu } from "$lib/stores/menu.svelte";
+  import { copyText } from "$lib/utils/actions";
   import { NS_KINDS, nsLabel } from "$lib/features/namespaces/logic";
   import { keyOf, namespaces } from "$lib/features/namespaces/store.svelte";
   import type { NamespaceRow } from "$lib/api/types";
@@ -97,6 +99,19 @@
       emptyText="No namespaces match."
       onsort={(k) => namespaces.sortBy(k)}
       onselect={(k) => (namespaces.selected = k)}
+      oncontext={(n, e) =>
+        menu.open(
+          e,
+          [
+            { label: "View details", onselect: () => (namespaces.selected = keyOf(n)) },
+            {
+              label: "Copy ID",
+              hint: String(n.id),
+              onselect: () => copyText(String(n.id), "namespace ID"),
+            },
+          ],
+          `${nsLabel(n.kind)} namespace`,
+        )}
     >
       {#snippet cell(n, c)}
         {#if c.key === "kind"}

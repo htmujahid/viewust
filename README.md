@@ -29,8 +29,21 @@ _Sample data, not a real machine._
 
 **Linux only**, by design. Viewust reads `/proc`, `/sys` and the system's own tools directly, so it
 can show far more than a cross-platform abstraction would. Windows and macOS versions would be
-separate codebases. Everything is read-only; the one exception is memory-module details, which ask
-for permission first.
+separate codebases.
+
+## Right-click actions
+
+Right-click anything in a table or on the map for a menu:
+
+- **Processes** – view, copy, jump to the owner's account, pause/resume, quit, force kill.
+- **Services** – view, jump to the main process, start, stop, restart, enable or disable at boot.
+- **Filesystems** – view, open in the file manager, copy paths, unmount.
+- **Accounts, groups, namespaces, devices** – view, copy, and jump to related pages.
+
+Viewing is read-only and needs no permission. Anything that changes the system asks first: stopping
+a program or unmounting a drive shows a confirmation, and actions that need administrator rights
+(service control, unmounting some shares) ask the desktop for your password. System-critical targets
+(PID 1, `/`, `/boot`, …) are refused.
 
 ## Built with
 

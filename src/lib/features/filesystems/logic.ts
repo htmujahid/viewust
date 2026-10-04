@@ -47,3 +47,24 @@ export function search(rows: readonly FilesystemRow[], query: string): Filesyste
 }
 
 export const displayName = (r: FilesystemRow): string => r.label ?? r.mount;
+
+/** Folders the system needs to keep running. The backend refuses to unmount these too. */
+const SYSTEM_MOUNTS = [
+  "/",
+  "/boot",
+  "/boot/efi",
+  "/usr",
+  "/var",
+  "/etc",
+  "/proc",
+  "/sys",
+  "/dev",
+  "/run",
+];
+
+/** Only real storage can be unmounted from here: not memory, system views, snaps or containers. */
+export const canUnmount = (r: Pick<FilesystemRow, "kind" | "mount">): boolean =>
+  ["disk", "removable", "optical", "network"].includes(r.kind) && !SYSTEM_MOUNTS.includes(r.mount);
+
+/** Memory, system and container mounts have nothing a person would browse. */
+export const canOpen = (r: Pick<FilesystemRow, "kind">): boolean => r.kind !== "virtual";

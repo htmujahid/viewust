@@ -2,7 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import { fixtures } from "$lib/api/mock";
 
-import { displayName, healthOf, KIND_ORDER, matches, search, usedPercent } from "./logic";
+import {
+  canOpen,
+  canUnmount,
+  displayName,
+  healthOf,
+  KIND_ORDER,
+  matches,
+  search,
+  usedPercent,
+} from "./logic";
 
 const rows = fixtures.filesystemList().filesystems;
 const at = (mount: string) => rows.find((r) => r.mount === mount)!;
@@ -43,5 +52,22 @@ describe("filesystem logic", () => {
 
   it("covers every kind the backend can send", () => {
     expect(new Set(rows.map((r) => r.kind))).toEqual(new Set(KIND_ORDER));
+  });
+
+  it("offers to unmount only drives and shares that aren't the system's own", () => {
+    expect(canUnmount(at("/media/talha/STICK"))).toBe(true);
+    expect(canUnmount(at("/mnt/nas"))).toBe(true);
+    expect(canUnmount(at("/home"))).toBe(true);
+    expect(canUnmount(at("/"))).toBe(false);
+    expect(canUnmount(at("/boot/efi"))).toBe(false);
+    expect(canUnmount(at("/tmp"))).toBe(false);
+    expect(canUnmount(at("/snap/core22/1722"))).toBe(false);
+    expect(canUnmount(at("/proc"))).toBe(false);
+  });
+
+  it("offers to open everything except kernel views", () => {
+    expect(canOpen(at("/home"))).toBe(true);
+    expect(canOpen(at("/tmp"))).toBe(true);
+    expect(canOpen(at("/proc"))).toBe(false);
   });
 });

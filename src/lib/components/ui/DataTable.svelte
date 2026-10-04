@@ -21,6 +21,7 @@
     emptyText,
     onsort,
     onselect,
+    oncontext,
     cell,
   }: {
     rows: readonly T[];
@@ -32,6 +33,8 @@
     emptyText: string;
     onsort: (key: string) => void;
     onselect: (key: string) => void;
+    /** Called on right-click; the table doesn't know what the menu holds. */
+    oncontext?: (row: T, event: MouseEvent) => void;
     cell: Snippet<[T, Column]>;
   } = $props();
 
@@ -61,7 +64,11 @@
     </thead>
     <tbody>
       {#each rows as row (rowKey(row))}
-        <tr class:selected={selectedKey === rowKey(row)} onclick={() => onselect(rowKey(row))}>
+        <tr
+          class:selected={selectedKey === rowKey(row)}
+          onclick={() => onselect(rowKey(row))}
+          oncontextmenu={oncontext && ((e) => oncontext(row, e))}
+        >
           {#each columns as c (c.key)}
             <td class:right={c.right}>{@render cell(row, c)}</td>
           {/each}

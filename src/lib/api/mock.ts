@@ -791,6 +791,10 @@ export function installMockBackend(): void {
         return namespaceList();
       case "filesystem_list":
         return filesystemList();
+      case "process_signal":
+      case "service_action":
+      case "filesystem_action":
+        return null;
       case "service_list":
         return serviceList();
       case "service_detail":

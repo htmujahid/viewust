@@ -1,6 +1,7 @@
 pub mod blocking;
 pub mod cmd;
 pub mod details;
+pub mod elevate;
 pub mod format;
 pub mod ids;
 pub mod nvidia;
