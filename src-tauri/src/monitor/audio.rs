@@ -230,8 +230,29 @@ mod tests {
     }
 
     #[test]
-    fn this_machine_reports_its_audio() {
+    fn whatever_the_machine_the_answer_holds_together() {
+        // A desktop has cards; a CI runner has none at all. Both are truthful,
+        // so assert the shape of the answer, not the hardware on the desk.
         let a = sample();
-        assert!(!a.cards.is_empty());
+        assert_eq!(
+            a.playing,
+            a.streams
+                .iter()
+                .filter(|s| s.direction == "playback")
+                .count()
+        );
+        assert_eq!(
+            a.capturing,
+            a.streams
+                .iter()
+                .filter(|s| s.direction == "capture")
+                .count()
+        );
+        for s in &a.streams {
+            assert!(!s.card.is_empty());
+        }
+        for d in a.sinks.iter().chain(&a.sources) {
+            assert!(!d.name.is_empty());
+        }
     }
 }

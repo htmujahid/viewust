@@ -195,9 +195,15 @@ mod tests {
     }
 
     #[test]
-    fn this_machine_reports_its_virtualization() {
+    fn whatever_the_machine_the_answer_holds_together() {
+        // x86 desktops have vmx/svm; arm machines have /dev/kvm with neither flag;
+        // CI runners may have nothing. Only the shape is guaranteed.
         let v = overview();
-        // Whatever the hardware, the shape must hold together.
-        assert!(v.cpu.is_some() || !v.kvm_device);
+        for s in &v.slices {
+            assert!(s.groups > 0, "{} listed with no groups", s.name);
+        }
+        for d in &v.docker_df {
+            assert!(!d.kind.is_empty());
+        }
     }
 }
