@@ -4,9 +4,7 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
 
-  import CopyButton from "$lib/components/ui/CopyButton.svelte";
   import Page from "$lib/components/ui/Page.svelte";
-  import PageHeader from "$lib/components/ui/PageHeader.svelte";
   import DeviceHero from "$lib/features/device/DeviceHero.svelte";
   import { DeviceReport } from "$lib/features/device/report.svelte";
   import SectionCards from "$lib/features/device/SectionCards.svelte";
@@ -14,7 +12,7 @@
   import { hardware } from "$lib/features/devices/store.svelte";
   import { internals } from "$lib/features/internals/store.svelte";
   import { infoRows, type NodeInfo } from "$lib/map/model";
-  import { groupBySection, sectionsToText, sortSections } from "$lib/utils/details";
+  import { groupBySection, sortSections } from "$lib/utils/details";
 
   const SECTION_ORDER = [
     "Device",
@@ -63,16 +61,6 @@
 <svelte:window {onkeydown} />
 
 <Page>
-  <PageHeader back={backUrl} backLabel={internal ? "Internal components" : "All devices"}>
-    {#snippet actions()}
-      <CopyButton
-        label="Copy report"
-        disabled={!sections.length}
-        text={() => sectionsToText(`${info?.label ?? ""}: ${info?.title ?? id}`, sections)}
-      />
-    {/snippet}
-  </PageHeader>
-
   {#if !info && store.loading}
     <p class="note">Scanning…</p>
   {:else if !info}
