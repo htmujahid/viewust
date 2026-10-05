@@ -72,6 +72,7 @@
     margin-bottom: var(--s-5);
   }
   .tile {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: var(--s-2);

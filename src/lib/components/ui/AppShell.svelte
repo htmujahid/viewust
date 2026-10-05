@@ -66,12 +66,17 @@
     display: grid;
     grid-template-columns: 64px minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      "titlebar titlebar"
+      "sidebar main";
+    height: 100vh;
     height: 100dvh;
   }
   .shell > :global(.titlebar) {
-    grid-column: 1 / -1;
+    grid-area: titlebar;
   }
   .sidebar {
+    grid-area: sidebar;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -143,6 +148,7 @@
     border-top: 1px solid var(--border);
   }
   main {
+    grid-area: main;
     min-width: 0;
     min-height: 0;
     overflow: hidden;
