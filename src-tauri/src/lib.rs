@@ -11,6 +11,7 @@ mod processes;
 mod report;
 mod services;
 mod system;
+mod tray;
 
 pub use error::{AppError, Result};
 
@@ -30,6 +31,10 @@ pub fn run() {
         .manage(processes::ProcessService::default())
         .manage(monitor::MonitorService::default())
         .manage(disk_usage::UsageService::default())
+        .setup(|app| {
+            tray::setup(app)?;
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             hardware::commands::hardware_info,
             health::commands::health_report,

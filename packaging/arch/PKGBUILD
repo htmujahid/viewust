@@ -8,7 +8,7 @@ pkgdesc="A live map of everything connected to this computer, and a window into 
 arch=('x86_64' 'aarch64')
 url="https://github.com/htmujahid/viewust"
 license=('MIT')
-depends=('webkit2gtk-4.1' 'gtk3')
+depends=('webkit2gtk-4.1' 'gtk3' 'libayatana-appindicator')
 optdepends=(
   'udisks2: mount drives from the Disk usage page'
   'curl: internet speed test'
